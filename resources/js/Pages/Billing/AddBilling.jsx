@@ -12,7 +12,7 @@ import {
     Option,
     Select,
 } from "@material-tailwind/react";
-import { useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 export default function AddBiling({ auth, ownerData }) {
     const [owner, setOwner] = useState(ownerData[0]);
@@ -25,7 +25,38 @@ export default function AddBiling({ auth, ownerData }) {
         billing_type: billingType,
         fine: "",
         due_date: "",
+        meter_reading_start: "",
+        meter_reading_end: "",
+        price_per_kwh: "",
     });
+
+    useEffect(() => {
+        updateMeterReadingDiff();
+        console.log("rerender useEffect");
+    }, [data.meter_reading_start, data.meter_reading_end]);
+
+    useEffect(() => {
+        countTotalsBilling();
+    }, [data.price_per_kwh, data.meter_reading]);
+
+    const updateMeterReadingDiff = () => {
+        const start = Number(data.meter_reading_start) || 0;
+        const end = Number(data.meter_reading_end) || 0;
+        const diff = start == end ? start : start - end;
+
+        setData("meter_reading", diff); // Perbarui state
+    };
+
+    const countTotalsBilling = useCallback(() => {
+        const pricePerKwh = Number(data.price_per_kwh) || 0;
+        const totals =
+            data.meter_reading && pricePerKwh
+                ? Number(data.meter_reading) * pricePerKwh
+                : 0;
+
+        setData("billing_fee", totals);
+        console.log("useCallback");
+    }, [data.meter_reading, data.price_per_kwh]);
 
     const handleOwnerChangeChange = (value) => {
         setOwner(value);
@@ -56,7 +87,7 @@ export default function AddBiling({ auth, ownerData }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Add Billing Data
                 </h2>
             }
@@ -80,20 +111,20 @@ export default function AddBiling({ auth, ownerData }) {
                         </Link>
                         <Link
                             href={route("billing.add")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Add Billing
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 title={"New Billing Data"}
                                 description={"Tambah Tagihan Billing yang Baru"}
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
@@ -105,7 +136,7 @@ export default function AddBiling({ auth, ownerData }) {
                                                 options={ownerData}
                                             />
                                             {errors.owner_id && (
-                                                <p className="text-red-500 text-sm ml-0 mt-3">
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.owner_id}
                                                 </p>
                                             )}
@@ -134,23 +165,93 @@ export default function AddBiling({ auth, ownerData }) {
                                             </Select>
                                         </div>
                                     </div>
-                                    <div className="flex flex-row justify-start tablet:flex-col mt-8">
+
+                                    {/* tagihan listrik */}
+                                    {billingType === "Listrik" && (
+                                        <>
+                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                                <CustomInput
+                                                    label="Meteran Awal"
+                                                    id="meter_reading_start"
+                                                    value={
+                                                        data.meter_reading_start
+                                                    }
+                                                    onChange={(e) => {
+                                                        setData(
+                                                            "meter_reading_start",
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    type="number"
+                                                    errors={
+                                                        errors.meter_reading_start
+                                                    }
+                                                />
+                                                <CustomInput
+                                                    label="Meteran Akhir"
+                                                    id="meter_reading_end"
+                                                    value={
+                                                        data.meter_reading_end
+                                                    }
+                                                    onChange={(e) => {
+                                                        setData(
+                                                            "meter_reading_end",
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    type="number"
+                                                    errors={
+                                                        errors.meter_reading_end
+                                                    }
+                                                />
+                                                <CustomInput
+                                                    disabled={true}
+                                                    label="Total Meteran"
+                                                    id="meter_reading"
+                                                    value={data.meter_reading}
+                                                    type="number"
+                                                    errors={
+                                                        errors.meter_reading
+                                                    }
+                                                />
+                                                <CustomInput
+                                                    label="Harga / KWh"
+                                                    id="price_per_kwh"
+                                                    value={data.price_per_kwh}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "price_per_kwh",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    type="number"
+                                                    errors={
+                                                        errors.price_per_kwh
+                                                    }
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
                                         <CustomInput
                                             label="Biaya Tagihan"
                                             id="billing_fee"
                                             value={data.billing_fee}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "billing_fee",
-                                                    e.target.value
-                                                )
-                                            }
                                             type="number"
+                                            {...(data.billing_type === "Listrik"
+                                                ? { disabled: true }
+                                                : {
+                                                      onChange: (e) =>
+                                                          setData(
+                                                              "billing_fee",
+                                                              e.target.value
+                                                          ),
+                                                  })}
                                             errors={errors.billing_fee}
                                         />
 
-                                        {billingType === "Air" ||
-                                        billingType === "Listrik" ? (
+                                        {billingType === "Air" && (
                                             <CustomInput
                                                 label="Meteran"
                                                 id="meter_reading"
@@ -165,7 +266,7 @@ export default function AddBiling({ auth, ownerData }) {
                                                 className="tablet:mt-8"
                                                 type="number"
                                             />
-                                        ) : null}
+                                        )}
 
                                         <CustomInput
                                             label="Tanggal Tagihan Dibuat"
@@ -183,7 +284,7 @@ export default function AddBiling({ auth, ownerData }) {
                                         />
                                     </div>
 
-                                    <div className="flex flex-row justify-start tablet:flex-col mt-8 tablet:mt-0">
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tanggal Batas Pembayaran"
                                             id="due_date"
@@ -213,7 +314,7 @@ export default function AddBiling({ auth, ownerData }) {
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
                                                 variant="fill"
                                                 onClick={handleSubmit}
