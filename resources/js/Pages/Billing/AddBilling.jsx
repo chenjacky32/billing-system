@@ -24,6 +24,7 @@ export default function AddBiling({ auth, ownerData }) {
         billing_date: "",
         billing_type: billingType,
         fine: "",
+        minimum_charge: "",
         due_date: "",
         meter_reading_start: "",
         meter_reading_end: "",
@@ -95,7 +96,7 @@ export default function AddBiling({ auth, ownerData }) {
             <Head title="Add Billing Data" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-[35rem] tablet:h-[55rem]">
+                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-[35rem] tablet:h-[55rem] ">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -117,14 +118,19 @@ export default function AddBiling({ auth, ownerData }) {
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
-                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className="w-full h-full p-12 ">
-                            <PageHeader
-                                title={"New Billing Data"}
-                                description={"Tambah Tagihan Billing yang Baru"}
-                                showSearch={false}
-                            />
-                            <CardBody className="h-full px-0 ">
+                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-fit">
+                        <Card className="w-full h-full p-12">
+                            <div className="w-full h-fit">
+                                <PageHeader
+                                    title={"New Billing Data"}
+                                    description={
+                                        "Tambah Tagihan Billing yang Baru"
+                                    }
+                                    showSearch={false}
+                                    className
+                                />
+                            </div>
+                            <CardBody className="h-full px-0">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
@@ -165,55 +171,84 @@ export default function AddBiling({ auth, ownerData }) {
                                             </Select>
                                         </div>
                                     </div>
-
-                                    {/* tagihan listrik */}
-                                    {billingType === "Listrik" && (
-                                        <>
-                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                                <CustomInput
-                                                    label="Meteran Awal"
-                                                    id="meter_reading_start"
-                                                    value={
-                                                        data.meter_reading_start
-                                                    }
-                                                    onChange={(e) => {
-                                                        setData(
-                                                            "meter_reading_start",
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                    type="number"
-                                                    errors={
-                                                        errors.meter_reading_start
-                                                    }
-                                                />
-                                                <CustomInput
-                                                    label="Meteran Akhir"
-                                                    id="meter_reading_end"
-                                                    value={
-                                                        data.meter_reading_end
-                                                    }
-                                                    onChange={(e) => {
-                                                        setData(
-                                                            "meter_reading_end",
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                    type="number"
-                                                    errors={
-                                                        errors.meter_reading_end
-                                                    }
-                                                />
-                                                <CustomInput
-                                                    disabled={true}
-                                                    label="Total Meteran"
-                                                    id="meter_reading"
-                                                    value={data.meter_reading}
-                                                    type="number"
-                                                    errors={
-                                                        errors.meter_reading
-                                                    }
-                                                />
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                        {billingType === "Air" && (
+                                            <CustomInput
+                                                label="Meteran"
+                                                id="meter_reading"
+                                                value={data.meter_reading}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "meter_reading",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                errors={errors.meter_reading}
+                                                className="tablet:mt-8"
+                                                type="number"
+                                            />
+                                        )}
+                                        {/* Tagihan Listrik */}
+                                        {billingType === "Listrik" && (
+                                            <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
+                                                <div className="w-full mr-4">
+                                                    <CustomInput
+                                                        label="Meteran Awal"
+                                                        id="meter_reading_start"
+                                                        value={
+                                                            data.meter_reading_start
+                                                        }
+                                                        onChange={(e) => {
+                                                            setData(
+                                                                "meter_reading_start",
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                        type="number"
+                                                        errors={
+                                                            errors.meter_reading_start
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="w-full mr-4 tablet:mt-8">
+                                                    <CustomInput
+                                                        label="Meteran Akhir"
+                                                        id="meter_reading_end"
+                                                        value={
+                                                            data.meter_reading_end
+                                                        }
+                                                        onChange={(e) => {
+                                                            setData(
+                                                                "meter_reading_end",
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                        type="number"
+                                                        errors={
+                                                            errors.meter_reading_end
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="w-full mr-4 tablet:mt-8">
+                                                    <CustomInput
+                                                        disabled={true}
+                                                        label="Total Meteran"
+                                                        id="meter_reading"
+                                                        value={
+                                                            data.meter_reading
+                                                        }
+                                                        type="number"
+                                                        errors={
+                                                            errors.meter_reading
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {billingType === "Listrik" ? (
+                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                            <div className="w-full mr-4 tablet:mt-8">
                                                 <CustomInput
                                                     label="Harga / KWh"
                                                     id="price_per_kwh"
@@ -230,10 +265,38 @@ export default function AddBiling({ auth, ownerData }) {
                                                     }
                                                 />
                                             </div>
-                                        </>
-                                    )}
+                                            <div className="w-full mr-4 tablet:mt-8">
+                                                <CustomInput
+                                                    label="Minimum Charge"
+                                                    id="minimum_charge"
+                                                    value={data.minimum_charge}
+                                                    type="number"
+                                                ></CustomInput>
+                                            </div>
+                                            <div className="w-full mr-4 tablet:mt-8">
+                                                <Button
+                                                    fullWidth={true}
+                                                    variant="filled"
+                                                    onClick={() =>
+                                                        console.log("hitung")
+                                                    }
+                                                    className="bg-orange-500"
+                                                >
+                                                    Hitung Tagihan
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : null}
 
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
+                                    <div
+                                        className={`flex flex-row justify-start tablet:flex-col 
+                                            ${
+                                                billingType === "Listrik" ||
+                                                billingType === "Air"
+                                                    ? "mt-8"
+                                                    : "mt-0 tablet:mt-8"
+                                            } `}
+                                    >
                                         <CustomInput
                                             label="Biaya Tagihan"
                                             id="billing_fee"
@@ -251,23 +314,6 @@ export default function AddBiling({ auth, ownerData }) {
                                             errors={errors.billing_fee}
                                         />
 
-                                        {billingType === "Air" && (
-                                            <CustomInput
-                                                label="Meteran"
-                                                id="meter_reading"
-                                                value={data.meter_reading}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "meter_reading",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                errors={errors.meter_reading}
-                                                className="tablet:mt-8"
-                                                type="number"
-                                            />
-                                        )}
-
                                         <CustomInput
                                             label="Tanggal Tagihan Dibuat"
                                             id="billing_date"
@@ -283,7 +329,6 @@ export default function AddBiling({ auth, ownerData }) {
                                             type="date"
                                         />
                                     </div>
-
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tanggal Batas Pembayaran"
@@ -312,11 +357,10 @@ export default function AddBiling({ auth, ownerData }) {
                                             className="tablet:mt-8"
                                         />
                                     </div>
-
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button
-                                                variant="fill"
+                                                variant="filled"
                                                 onClick={handleSubmit}
                                                 className="bg-green-500"
                                                 loading={processing}

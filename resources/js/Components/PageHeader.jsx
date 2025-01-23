@@ -25,8 +25,8 @@ export default function PageHeader({
             shadow={false}
             className="rounded-none ml-[0rem]"
         >
-            <div className="mb-8 flex items-center justify-between gap-8 border-b-2 border-primaryHover">
-                <div className="mb-8 flex items-center justify-between gap-8">
+            <div className="flex items-center justify-between gap-8 mb-8 border-b-2 border-primaryHover">
+                <div className="flex items-center justify-between gap-8 mb-8">
                     <div>
                         <Typography variant="h5" className="text-primary">
                             {title}
@@ -35,7 +35,7 @@ export default function PageHeader({
                             {description}
                         </Typography>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row "></div>
+                    <div className="flex flex-col gap-2 shrink-0 sm:flex-row "></div>
                 </div>
             </div>
             {showSearch ? (
@@ -49,14 +49,14 @@ export default function PageHeader({
                     >
                         <Input
                             label={label}
-                            icon={<MagnifyingGlassIcon className="h-5 w-5 " />}
+                            icon={<MagnifyingGlassIcon className="w-5 h-5 " />}
                             onChange={handleSearch}
                         />
                     </div>
                     {showAddButton ? (
                         <Link href={route(addRoute)} className=" mobile:w-full">
                             <Button
-                                className="flex items-center gap-3 bg-green-500  mobile:justify-center mobile:mt-2 mobile:w-full"
+                                className="flex items-center gap-3 bg-green-500 mobile:justify-center mobile:mt-2 mobile:w-full"
                                 variant="fill"
                                 size="xl"
                             >
