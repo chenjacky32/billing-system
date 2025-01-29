@@ -41,7 +41,9 @@ class HandleInertiaRequests extends Middleware
             },
             'flash' => [
                 // in your case, you named your flash message "success"
-                'message' => fn () => $request->session()->get('success')
+                'message' => fn () => $request->session()->get('success'),
+                'billing_fee' => fn () => $request->session()->get('billing_fee'),
+                'meter_reading'=> fn()=>$request->session()->get('meter_reading'),
             ],
         ]);
     }

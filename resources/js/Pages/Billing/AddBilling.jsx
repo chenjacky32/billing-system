@@ -2,7 +2,8 @@ import CustomInput from "@/Components/CustomInput";
 import InputSelect from "@/Components/InputSelect";
 import PageHeader from "@/Components/PageHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { TrashIcon } from "@heroicons/react/24/solid";
+import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import {
     Breadcrumbs,
     Button,
@@ -11,53 +12,75 @@ import {
     Input,
     Option,
     Select,
+    Typography,
 } from "@material-tailwind/react";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { TypeBilling } from "@/utils/constant";
 
-export default function AddBiling({ auth, ownerData }) {
+export default function AddBiling({ auth, ownerData, billingCategory }) {
     const [owner, setOwner] = useState(ownerData[0]);
     const [billingType, setBillingType] = useState("Air");
+    const [maintenanceTypeSelected, setMaintenanceTypeSelected] = useState("");
+    const [vehicleTypeSelected, setVehicleTypeSelected] = useState("");
+    const [isLoading, setIsLoading] = useState(null);
+    const { flash } = usePage().props;
 
     const { data, setData, post, processing, errors } = useForm({
-        billing_fee: "",
-        meter_reading: "",
+        billing_fee: flash?.billing_fee || "",
+        meter_reading: flash?.meter_reading || "",
         billing_date: "",
         billing_type: billingType,
         fine: "",
         minimum_charge: "",
         due_date: "",
-        meter_reading_start: "",
-        meter_reading_end: "",
-        price_per_kwh: "",
+        start_meter: "",
+        end_meter: "",
+        unit_price: "",
+        maintenance_type: maintenanceTypeSelected,
+        vehicle_type_parking: vehicleTypeSelected,
     });
 
-    useEffect(() => {
-        updateMeterReadingDiff();
-        console.log("rerender useEffect");
-    }, [data.meter_reading_start, data.meter_reading_end]);
+    console.log(data.billing_fee);
+    console.log(data.billing_type);
+    console.log(data.maintenance_type);
+    console.log(data.vehicle_type_parking);
 
     useEffect(() => {
-        countTotalsBilling();
-    }, [data.price_per_kwh, data.meter_reading]);
+        if (flash?.billing_fee || flash?.meter_reading) {
+            setData((prevValues) => ({
+                ...prevValues,
+                billing_fee: flash.billing_fee,
+                meter_reading: flash.meter_reading,
+            }));
+        }
+    }, [flash?.billing_fee, flash?.meter_reading]);
 
-    const updateMeterReadingDiff = () => {
-        const start = Number(data.meter_reading_start) || 0;
-        const end = Number(data.meter_reading_end) || 0;
-        const diff = start == end ? start : start - end;
-
-        setData("meter_reading", diff); // Perbarui state
+    //handle for filter option select category
+    const getOptionsForType = (type) => {
+        const filteredCategory = billingCategory.find(
+            (category) => category.billing_type === type
+        );
+        return filteredCategory ? filteredCategory.categories : [];
     };
 
-    const countTotalsBilling = useCallback(() => {
-        const pricePerKwh = Number(data.price_per_kwh) || 0;
-        const totals =
-            data.meter_reading && pricePerKwh
-                ? Number(data.meter_reading) * pricePerKwh
-                : 0;
+    const maintenanceOptions = getOptionsForType("Maintenance");
+    const vehicleOptions = getOptionsForType("Parkir");
 
-        setData("billing_fee", totals);
-        console.log("useCallback");
-    }, [data.meter_reading, data.price_per_kwh]);
+    const handleChangeVehicleType = (value) => {
+        setVehicleTypeSelected(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            vehicle_type_parking: value,
+        }));
+    };
+
+    const handleChangeMaintenanceType = (value) => {
+        setMaintenanceTypeSelected(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            maintenance_type: value,
+        }));
+    };
 
     const handleOwnerChangeChange = (value) => {
         setOwner(value);
@@ -73,14 +96,52 @@ export default function AddBiling({ auth, ownerData }) {
             ...prevValues,
             billing_type: value,
             meter_reading: null,
+            billing_fee: "",
         }));
     };
 
     // ! Handle submit
     function handleSubmit(e) {
         e.preventDefault();
+        setIsLoading("add-billing");
         // console.warn(data);
-        post("/billing/store");
+        post("/billing/store", {
+            onFinish: () => setIsLoading(null),
+        });
+    }
+
+    // ! Handle Count Billing
+    function handleCountBilling(e) {
+        e.preventDefault();
+        setIsLoading("count-billing");
+        post(route("billing.count"), {
+            preserveScroll: true,
+            onFinish: () => setIsLoading(null),
+        });
+    }
+    // ! Handle Clear Count Billing
+    function handleClearCountBilling() {
+        if (billingType === "Listrik") {
+            setData((prevValues) => ({
+                ...prevValues,
+                start_meter: "",
+                end_meter: "",
+                meter_reading: "",
+                unit_price: "",
+                minimum_charge: "",
+                billing_fee: "",
+            }));
+        } else if (billingType === "Maintenance" || billingType === "Parkir") {
+            setData((prevValues) => ({
+                ...prevValues,
+                meter_reading: null,
+                billing_fee: "",
+                maintenance_type: "",
+                vehicle_type_parking: "",
+            }));
+            setMaintenanceTypeSelected("");
+            setVehicleTypeSelected("");
+        }
     }
 
     return (
@@ -158,16 +219,16 @@ export default function AddBiling({ auth, ownerData }) {
                                                     handleBillingTypeChange
                                                 }
                                             >
-                                                <Option value="Air">Air</Option>
-                                                <Option value="Listrik">
-                                                    Listrik
-                                                </Option>
-                                                <Option value="Maintenance">
-                                                    Maintenance
-                                                </Option>
-                                                <Option value="Parkir">
-                                                    Parkir
-                                                </Option>
+                                                {TypeBilling.map(
+                                                    (item, index) => (
+                                                        <Option
+                                                            key={index}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </Option>
+                                                    )
+                                                )}
                                             </Select>
                                         </div>
                                     </div>
@@ -194,38 +255,34 @@ export default function AddBiling({ auth, ownerData }) {
                                                 <div className="w-full mr-4">
                                                     <CustomInput
                                                         label="Meteran Awal"
-                                                        id="meter_reading_start"
-                                                        value={
-                                                            data.meter_reading_start
-                                                        }
+                                                        id="start_meter"
+                                                        value={data.start_meter}
                                                         onChange={(e) => {
                                                             setData(
-                                                                "meter_reading_start",
+                                                                "start_meter",
                                                                 e.target.value
                                                             );
                                                         }}
                                                         type="number"
                                                         errors={
-                                                            errors.meter_reading_start
+                                                            errors.start_meter
                                                         }
                                                     />
                                                 </div>
                                                 <div className="w-full mr-4 tablet:mt-8">
                                                     <CustomInput
                                                         label="Meteran Akhir"
-                                                        id="meter_reading_end"
-                                                        value={
-                                                            data.meter_reading_end
-                                                        }
+                                                        id="end_meter"
+                                                        value={data.end_meter}
                                                         onChange={(e) => {
                                                             setData(
-                                                                "meter_reading_end",
+                                                                "end_meter",
                                                                 e.target.value
                                                             );
                                                         }}
                                                         type="number"
                                                         errors={
-                                                            errors.meter_reading_end
+                                                            errors.end_meter
                                                         }
                                                     />
                                                 </div>
@@ -251,18 +308,16 @@ export default function AddBiling({ auth, ownerData }) {
                                             <div className="w-full mr-4 tablet:mt-8">
                                                 <CustomInput
                                                     label="Harga / KWh"
-                                                    id="price_per_kwh"
-                                                    value={data.price_per_kwh}
+                                                    id="unit_price"
+                                                    value={data.unit_price}
                                                     onChange={(e) =>
                                                         setData(
-                                                            "price_per_kwh",
+                                                            "unit_price",
                                                             e.target.value
                                                         )
                                                     }
                                                     type="number"
-                                                    errors={
-                                                        errors.price_per_kwh
-                                                    }
+                                                    errors={errors.unit_price}
                                                 />
                                             </div>
                                             <div className="w-full mr-4 tablet:mt-8">
@@ -271,19 +326,16 @@ export default function AddBiling({ auth, ownerData }) {
                                                     id="minimum_charge"
                                                     value={data.minimum_charge}
                                                     type="number"
-                                                ></CustomInput>
-                                            </div>
-                                            <div className="w-full mr-4 tablet:mt-8">
-                                                <Button
-                                                    fullWidth={true}
-                                                    variant="filled"
-                                                    onClick={() =>
-                                                        console.log("hitung")
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "minimum_charge",
+                                                            e.target.value
+                                                        )
                                                     }
-                                                    className="bg-orange-500"
-                                                >
-                                                    Hitung Tagihan
-                                                </Button>
+                                                    errors={
+                                                        errors.minimum_charge
+                                                    }
+                                                ></CustomInput>
                                             </div>
                                         </div>
                                     ) : null}
@@ -297,23 +349,131 @@ export default function AddBiling({ auth, ownerData }) {
                                                     : "mt-0 tablet:mt-8"
                                             } `}
                                     >
-                                        <CustomInput
-                                            label="Biaya Tagihan"
-                                            id="billing_fee"
-                                            value={data.billing_fee}
-                                            type="number"
-                                            {...(data.billing_type === "Listrik"
-                                                ? { disabled: true }
-                                                : {
-                                                      onChange: (e) =>
-                                                          setData(
-                                                              "billing_fee",
-                                                              e.target.value
-                                                          ),
-                                                  })}
-                                            errors={errors.billing_fee}
-                                        />
+                                        {billingType === "Maintenance" && (
+                                            <div className="w-full mr-4 tablet:mb-8">
+                                                <Select
+                                                    label="Jenis Maintenance"
+                                                    id="maintenance_type"
+                                                    value={
+                                                        maintenanceTypeSelected
+                                                    }
+                                                    onChange={
+                                                        handleChangeMaintenanceType
+                                                    }
+                                                    errors={
+                                                        errors.maintenance_type
+                                                    }
+                                                >
+                                                    {maintenanceOptions.map(
+                                                        (items, index) => {
+                                                            return (
+                                                                <Option
+                                                                    key={index}
+                                                                    value={
+                                                                        items.label
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        items.label
+                                                                    }
+                                                                </Option>
+                                                            );
+                                                        }
+                                                    )}
+                                                </Select>
+                                            </div>
+                                        )}
 
+                                        {billingType === "Parkir" && (
+                                            <div className="w-full mr-4 tablet:mb-8">
+                                                <Select
+                                                    label="Jenis Kendaraan"
+                                                    id="vehicle_type"
+                                                    value={vehicleTypeSelected}
+                                                    onChange={
+                                                        handleChangeVehicleType
+                                                    }
+                                                >
+                                                    {vehicleOptions.map(
+                                                        (items, index) => {
+                                                            return (
+                                                                <Option
+                                                                    key={index}
+                                                                    value={
+                                                                        items.label
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        items.label
+                                                                    }
+                                                                </Option>
+                                                            );
+                                                        }
+                                                    )}
+                                                </Select>
+                                            </div>
+                                        )}
+                                        <div className="w-full mr-4">
+                                            {billingType === "Listrik" ? (
+                                                <Typography
+                                                    variant="paragraph"
+                                                    className="mb-2 text-base font-semibold "
+                                                >
+                                                    Total Tagihan
+                                                </Typography>
+                                            ) : null}
+                                            <CustomInput
+                                                label="Biaya Tagihan"
+                                                id="billing_fee"
+                                                value={data.billing_fee}
+                                                type="number"
+                                                {...(data.billing_type ===
+                                                "Listrik"
+                                                    ? { disabled: true }
+                                                    : {
+                                                          onChange: (e) =>
+                                                              setData(
+                                                                  "billing_fee",
+                                                                  e.target.value
+                                                              ),
+                                                      })}
+                                                errors={errors.billing_fee}
+                                            />
+                                        </div>
+                                    </div>
+                                    {billingType === "Listrik" ||
+                                    billingType === "Maintenance" ||
+                                    billingType === "Parkir" ? (
+                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                            <div className="mr-4 w-fit tablet:mt-8">
+                                                <Button
+                                                    variant="filled"
+                                                    onClick={handleCountBilling}
+                                                    className="bg-orange-500"
+                                                    loading={
+                                                        isLoading ===
+                                                        "count-billing"
+                                                    }
+                                                >
+                                                    Hitung Tagihan
+                                                </Button>
+                                            </div>
+                                            <div className="mr-4 w-fit tablet:mt-8">
+                                                <Button
+                                                    variant="filled"
+                                                    onClick={
+                                                        handleClearCountBilling
+                                                    }
+                                                    className="flex items-center justify-center gap-2 bg-red-600 "
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />{" "}
+                                                    <span>Clear</span>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : null}
+
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tanggal Tagihan Dibuat"
                                             id="billing_date"
@@ -328,8 +488,6 @@ export default function AddBiling({ auth, ownerData }) {
                                             className="tablet:mt-8"
                                             type="date"
                                         />
-                                    </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tanggal Batas Pembayaran"
                                             id="due_date"
@@ -363,7 +521,9 @@ export default function AddBiling({ auth, ownerData }) {
                                                 variant="filled"
                                                 onClick={handleSubmit}
                                                 className="bg-green-500"
-                                                loading={processing}
+                                                loading={
+                                                    isLoading === "add-billing"
+                                                }
                                             >
                                                 Tambah Data
                                             </Button>

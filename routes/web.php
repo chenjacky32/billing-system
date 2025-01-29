@@ -89,7 +89,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing/{id}/edit', [BillingController::class, 'edit'])->name('billing.edit');
     Route::post('/billing/{id}/update', [BillingController::class, 'update'])->name('billing.update');
     Route::post('/billing/delete', [BillingController::class, 'destroy'])->name('billing.delete');
-
+    Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');

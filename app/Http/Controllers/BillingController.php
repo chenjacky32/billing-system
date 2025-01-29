@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApartmentOwner;
 use App\Models\Billing;
+use App\Models\BillingsCategory;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,9 +44,11 @@ class BillingController extends Controller
         $apartemntId = $user->apartment_id;
 
         $ownerQuery = ApartmentOwner::query();
+        $categoryBillingQuery = BillingsCategory::query();
 
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartemntId);
+            $categoryBillingQuery->where('apartment_id', $apartemntId);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -55,10 +58,29 @@ class BillingController extends Controller
             ->prepend(['label' => 'Pilih Owner', 'value' => ''])
             ->values()
             ->toArray();
-
+        
+            $category_billing_data = $categoryBillingQuery
+            ->get(['id','billing_type','category_name','unit_price'])
+            ->groupBy('billing_type')
+            ->map(function ($categories, $billingType) {
+                return [
+                    'billing_type' => $billingType,
+                    'categories' => $categories->map(function ($category) {
+                        return [
+                            'label' => $category->category_name,
+                            'value' => $category->id,
+                            'price' => $category->unit_price,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values()
+            ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
+            ->toArray();
 
         return Inertia::render("Billing/AddBilling", [
             'ownerData' => $owner_data,
+            'billingCategory'=>$category_billing_data
         ]);
     }
 
@@ -77,6 +99,14 @@ class BillingController extends Controller
         // Conditionally add the meter_reading validation if billing_type is Air or Listrik
         if (in_array($request->input('billing_type'), ['Air', 'Listrik'])) {
             $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
+        if(in_array($request->input('billing_type'), ['Listrik'])) {
+            $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
+            $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
         }
 
         // Validate the incoming data with the dynamically adjusted rules
@@ -192,5 +222,65 @@ class BillingController extends Controller
         $billing = Billing::find($request->id);
         $billing->delete();
         return redirect('/billing')->with('success', 'Billing data has been deleted!');
+    }
+
+    //count electric bill
+    public function calculateElectricityBill(Request $request){
+        $request->validate ([
+                'start_meter' => 'required|integer|min:1|max:999999999999999',
+                'end_meter' => 'required|integer|min:1|max:999999999999999',
+                'unit_price' => 'required|integer|min:1|max:999999999999999',
+                'minimum_charge'=>'required|integer|min:1|max:999999999999999',
+        ]);
+
+        $startMeter = $request->input('start_meter');
+        $endMeter = $request->input('end_meter');
+        $unitPrice = $request->input('unit_price');
+        $minimumCharge = $request->input('minimum_charge');
+
+        $meterDifference = $startMeter - $endMeter;
+        $totalCharge = $meterDifference * $unitPrice;
+        $billingFee =  $totalCharge < $minimumCharge ? $minimumCharge : $totalCharge;
+        return back()->with([
+            'billing_fee' => $billingFee,
+            'meter_reading' => $meterDifference
+        ]);
+    }
+
+    //get billing fee category from billing_category
+    public function fetchBillingFee($apartmentId, $billingType, $categoryName){
+        $billingCategory = BillingsCategory::where([
+            'apartment_id' => $apartmentId,
+            'billing_type' => $billingType,
+            'category_name' => $categoryName
+        ])->first();
+
+        return back()->with([
+            'billing_fee' => $billingCategory ? $billingCategory->unit_price : 0
+        ]);
+    }
+
+    public function countBilling(Request $request){
+        $billingType = $request->input('billing_type');
+        $apartmentId = Auth::user()->apartment_id; 
+
+        // basic rules validation
+        $request->validate([
+            'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
+        ]);
+
+        switch($billingType){
+            case 'Listrik':
+                return $this->calculateElectricityBill($request);
+            case 'Maintenance':
+                $request->validate(['maintenance_type' => 'required|string']);
+                return $this->fetchBillingFee($apartmentId, $billingType, $request->input('maintenance_type'));
+            case 'Parkir':
+                $request->validate(['vehicle_type_parking' => 'required|string']);
+                return $this->fetchBillingFee($apartmentId, $billingType, $request->input('vehicle_type_parking'));
+            
+            default:
+                return back();
+        }
     }
 }
