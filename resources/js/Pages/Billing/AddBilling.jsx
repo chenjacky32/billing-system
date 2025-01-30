@@ -40,11 +40,6 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
         vehicle_type_parking: vehicleTypeSelected,
     });
 
-    console.log(data.billing_fee);
-    console.log(data.billing_type);
-    console.log(data.maintenance_type);
-    console.log(data.vehicle_type_parking);
-
     useEffect(() => {
         if (flash?.billing_fee || flash?.meter_reading) {
             setData((prevValues) => ({
@@ -370,12 +365,10 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                                 <Option
                                                                     key={index}
                                                                     value={
-                                                                        items.label
+                                                                        items.value
                                                                     }
                                                                 >
-                                                                    {
-                                                                        items.label
-                                                                    }
+                                                                    {`${items.label}`}
                                                                 </Option>
                                                             );
                                                         }
@@ -400,7 +393,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                                 <Option
                                                                     key={index}
                                                                     value={
-                                                                        items.label
+                                                                        items.value
                                                                     }
                                                                 >
                                                                     {

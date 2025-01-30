@@ -109,22 +109,52 @@ class BillingController extends Controller
             $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
         }
 
+        if(in_array($request->input('billing_type'), ['Maintenance'])) {
+            $rules['maintenance_type'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Parkir'])) {
+            $rules['vehicle_type_parking'] = 'required|integer|min:1|max:999999999999999';
+        }
+
         // Validate the incoming data with the dynamically adjusted rules
         $validatedData = $request->validate($rules);
 
         // Add user_id to the validated data from the authenticated user
         $validatedData['created_by'] = Auth::id();
+        
+        // Retrieve the billing category ID based on billing_type
+        if ($request->input('billing_type') === 'Maintenance') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Maintenance',
+                'id' => $request->input('maintenance_type')
+            ])->first();
+        } elseif ($request->input('billing_type') === 'Parkir') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Parkir',
+                'id' => $request->input('vehicle_type_parking')
+            ])->first();
+        } else {
+            $billingCategory = null;
+        }
+
+         // Check if billing category exists
+        if (in_array($request->input('billing_type'), ['Maintenance', 'Parkir']) && !$billingCategory) {
+            return back()->with('error', 'Billing Category not found.');
+        }
+
+        $validatedData['billing_category_id'] = $billingCategory ? $billingCategory->id : null;
 
         $ownerId = $request->input('owner_id');
         $owner = ApartmentOwner::findOrFail($ownerId);
-        $apartemntId = $owner->apartment_id;
-        $validatedData['apartment_id'] = $apartemntId;
+
+        $apartmentId = $owner->apartment_id;
+        $validatedData['apartment_id'] = $apartmentId;
 
         // Store the validated data in the billing table
         $billing = Billing::create($validatedData);
 
         // dd($billing);
-
         return redirect('/billing')->with('success', 'New Billing has been created!');
     }
 
@@ -248,12 +278,8 @@ class BillingController extends Controller
     }
 
     //get billing fee category from billing_category
-    public function fetchBillingFee($apartmentId, $billingType, $categoryName){
-        $billingCategory = BillingsCategory::where([
-            'apartment_id' => $apartmentId,
-            'billing_type' => $billingType,
-            'category_name' => $categoryName
-        ])->first();
+    public function fetchBillingFee($id){
+        $billingCategory = BillingsCategory::find($id);
 
         return back()->with([
             'billing_fee' => $billingCategory ? $billingCategory->unit_price : 0
@@ -262,7 +288,8 @@ class BillingController extends Controller
 
     public function countBilling(Request $request){
         $billingType = $request->input('billing_type');
-        $apartmentId = Auth::user()->apartment_id; 
+        $maintenanceId = $request->input('maintenance_type');
+        $vehicleId = $request->input('vehicle_type_parking');
 
         // basic rules validation
         $request->validate([
@@ -273,12 +300,11 @@ class BillingController extends Controller
             case 'Listrik':
                 return $this->calculateElectricityBill($request);
             case 'Maintenance':
-                $request->validate(['maintenance_type' => 'required|string']);
-                return $this->fetchBillingFee($apartmentId, $billingType, $request->input('maintenance_type'));
+                $request->validate(['maintenance_type' => 'required|integer']);
+                return $this->fetchBillingFee($maintenanceId);
             case 'Parkir':
-                $request->validate(['vehicle_type_parking' => 'required|string']);
-                return $this->fetchBillingFee($apartmentId, $billingType, $request->input('vehicle_type_parking'));
-            
+                $request->validate(['vehicle_type_parking' => 'required|integer']);
+                return $this->fetchBillingFee($vehicleId);
             default:
                 return back();
         }
