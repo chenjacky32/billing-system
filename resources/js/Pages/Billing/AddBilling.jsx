@@ -232,7 +232,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                             <CustomInput
                                                 label="Meteran"
                                                 id="meter_reading"
-                                                value={data.meter_reading}
+                                                value={data.meter_reading || ""}
                                                 onChange={(e) =>
                                                     setData(
                                                         "meter_reading",
@@ -251,7 +251,10 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                     <CustomInput
                                                         label="Meteran Awal"
                                                         id="start_meter"
-                                                        value={data.start_meter}
+                                                        value={
+                                                            data.start_meter ||
+                                                            ""
+                                                        }
                                                         onChange={(e) => {
                                                             setData(
                                                                 "start_meter",
@@ -268,7 +271,9 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                     <CustomInput
                                                         label="Meteran Akhir"
                                                         id="end_meter"
-                                                        value={data.end_meter}
+                                                        value={
+                                                            data.end_meter || ""
+                                                        }
                                                         onChange={(e) => {
                                                             setData(
                                                                 "end_meter",
@@ -287,7 +292,8 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                         label="Total Meteran"
                                                         id="meter_reading"
                                                         value={
-                                                            data.meter_reading
+                                                            data.meter_reading ||
+                                                            ""
                                                         }
                                                         type="number"
                                                         errors={
@@ -304,7 +310,9 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                 <CustomInput
                                                     label="Harga / KWh"
                                                     id="unit_price"
-                                                    value={data.unit_price}
+                                                    value={
+                                                        data.unit_price || ""
+                                                    }
                                                     onChange={(e) =>
                                                         setData(
                                                             "unit_price",
@@ -319,7 +327,10 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                 <CustomInput
                                                     label="Minimum Charge"
                                                     id="minimum_charge"
-                                                    value={data.minimum_charge}
+                                                    value={
+                                                        data.minimum_charge ||
+                                                        ""
+                                                    }
                                                     type="number"
                                                     onChange={(e) =>
                                                         setData(
@@ -364,9 +375,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                             return (
                                                                 <Option
                                                                     key={index}
-                                                                    value={
-                                                                        items.value
-                                                                    }
+                                                                    value={items.value.toString()}
                                                                 >
                                                                     {`${items.label}`}
                                                                 </Option>
@@ -392,9 +401,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                             return (
                                                                 <Option
                                                                     key={index}
-                                                                    value={
-                                                                        items.value
-                                                                    }
+                                                                    value={items.value.toString()}
                                                                 >
                                                                     {
                                                                         items.label
@@ -418,7 +425,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                             <CustomInput
                                                 label="Biaya Tagihan"
                                                 id="billing_fee"
-                                                value={data.billing_fee}
+                                                value={data.billing_fee || ""}
                                                 type="number"
                                                 {...(data.billing_type ===
                                                 "Listrik"

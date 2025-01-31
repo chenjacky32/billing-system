@@ -111,7 +111,7 @@ export default function Billing({ auth, errors, data, filters }) {
         return url;
     }
 
-    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="h-4 w-4" />;
+    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
     useEffect(() => {
         if (flash.message) {
@@ -123,15 +123,15 @@ export default function Billing({ auth, errors, data, filters }) {
         toast.info(
             <div className="p-4">
                 <p>Are you sure you want to delete this data?</p>
-                <div className="mt-4 flex justify-end">
+                <div className="flex justify-end mt-4">
                     <button
-                        className="px-4 py-2 mr-2 bg-red-500 text-white rounded hover:bg-red-700"
+                        className="px-4 py-2 mr-2 text-white bg-red-500 rounded hover:bg-red-700"
                         onClick={() => deleteData(id)}
                     >
                         Yes
                     </button>
                     <button
-                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
+                        className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-700"
                         onClick={() => toast.dismiss()}
                     >
                         No
@@ -163,7 +163,7 @@ export default function Billing({ auth, errors, data, filters }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Unit Owner
                 </h2>
             }
@@ -171,7 +171,7 @@ export default function Billing({ auth, errors, data, filters }) {
             <Head title="Billing List" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -181,14 +181,14 @@ export default function Billing({ auth, errors, data, filters }) {
                         </Link>
                         <Link
                             href={route("billing.index")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Billing
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 handleSearch={(event) =>
                                     handleInputChange(
@@ -207,7 +207,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                 hasFilter={true}
                             />
                             <div className="mt-5">
-                                <div className=" flex flex-wrap">
+                                <div className="flex flex-wrap ">
                                     <div className="w-[21rem] mr-4 tablet:w-full">
                                         <InputLabel>
                                             Status Pembyaran
@@ -237,7 +237,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                             </Option>
                                         </Select>
                                     </div>
-                                    {/* <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                    {/* <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Dari Tanggal</InputLabel>
                                         <CustomInput
                                             id="from_date"
@@ -251,7 +251,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                             type="date"
                                         />
                                     </div>
-                                    <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Sampai Tanggal</InputLabel>
                                         <CustomInput
                                             id="until_date"
@@ -267,9 +267,9 @@ export default function Billing({ auth, errors, data, filters }) {
                                     </div> */}
                                 </div>
                             </div>
-                            <CardBody className="overflow-scroll px-0">
+                            <CardBody className="px-0 overflow-scroll">
                                 <table
-                                    className="mt-4 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -280,7 +280,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="border-y  bg-primary py-4 pl-4"
+                                                    className="py-4 pl-4 border-y bg-primary"
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -318,7 +318,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                 return (
                                                     <tr
                                                         key={id}
-                                                        className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                        className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
@@ -421,80 +421,72 @@ export default function Billing({ auth, errors, data, filters }) {
                                                         </td>
 
                                                         <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "billing.edit",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="get"
-                                                                data={{
-                                                                    id: undefined,
+                                                            <Tooltip
+                                                                content="Edit Billing"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
                                                                 }}
-                                                                as="button"
+                                                                className="bg-green-600"
                                                             >
-                                                                <Tooltip
-                                                                    content="Edit Billing"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
+                                                                <Link
+                                                                    href={route(
+                                                                        "billing.edit",
+                                                                        {
+                                                                            id: id,
+                                                                        }
+                                                                    )}
+                                                                    method="get"
+                                                                    data={{
+                                                                        id: undefined,
                                                                     }}
-                                                                    className="bg-green-600"
+                                                                    as="button"
                                                                 >
-                                                                    <IconButton
-                                                                        variant="fill"
-                                                                        color="green"
-                                                                    >
-                                                                        <PencilIcon className="h-4 w-4" />
+                                                                    <IconButton color="green">
+                                                                        <PencilIcon className="w-4 h-4" />
                                                                     </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
+                                                                </Link>
+                                                            </Tooltip>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "billing.delete",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="post"
-                                                                data={{
-                                                                    id: undefined,
+                                                            <Tooltip
+                                                                content="Delete Billing"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
                                                                 }}
-                                                                as="button"
+                                                                className="bg-red-600"
                                                             >
-                                                                <Tooltip
-                                                                    content="Delete Billing"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
+                                                                <Link
+                                                                    href={route(
+                                                                        "billing.delete",
+                                                                        {
+                                                                            id: id,
+                                                                        }
+                                                                    )}
+                                                                    method="post"
+                                                                    data={{
+                                                                        id: undefined,
                                                                     }}
-                                                                    className="bg-red-600"
+                                                                    as="button"
                                                                 >
-                                                                    <IconButton
-                                                                        variant="fill"
-                                                                        color="red"
-                                                                    >
-                                                                        <TrashIcon className="h-4 w-4" />
+                                                                    <IconButton color="red">
+                                                                        <TrashIcon className="w-4 h-4" />
                                                                     </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
+                                                                </Link>
+                                                            </Tooltip>
                                                         </td>
                                                     </tr>
                                                 );

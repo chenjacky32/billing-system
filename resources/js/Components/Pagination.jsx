@@ -11,7 +11,7 @@ export default function Pagination({
     getPaginationUrl,
 }) {
     return (
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+        <CardFooter className="flex items-center justify-between p-4 border-t border-blue-gray-50">
             <Typography
                 variant="small"
                 // color="blue-gray"
@@ -24,7 +24,7 @@ export default function Pagination({
                     <Link href={getPaginationUrl(prev_page_url, search)}>
                         <Button
                             variant="outlined"
-                            size="xl"
+                            size="md"
                             className="border-primary text-primary"
                         >
                             Previous
@@ -34,8 +34,8 @@ export default function Pagination({
                 {next_page_url && (
                     <Link href={getPaginationUrl(next_page_url, search)}>
                         <Button
-                            variant="fill"
-                            size="xl"
+                            variant="filled"
+                            size="md"
                             className="w-28 h-[2.6rem] bg-primary text-white"
                         >
                             Next

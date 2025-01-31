@@ -162,14 +162,16 @@ class BillingController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
-        $apartemntId = $user->apartment_id;
+        $apartment_id = $user->apartment_id;
         $billingData = $billing->find($request->id);
         $billingApartmentId = $billingData->apartment_id;
 
         $ownerQuery = ApartmentOwner::query();
+        $categoryBillingQuery = BillingsCategory::query();
 
         if ($role !== 'SUPER ADMIN') {
-            $ownerQuery->where('apartment_id', $apartemntId);
+            $ownerQuery->where('apartment_id', $apartment_id);
+            $categoryBillingQuery->where('apartment_id', $apartment_id);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -180,16 +182,39 @@ class BillingController extends Controller
             ->values()
             ->toArray();
 
+            $category_billing_data = $categoryBillingQuery
+            ->get(['id','billing_type','category_name','unit_price'])
+            ->groupBy('billing_type')
+            ->map(function ($categories, $billingType) {
+                return [
+                    'billing_type' => $billingType,
+                    'categories' => $categories->map(function ($category) {
+                        return [
+                            'label' => $category->category_name,
+                            'value' => $category->id,
+                            'price' => $category->unit_price,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values()
+            ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
+            ->toArray();
+
+        
+
         if ($role === 'SUPER ADMIN') {
             return Inertia::render('Billing/EditBilling', [
                 "billingData" => $billing->find($request->id),
                 'ownerData' => $owner_data,
+                'billingCategory' => $category_billing_data,
             ]);
         } else {
-            if ($apartemntId == $billingApartmentId) {
+            if ($apartment_id == $billingApartmentId) {
                 return Inertia::render('Billing/EditBilling', [
                     "billingData" => $billing->find($request->id),
                     'ownerData' => $owner_data,
+                    'billingCategory' => $category_billing_data,
                 ]);
             } else {
                 return redirect('/unauthorized');
@@ -216,6 +241,22 @@ class BillingController extends Controller
             $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
         }
 
+        // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
+        if(in_array($request->input('billing_type'), ['Listrik'])){
+            $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
+            $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Maintenance'])) {
+            $rules['maintenance_type'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Parkir'])) {
+            $rules['vehicle_type_parking'] = 'required|integer|min:1|max:999999999999999';
+        }
+
         // Conditionally add the paid_date validation if status is Success
         if ($request->input('status') === 'Success') {
             $rules['paid_date'] = 'required|date';
@@ -227,6 +268,10 @@ class BillingController extends Controller
         // Set meter_reading to null if billing_type is Parkir or Maintenance
         if (in_array($request->input('billing_type'), ['Parkir', 'Maintenance'])) {
             $validatedData['meter_reading'] = null;
+            $validatedData['start_meter'] = null;
+            $validatedData['end_meter'] = null;
+            $validatedData['unit_price'] = null;
+            $validatedData['minimum_charge'] = null;
         }
 
         if ($request->input('status') !== 'Success') {
@@ -236,10 +281,32 @@ class BillingController extends Controller
             $validatedData['is_paid'] = 1;
         }
 
+        // Retrieve the billing category ID based on billing_type
+        if ($request->input('billing_type') === 'Maintenance') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Maintenance',
+                'id' => $request->input('maintenance_type')
+            ])->first();
+        } elseif ($request->input('billing_type') === 'Parkir') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Parkir',
+                'id' => $request->input('vehicle_type_parking')
+            ])->first();
+        } else {
+            $billingCategory = null;
+        }
+
+         // Check if billing category exists
+        if (in_array($request->input('billing_type'), ['Maintenance', 'Parkir']) && !$billingCategory) {
+            return back()->with('error', 'Billing Category not found.');
+        }
+
+        $validatedData['billing_category_id'] = $billingCategory ? $billingCategory->id : null;
+
         $ownerId = $request->input('owner_id');
         $owner = ApartmentOwner::findOrFail($ownerId);
-        $apartemntId = $owner->apartment_id;
-        $validatedData['apartment_id'] = $apartemntId;
+        $apartment_id = $owner->apartment_id;
+        $validatedData['apartment_id'] = $apartment_id;
 
         // Update the billing record
         $billing->update($validatedData);
