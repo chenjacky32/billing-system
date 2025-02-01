@@ -13,9 +13,8 @@ import {
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/solid";
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import { useEffect } from "react";
-import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
@@ -34,8 +33,27 @@ const TABLE_HEAD = [
 
 export default function BillingCategory({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
-    console.log("data", data);
-    console.log("filters", filters);
+
+    function handleSearch(event) {
+        router.get(
+            route(route().current()),
+            { search: event.target.value },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }
+
+    function getPaginationUrl(baseUrl, searchQuery) {
+        if (searchQuery) {
+            // Include the search query in the URL
+            return `${baseUrl}&search=${searchQuery}`;
+        } else {
+            // Don't include the search query
+            return baseUrl;
+        }
+    }
 
     useEffect(() => {
         if (flash.message) {
@@ -56,6 +74,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
             }
         >
             <Head title="Billing Category" />
+
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
@@ -76,7 +95,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12">
                             <PageHeader
-                                // handleSearch={handleSearch}
+                                handleSearch={handleSearch}
                                 title={"Billing Category List"}
                                 description={
                                     "Informasi Data Kategori Tagihan pada Apartemen"
@@ -120,7 +139,6 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                     unit_price,
                                                     apartment,
                                                     created_by,
-                                                    created_at,
                                                     id,
                                                 },
                                                 index
@@ -129,14 +147,14 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                     index ===
                                                     data.data.length - 1;
                                                 const classes = isLast
-                                                    ? "p-4"
-                                                    : "p-4 border-b border-blue-gray-50";
+                                                    ? "pl-4"
+                                                    : "pl-4 border-b border-blue-gray-50";
                                                 return (
                                                     <tr
-                                                        key={index}
+                                                        key={id}
                                                         className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -146,7 +164,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -158,7 +176,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -170,7 +188,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -181,7 +199,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -193,58 +211,81 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {created_at}
+                                                                    {
+                                                                        created_by.name
+                                                                    }
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td>
-                                                            <Tooltip
-                                                                content="Edit Billing Category"
-                                                                animate={{
-                                                                    mount: {
-                                                                        scale: 1,
-                                                                        y: 0,
-                                                                    },
-                                                                    unmount: {
-                                                                        scale: 0,
-                                                                        y: 25,
-                                                                    },
+                                                        <td className={classes}>
+                                                            <Link
+                                                                href={route(
+                                                                    "billingCategory.edit",
+                                                                    {
+                                                                        id: id,
+                                                                    }
+                                                                )}
+                                                                method="get"
+                                                                data={{
+                                                                    id: undefined,
                                                                 }}
-                                                                className="bg-green-600"
+                                                                as="button"
                                                             >
-                                                                <IconButton
-                                                                    variant="filled"
-                                                                    color="green"
+                                                                <Tooltip
+                                                                    content="Edit Billing Category"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                    className="bg-green-600"
                                                                 >
-                                                                    <PencilIcon className="w-4 h-4" />
-                                                                </IconButton>
-                                                            </Tooltip>
+                                                                    <IconButton
+                                                                        variant="filled"
+                                                                        color="green"
+                                                                    >
+                                                                        <PencilIcon className="w-4 h-4" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </Link>
                                                         </td>
-                                                        <td>
-                                                            <Tooltip
-                                                                content="Delete Billing Category"
-                                                                animate={{
-                                                                    mount: {
-                                                                        scale: 1,
-                                                                        y: 0,
-                                                                    },
-                                                                    unmount: {
-                                                                        scale: 0,
-                                                                        y: 25,
-                                                                    },
-                                                                }}
-                                                                className="bg-red-600"
-                                                            >
-                                                                <IconButton color="red">
-                                                                    <TrashIcon className="w-4 h-4" />
-                                                                </IconButton>
-                                                            </Tooltip>
+                                                        <td className={classes}>
+                                                            <Link>
+                                                                <Tooltip
+                                                                    content="Delete Billing Category"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                    className="bg-red-600"
+                                                                >
+                                                                    <IconButton
+                                                                        color="red"
+                                                                        variant="filled"
+                                                                    >
+                                                                        <TrashIcon className="w-4 h-4" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </Link>
                                                         </td>
                                                     </tr>
                                                 );
@@ -253,14 +294,14 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                     </tbody>
                                 </table>
                             </CardBody>
-                            {/* <Pagination
-                            // current_page={data.current_page}
-                            // last_page={data.last_page}
-                            // prev_page_url={data.prev_page_url}
-                            // next_page_url={data.next_page_url}
-                            // search={filters.search}
-                            // getPaginationUrl={getPaginationUrl}
-                            /> */}
+                            <Pagination
+                                current_page={data.current_page}
+                                last_page={data.last_page}
+                                prev_page_url={data.prev_page_url}
+                                next_page_url={data.next_page_url}
+                                search={filters.search}
+                                getPaginationUrl={getPaginationUrl}
+                            />
                         </Card>
                     </div>
                 </div>

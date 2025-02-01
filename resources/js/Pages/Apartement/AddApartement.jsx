@@ -28,7 +28,7 @@ export default function AddApartement({ auth }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Add Apartment
                 </h2>
             }
@@ -36,7 +36,7 @@ export default function AddApartement({ auth }) {
             <Head title="Add Apartement" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -52,14 +52,14 @@ export default function AddApartement({ auth }) {
                         </Link>
                         <Link
                             href={route("apartement.add")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Add Apartment
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 title={"New Apartement Data"}
                                 description={
@@ -68,7 +68,7 @@ export default function AddApartement({ auth }) {
                                 label="Cari Nama Apartemen"
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col">
                                         <CustomInput
@@ -111,7 +111,7 @@ export default function AddApartement({ auth }) {
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
                                                 variant="fill"
                                                 onClick={handleSubmit}

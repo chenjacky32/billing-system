@@ -84,8 +84,9 @@ Route::middleware('auth')->group(function () {
 
     //!Billing Category
     Route::get('/billing-category',[BillingCategoryController::class,'index'])->name('billingCategory.index');
-    Route::get('/billing-category/add',[BillingCategoryController::class,'index'])->name('billingCategory.add');
-
+    Route::get('/billing-category/add',[BillingCategoryController::class,'add'])->name('billingCategory.add');
+    Route::get('/billing-category/{id}/edit', [BillingCategoryController::class, 'edit'])->name('billingCategory.edit');
+    Route::post('/billing-category/store', [BillingCategoryController::class, 'store'])->name('billingCategory.store');
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');

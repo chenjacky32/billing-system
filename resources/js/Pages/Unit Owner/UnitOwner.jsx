@@ -31,8 +31,6 @@ const TABLE_HEAD = [
 export default function UnitOwner({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
 
-    console.log("data", data);
-
     function handleSearch(event) {
         router.get(
             route(route().current()),
