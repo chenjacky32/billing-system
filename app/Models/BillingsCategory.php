@@ -10,6 +10,15 @@ class BillingsCategory extends Model
     use HasFactory;
 
     protected $table = 'billings_category';
-    protected $fillable = ['billing_type','apartment_id','category_name','unit_price'];
+    protected $fillable = ['billing_type','apartment_id','category_name','unit_price','created_by'];
 
+    public function apartment()
+    {
+        return $this->belongsTo(Apartment::class, foreignKey:'apartment_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, foreignKey:'created_by');
+    }
 }

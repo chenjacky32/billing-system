@@ -8,8 +8,12 @@ import {
     Tooltip,
     Breadcrumbs,
 } from "@material-tailwind/react";
-import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { router, usePage } from "@inertiajs/react";
+import {
+    FolderPlusIcon,
+    PencilIcon,
+    TrashIcon,
+} from "@heroicons/react/24/solid";
+import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
@@ -18,49 +22,28 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
-    "No Identitas",
-    "Nama Owner",
-    "Nomor HP",
-    "Apartemen",
-    "No Apartemen",
-    "Dibuat Pada Tanggal",
+    "No",
+    "Nama Kategori",
+    "Jenis Tagihan",
+    "Harga",
+    "Apartement",
     "Dibuat Oleh",
     "Edit",
+    "Hapus",
 ];
 
-export default function UnitOwner({ auth, errors, data, filters }) {
+export default function BillingCategory({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
-
     console.log("data", data);
-
-    function handleSearch(event) {
-        router.get(
-            route(route().current()),
-            { search: event.target.value },
-            {
-                preserveState: true,
-                replace: true,
-            }
-        );
-    }
-
-    function getPaginationUrl(baseUrl, searchQuery) {
-        if (searchQuery) {
-            // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
-        } else {
-            // Don't include the search query
-            return baseUrl;
-        }
-    }
-
-    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
+    console.log("filters", filters);
 
     useEffect(() => {
         if (flash.message) {
             toast.success(flash.message);
         }
     }, [flash.message]);
+
+    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
     return (
         <AuthenticatedLayout
@@ -72,8 +55,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                 </h2>
             }
         >
-            <Head title="Unit Owner" />
-
+            <Head title="Billing Category" />
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
@@ -84,25 +66,25 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                             Dashboard
                         </Link>
                         <Link
-                            href={route("unitowner.index")}
+                            href={route("billingCategory.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Unit Owner
+                            Billing Category
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className="w-full h-full p-12 ">
+                        <Card className="w-full h-full p-12">
                             <PageHeader
-                                handleSearch={handleSearch}
-                                title={"Unit Owner List"}
+                                // handleSearch={handleSearch}
+                                title={"Billing Category List"}
                                 description={
-                                    "Informasi Data Unit Owner pada Apartemen"
+                                    "Informasi Data Kategori Tagihan pada Apartemen"
                                 }
-                                buttonLabel={"Tambah Unit Owner"}
+                                buttonLabel={"Tambah Kategori Tagihan"}
                                 icon={buttonIcon}
-                                addRoute={"unitowner.add"}
-                                label="Cari Nama Unit Owner"
+                                label="Cari Data Kategori Tagihan"
+                                addRoute={"billingCategory.add"}
                             />
                             <CardBody className="px-0 overflow-scroll">
                                 <table
@@ -117,7 +99,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="py-4 pl-4 border-y bg-primary "
+                                                    className="py-4 pl-4 border-y bg-primary"
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -133,14 +115,13 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                         {data.data.map(
                                             (
                                                 {
-                                                    identity_no,
-                                                    owner_name,
-                                                    phone,
+                                                    category_name,
+                                                    billing_type,
+                                                    unit_price,
                                                     apartment,
-                                                    room_no,
+                                                    created_by,
                                                     created_at,
                                                     id,
-                                                    created_by,
                                                 },
                                                 index
                                             ) => {
@@ -148,49 +129,59 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                     index ===
                                                     data.data.length - 1;
                                                 const classes = isLast
-                                                    ? "pl-4"
-                                                    : "pl-4 border-b border-blue-gray-150";
-
+                                                    ? "p-4"
+                                                    : "p-4 border-b border-blue-gray-50";
                                                 return (
                                                     <tr
-                                                        key={id}
+                                                        key={index}
                                                         className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
-                                                        <td className={classes}>
+                                                        <td>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {index + 1}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        identity_no
+                                                                        category_name
                                                                     }
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
-                                                        <td className={classes}>
+                                                        <td>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {owner_name}
+                                                                    {
+                                                                        billing_type
+                                                                    }
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td className={classes}>
+                                                        <td>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {phone}
+                                                                    Rp.{" "}
+                                                                    {unit_price}
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
-                                                        <td className={classes}>
+                                                        <td>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
@@ -202,77 +193,58 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
-                                                        <td className={classes}>
+                                                        <td>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {room_no}
+                                                                    {created_at}
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {moment(
-                                                                    created_at
-                                                                ).format("LL")}
-                                                            </Typography>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {
-                                                                    created_by.name
-                                                                }
-                                                            </Typography>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "unitowner.edit",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="get"
-                                                                data={{
-                                                                    id: undefined,
+                                                        <td>
+                                                            <Tooltip
+                                                                content="Edit Billing Category"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
                                                                 }}
-                                                                as="button"
+                                                                className="bg-green-600"
                                                             >
-                                                                <Tooltip
-                                                                    content="Edit Unit Owner"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
-                                                                    }}
-                                                                    className="bg-green-600"
+                                                                <IconButton
+                                                                    variant="filled"
+                                                                    color="green"
                                                                 >
-                                                                    <IconButton
-                                                                        variant="fill"
-                                                                        color="green"
-                                                                    >
-                                                                        <PencilIcon className="w-4 h-4" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
+                                                                    <PencilIcon className="w-4 h-4" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </td>
+                                                        <td>
+                                                            <Tooltip
+                                                                content="Delete Billing Category"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
+                                                                }}
+                                                                className="bg-red-600"
+                                                            >
+                                                                <IconButton color="red">
+                                                                    <TrashIcon className="w-4 h-4" />
+                                                                </IconButton>
+                                                            </Tooltip>
                                                         </td>
                                                     </tr>
                                                 );
@@ -281,14 +253,14 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                     </tbody>
                                 </table>
                             </CardBody>
-                            <Pagination
-                                current_page={data.current_page}
-                                last_page={data.last_page}
-                                prev_page_url={data.prev_page_url}
-                                next_page_url={data.next_page_url}
-                                search={filters.search}
-                                getPaginationUrl={getPaginationUrl}
-                            />
+                            {/* <Pagination
+                            // current_page={data.current_page}
+                            // last_page={data.last_page}
+                            // prev_page_url={data.prev_page_url}
+                            // next_page_url={data.next_page_url}
+                            // search={filters.search}
+                            // getPaginationUrl={getPaginationUrl}
+                            /> */}
                         </Card>
                     </div>
                 </div>

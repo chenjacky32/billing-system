@@ -40,7 +40,7 @@ export default function Sidebar({ user, classname, auth }) {
         <Card
             className={`h-screen w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5 bg-primary ${classname}`}
         >
-            <div className="mb-2 flex items-center flex-col text-textColor gap-4 p-4">
+            <div className="flex flex-col items-center gap-4 p-4 mb-2 text-textColor">
                 <Link href={route("dashboard")}>
                     <ApplicationLogo className="bg-white p-3 rounded-2xl shadow-[0_1px_30px_#E8E3E7]" />
                 </Link>
@@ -50,7 +50,7 @@ export default function Sidebar({ user, classname, auth }) {
                 <Link href={route("dashboard")}>
                     <ListItem className="hover:text-primary text-textColor ">
                         <ListItemPrefix>
-                            <HomeIcon className="h-5 w-5" />
+                            <HomeIcon className="w-5 h-5" />
                         </ListItemPrefix>
                         Dashboard
                     </ListItem>
@@ -72,10 +72,10 @@ export default function Sidebar({ user, classname, auth }) {
                     >
                         <AccordionHeader
                             onClick={() => handleOpen(1)}
-                            className="border-b-0 p-3 group text-textColor group-hover:text-primary"
+                            className="p-3 border-b-0 group text-textColor group-hover:text-primary"
                         >
                             <ListItemPrefix>
-                                <BuildingOffice2Icon className="h-5 w-5 group-hover:text-primary" />
+                                <BuildingOffice2Icon className="w-5 h-5 group-hover:text-primary" />
                             </ListItemPrefix>
                             <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
                                 Master Data
@@ -90,7 +90,7 @@ export default function Sidebar({ user, classname, auth }) {
                                         <ListItemPrefix>
                                             <ChevronRightIcon
                                                 strokeWidth={3}
-                                                className="h-3 w-5"
+                                                className="w-5 h-3"
                                             />
                                         </ListItemPrefix>
                                         Admin
@@ -102,7 +102,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Apartment
@@ -114,10 +114,21 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Unit Owner
+                                </ListItem>
+                            </Link>
+                            <Link href={route("billingCategory.index")}>
+                                <ListItem className="hover:text-primary">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Billing Category
                                 </ListItem>
                             </Link>
                         </List>
@@ -127,7 +138,7 @@ export default function Sidebar({ user, classname, auth }) {
                 <Link href={route("billing.index")}>
                     <ListItem className="hover:text-primary text-textColor ">
                         <ListItemPrefix>
-                            <CreditCardIcon className="h-5 w-5" />
+                            <CreditCardIcon className="w-5 h-5" />
                         </ListItemPrefix>
                         Billing
                     </ListItem>
@@ -150,10 +161,10 @@ export default function Sidebar({ user, classname, auth }) {
                     >
                         <AccordionHeader
                             onClick={() => handleOpen(2)}
-                            className="border-b-0 p-3 group text-textColor group-hover:text-primary"
+                            className="p-3 border-b-0 group text-textColor group-hover:text-primary"
                         >
                             <ListItemPrefix>
-                                <DocumentTextIcon className="h-5 w-5 group-hover:text-primary" />
+                                <DocumentTextIcon className="w-5 h-5 group-hover:text-primary" />
                             </ListItemPrefix>
                             <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
                                 Report
@@ -167,7 +178,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Paid Billings
@@ -178,7 +189,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Unpaid Billings
@@ -189,7 +200,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Billings With Penalty
@@ -200,7 +211,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     <ListItemPrefix>
                                         <ChevronRightIcon
                                             strokeWidth={3}
-                                            className="h-3 w-5"
+                                            className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
                                     Unit Owner Report
@@ -215,7 +226,7 @@ export default function Sidebar({ user, classname, auth }) {
                 <Link href={route("profile.edit")}>
                     <ListItem className="hover:text-primary text-textColor ">
                         <ListItemPrefix>
-                            <UserCircleIcon className="h-5 w-5" />
+                            <UserCircleIcon className="w-5 h-5" />
                         </ListItemPrefix>
                         Profile
                     </ListItem>
@@ -223,7 +234,7 @@ export default function Sidebar({ user, classname, auth }) {
                 <Link href={route("logout")} method="post" as="button">
                     <ListItem className="hover:text-primary text-textColor">
                         <ListItemPrefix>
-                            <PowerIcon className="h-5 w-5" />
+                            <PowerIcon className="w-5 h-5" />
                         </ListItemPrefix>
                         Log Out
                     </ListItem>

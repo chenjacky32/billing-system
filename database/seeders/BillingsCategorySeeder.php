@@ -21,25 +21,29 @@ class BillingsCategorySeeder extends Seeder
                 'billing_type' => 'Maintenance',
                 'category_name' => 'Studio',
                 'apartment_id' => 2,
-                'unit_price' => 396000
+                'unit_price' => 396000,
+                'created_by' => 3
             ],
             [
                 'billing_type' => 'Maintenance',
                 'category_name' => '2 BR',
                 'apartment_id' => 2,
-                'unit_price' => 792000
+                'unit_price' => 792000,
+                'created_by' => 3
             ],
             [
                 'billing_type' => 'Parkir',
                 'category_name' => 'Sepeda Motor',
                 'apartment_id' => 2,
-                'unit_price' => 150000
+                'unit_price' => 150000,
+                'created_by' => 3
             ],
             [
                 'billing_type' => 'Parkir',
                 'category_name' => 'Mobil',
                 'apartment_id' => 2,
-                'unit_price' => 300000
+                'unit_price' => 300000,
+                'created_by' => 3
             ],
         ];
 

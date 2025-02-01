@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartementController;
+use App\Http\Controllers\BillingCategoryController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -81,6 +82,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/unit-owner/{id}/edit', [UnitOwnerController::class, 'edit'])->name('unitowner.edit');
     Route::post('/unit-owner/{id}/update', [UnitOwnerController::class, 'update'])->name('unitowner.update');
 
+    //!Billing Category
+    Route::get('/billing-category',[BillingCategoryController::class,'index'])->name('billingCategory.index');
+    Route::get('/billing-category/add',[BillingCategoryController::class,'index'])->name('billingCategory.add');
+
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');
@@ -90,6 +95,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing/{id}/update', [BillingController::class, 'update'])->name('billing.update');
     Route::post('/billing/delete', [BillingController::class, 'destroy'])->name('billing.delete');
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
+
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');
