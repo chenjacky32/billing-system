@@ -428,7 +428,10 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                 value={data.billing_fee || ""}
                                                 type="number"
                                                 {...(data.billing_type ===
-                                                "Listrik"
+                                                    "Listrik" ||
+                                                data.billing_type ===
+                                                    "Maintenance" ||
+                                                data.billing_type === "Parkir"
                                                     ? { disabled: true }
                                                     : {
                                                           onChange: (e) =>

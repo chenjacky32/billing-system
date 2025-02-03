@@ -59,9 +59,47 @@ class BillingCategoryController extends Controller
 
     }
 
-    public function edit()
+    public function edit(BillingsCategory $billingCategory, Request $request)
     {
-        return Inertia::render('BillingCategory/EditBillingCategory');
+      $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
+            return ['label' => $apartmentName, 'value' => $apartementId];
+        })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
+      
+        $user = Auth::user();
+        $billingCategoryData = $billingCategory->find($request->id);
+        $billingCategoryApartmentData = $billingCategoryData->apartment_id;
+    
+        $userApartmentId = $user->apartment_id;
+        $role = $user->role;
+
+        $apartId = $user->apartment_id;
+        $findApartment = Apartment::find($apartId);
+     
+        if ($findApartment){
+            $apartName = $findApartment->name;
+        } else {
+            $apartName = 'Apartment not found';
+        }
+        
+    
+        if ($role === 'SUPER ADMIN') {
+            return Inertia::render('BillingCategory/EditBillingCategory', [
+                "billingCategoryData" => $billingCategory->find($request->id),
+                'apartmentData' => $apartment,
+                'apartmentId' => $userApartmentId,
+                'apartmentName' => $apartName,
+            ]);
+        } else if ($userApartmentId == $billingCategoryApartmentData ) {
+            return Inertia::render('BillingCategory/EditBillingCategory', [
+                "billingCategoryData" => $billingCategory->find($request->id),
+                'apartmentData' => $apartment,
+                'apartmentId' => $userApartmentId,
+                'apartmentName' => $apartName,
+            ]);
+        }else {
+            return redirect('/unauthorized');
+        }
+    
     }
 
     public function store(Request $request)
@@ -78,5 +116,29 @@ class BillingCategoryController extends Controller
 
         BillingsCategory::create($validateData);
         return redirect('/billing-category')->with('success', 'Billing Category data has been created!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $billingCategory = BillingsCategory::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'billing_type'=>'required|string|max:255',
+            'category_name'=>'required|string|max:255',
+            'unit_price'=>'required|integer|min:1|max:999999999999999',
+            'apartment_id' => 'required|integer|exists:apartments,id',
+        ]);
+        $validatedData['created_by'] = Auth::id();
+
+        $billingCategory->update($validatedData);
+        return redirect('/billing-category')->with('success', 'Billing Category data has been updated!');
+    }
+
+
+    public function destroy(Request $request)
+    {
+     $billingCategory = BillingsCategory::find($request->id);
+     $billingCategory->delete();
+     return redirect('/billing-category')->with('success', 'Billing Category data has been deleted!');
     }
 }

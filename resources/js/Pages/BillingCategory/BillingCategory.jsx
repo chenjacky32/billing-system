@@ -224,33 +224,32 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                             </div>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "billingCategory.edit",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="get"
-                                                                data={{
-                                                                    id: undefined,
+                                                            <Tooltip
+                                                                content="Edit Billing Category"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
                                                                 }}
-                                                                as="button"
+                                                                className="bg-green-600"
                                                             >
-                                                                <Tooltip
-                                                                    content="Edit Billing Category"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
+                                                                <Link
+                                                                    href={route(
+                                                                        "billingCategory.edit",
+                                                                        {
+                                                                            id: id,
+                                                                        }
+                                                                    )}
+                                                                    method="get"
+                                                                    data={{
+                                                                        id: undefined,
                                                                     }}
-                                                                    className="bg-green-600"
+                                                                    as="button"
                                                                 >
                                                                     <IconButton
                                                                         variant="filled"
@@ -258,11 +257,23 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                     >
                                                                         <PencilIcon className="w-4 h-4" />
                                                                     </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
+                                                                </Link>
+                                                            </Tooltip>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Link>
+                                                            <Link
+                                                                href={route(
+                                                                    "billingCategory.delete",
+                                                                    {
+                                                                        id: id,
+                                                                    }
+                                                                )}
+                                                                method="post"
+                                                                data={{
+                                                                    id: undefined,
+                                                                }}
+                                                                as="button"
+                                                            >
                                                                 <Tooltip
                                                                     content="Delete Billing Category"
                                                                     animate={{

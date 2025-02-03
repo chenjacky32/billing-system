@@ -41,14 +41,14 @@ class BillingController extends Controller
 
         $user = Auth::user();
         $role = $user->role;
-        $apartemntId = $user->apartment_id;
+        $apartmentId = $user->apartment_id;
 
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
 
         if ($role !== 'SUPER ADMIN') {
-            $ownerQuery->where('apartment_id', $apartemntId);
-            $categoryBillingQuery->where('apartment_id', $apartemntId);
+            $ownerQuery->where('apartment_id', $apartmentId);
+            $categoryBillingQuery->where('apartment_id', $apartmentId);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')

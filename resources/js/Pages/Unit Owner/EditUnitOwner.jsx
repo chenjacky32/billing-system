@@ -68,7 +68,7 @@ export default function EditUnitOwner({
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Edit Unit Owner Data
                 </h2>
             }
@@ -94,20 +94,20 @@ export default function EditUnitOwner({
                             href={route("unitowner.edit", {
                                 id: dataID,
                             })}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Edit Unit Owner
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 title={"Edit Unit Owner Data"}
                                 description={"Edit Informasi Unit Owner"}
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col">
                                         <CustomInput
@@ -146,7 +146,7 @@ export default function EditUnitOwner({
                                         />
                                     </div>
 
-                                    <div className="flex flex-row justify-start tablet:flex-col mt-8">
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
                                         <div className="flex flex-col w-full mr-4">
                                             {role === "SUPER ADMIN" ? (
                                                 <InputSelect
@@ -165,7 +165,7 @@ export default function EditUnitOwner({
                                                 />
                                             )}
                                             {errors.apartment_id && (
-                                                <p className="text-red-500 text-sm ml-0 mt-3">
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.apartment_id}
                                                 </p>
                                             )}
@@ -201,7 +201,7 @@ export default function EditUnitOwner({
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
                                                 variant="fill"
                                                 onClick={handleSubmit}

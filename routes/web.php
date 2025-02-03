@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified', 'role:SUPER ADMIN'])->group(function () {
     })->name('apartement.add');
     Route::post('/apartement/store', [ApartementController::class, 'store'])->name('apartement.store');
 
+
     // !Admin 
     Route::get('/admin/add', [AdminController::class, 'add'])->name('admin.add');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -82,11 +83,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/unit-owner/{id}/edit', [UnitOwnerController::class, 'edit'])->name('unitowner.edit');
     Route::post('/unit-owner/{id}/update', [UnitOwnerController::class, 'update'])->name('unitowner.update');
 
+
     //!Billing Category
     Route::get('/billing-category',[BillingCategoryController::class,'index'])->name('billingCategory.index');
     Route::get('/billing-category/add',[BillingCategoryController::class,'add'])->name('billingCategory.add');
     Route::get('/billing-category/{id}/edit', [BillingCategoryController::class, 'edit'])->name('billingCategory.edit');
     Route::post('/billing-category/store', [BillingCategoryController::class, 'store'])->name('billingCategory.store');
+    Route::post('/billing-category/delete', [BillingCategoryController::class, 'destroy'])->name('billingCategory.delete');
+    Route::post('/billing-category/{id}/update', [BillingCategoryController::class, 'update'])->name('billingCategory.update');
+
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');
