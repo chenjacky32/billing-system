@@ -24,4 +24,14 @@ class Billing extends Model
     {
         return $this->belongsTo(ApartmentOwner::class, 'owner_id');
     }
+
+    public function billingCategory()
+    {
+        return $this->belongsTo(BillingsCategory::class, 'billing_category_id');
+    }
+
+    public function apartment()
+    {
+        return $this->belongsTo(Apartment::class, 'apartment_id');
+    }
 }
