@@ -37,9 +37,6 @@ class ApiSecretMiddleware
         if($serverHash !== $requestHeader) {
             return response()->json([
                 'status' => 'fail',
-                'clientHash' => $requestHeader,
-                'serverHash' => $serverHash,
-                'payload'=> $payload,
                 'message' => 'Unauthorized - Invalid Hash Signature'
             ],401);
         }
