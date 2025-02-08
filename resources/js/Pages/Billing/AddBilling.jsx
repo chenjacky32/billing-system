@@ -25,6 +25,8 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
     const [isLoading, setIsLoading] = useState(null);
     const { flash } = usePage().props;
 
+    console.log(billingType);
+
     const { data, setData, post, processing, errors } = useForm({
         billing_fee: flash?.billing_fee || "",
         meter_reading: flash?.meter_reading || "",
@@ -116,7 +118,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
     }
     // ! Handle Clear Count Billing
     function handleClearCountBilling() {
-        if (billingType === "Listrik") {
+        if (billingType === "Listrik" || billingType === "Air") {
             setData((prevValues) => ({
                 ...prevValues,
                 start_meter: "",
@@ -227,25 +229,11 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                             </Select>
                                         </div>
                                     </div>
+
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        {billingType === "Air" && (
-                                            <CustomInput
-                                                label="Meteran"
-                                                id="meter_reading"
-                                                value={data.meter_reading || ""}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "meter_reading",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                errors={errors.meter_reading}
-                                                className="tablet:mt-8"
-                                                type="number"
-                                            />
-                                        )}
                                         {/* Tagihan Listrik */}
-                                        {billingType === "Listrik" && (
+                                        {billingType === "Listrik" ||
+                                        billingType === "Air" ? (
                                             <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
                                                 <div className="w-full mr-4">
                                                     <CustomInput
@@ -302,13 +290,18 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                     />
                                                 </div>
                                             </div>
-                                        )}
+                                        ) : null}
                                     </div>
-                                    {billingType === "Listrik" ? (
+                                    {billingType === "Air" ||
+                                    billingType === "Listrik" ? (
                                         <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
                                             <div className="w-full mr-4 tablet:mt-8">
                                                 <CustomInput
-                                                    label="Harga / KWh"
+                                                    label={
+                                                        billingType === "Air"
+                                                            ? "Harga / m3"
+                                                            : "Harga / KWh"
+                                                    }
                                                     id="unit_price"
                                                     value={
                                                         data.unit_price || ""
@@ -385,7 +378,6 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                 </Select>
                                             </div>
                                         )}
-
                                         {billingType === "Parkir" && (
                                             <div className="w-full mr-4 tablet:mb-8">
                                                 <Select
@@ -414,7 +406,8 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                             </div>
                                         )}
                                         <div className="w-full mr-4">
-                                            {billingType === "Listrik" ? (
+                                            {billingType === "Air" ||
+                                            billingType === "Listrik" ? (
                                                 <Typography
                                                     variant="paragraph"
                                                     className="mb-2 text-base font-semibold "
@@ -427,54 +420,38 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                 id="billing_fee"
                                                 value={data.billing_fee || ""}
                                                 type="number"
-                                                {...(data.billing_type ===
-                                                    "Listrik" ||
-                                                data.billing_type ===
-                                                    "Maintenance" ||
-                                                data.billing_type === "Parkir"
-                                                    ? { disabled: true }
-                                                    : {
-                                                          onChange: (e) =>
-                                                              setData(
-                                                                  "billing_fee",
-                                                                  e.target.value
-                                                              ),
-                                                      })}
+                                                disabled={true}
                                                 errors={errors.billing_fee}
                                             />
                                         </div>
                                     </div>
-                                    {billingType === "Listrik" ||
-                                    billingType === "Maintenance" ||
-                                    billingType === "Parkir" ? (
-                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                            <div className="mr-4 w-fit tablet:mt-8">
-                                                <Button
-                                                    variant="filled"
-                                                    onClick={handleCountBilling}
-                                                    className="bg-orange-500"
-                                                    loading={
-                                                        isLoading ===
-                                                        "count-billing"
-                                                    }
-                                                >
-                                                    Hitung Tagihan
-                                                </Button>
-                                            </div>
-                                            <div className="mr-4 w-fit tablet:mt-8">
-                                                <Button
-                                                    variant="filled"
-                                                    onClick={
-                                                        handleClearCountBilling
-                                                    }
-                                                    className="flex items-center justify-center gap-2 bg-red-600 "
-                                                >
-                                                    <TrashIcon className="w-4 h-4" />{" "}
-                                                    <span>Clear</span>
-                                                </Button>
-                                            </div>
+                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={handleCountBilling}
+                                                className="bg-orange-500"
+                                                loading={
+                                                    isLoading ===
+                                                    "count-billing"
+                                                }
+                                            >
+                                                Hitung Tagihan
+                                            </Button>
                                         </div>
-                                    ) : null}
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={
+                                                    handleClearCountBilling
+                                                }
+                                                className="flex items-center justify-center gap-2 bg-red-600 "
+                                            >
+                                                <TrashIcon className="w-4 h-4" />{" "}
+                                                <span>Clear</span>
+                                            </Button>
+                                        </div>
+                                    </div>
 
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput

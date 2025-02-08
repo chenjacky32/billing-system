@@ -96,13 +96,9 @@ class BillingController extends Controller
             'owner_id' => 'required|integer',
         ];
 
-        // Conditionally add the meter_reading validation if billing_type is Air or Listrik
-        if (in_array($request->input('billing_type'), ['Air', 'Listrik'])) {
+        // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
+        if(in_array($request->input('billing_type'), ['Listrik','Air'])) {
             $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
-        }
-
-        // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
-        if(in_array($request->input('billing_type'), ['Listrik'])) {
             $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
@@ -322,7 +318,7 @@ class BillingController extends Controller
     }
 
     //count electric bill
-    public function calculateElectricityBill(Request $request){
+    public function calculateBill(Request $request){
         $request->validate ([
                 'start_meter' => 'required|integer|min:1|max:999999999999999',
                 'end_meter' => 'required|integer|min:1|max:999999999999999',
@@ -335,7 +331,12 @@ class BillingController extends Controller
         $unitPrice = $request->input('unit_price');
         $minimumCharge = $request->input('minimum_charge');
 
-        $meterDifference = $startMeter - $endMeter;
+        if($startMeter > $endMeter){
+            return back()->with('error', 'Meter reading end must be greater than start meter.');
+        }
+
+        $meterDifference = $endMeter - $startMeter;
+
         $totalCharge = $meterDifference * $unitPrice;
         $billingFee =  $totalCharge < $minimumCharge ? $minimumCharge : $totalCharge;
         return back()->with([
@@ -364,8 +365,10 @@ class BillingController extends Controller
         ]);
 
         switch($billingType){
+            case 'Air':
+                return $this->calculateBill($request);
             case 'Listrik':
-                return $this->calculateElectricityBill($request);
+                return $this->calculateBill($request);
             case 'Maintenance':
                 $request->validate(['maintenance_type' => 'required|integer']);
                 return $this->fetchBillingFee($maintenanceId);
