@@ -65,15 +65,6 @@ export default function Edit({
         }
     }, [flash?.billing_fee, flash?.meter_reading]);
 
-    function handleCountBilling(e) {
-        e.preventDefault();
-        setIsLoading("count-billing");
-        post(route("billing.count"), {
-            preserveScroll: true,
-            onFinish: () => setIsLoading(null),
-        });
-    }
-
     const getOptionsForType = (type) => {
         const filteredCategory = billingCategory.find(
             (category) => category.billing_type === type
@@ -142,9 +133,19 @@ export default function Edit({
         });
     }
 
+    // ! Handle Count Billing
+    function handleCountBilling(e) {
+        e.preventDefault();
+        setIsLoading("count-billing");
+        post(route("billing.count"), {
+            preserveScroll: true,
+            onFinish: () => setIsLoading(null),
+        });
+    }
+
     // ! Handle Clear Count Billing
     function handleClearCountBilling() {
-        if (billingType === "Listrik") {
+        if (billingType === "Listrik" || billingType === "Air") {
             setData((prevValues) => ({
                 ...prevValues,
                 start_meter: "",
@@ -232,7 +233,6 @@ export default function Edit({
                                                 </p>
                                             )}
                                         </div>
-
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Select
                                                 label="Tipe Billing"
@@ -256,125 +256,119 @@ export default function Edit({
                                             </Select>
                                         </div>
                                     </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        {billingType === "Air" && (
-                                            <CustomInput
-                                                label="Meteran"
-                                                id="meter_reading"
-                                                value={data.meter_reading || ""}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "meter_reading",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                errors={errors.meter_reading}
-                                                className="tablet:mt-8"
-                                                type="number"
-                                            />
-                                        )}
-                                        {/* Tagihan Listrik */}
-                                        {billingType === "Listrik" && (
-                                            <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
-                                                <div className="w-full mr-4">
+                                    {billingType === "Listrik" ||
+                                    billingType === "Air" ? (
+                                        <>
+                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                                <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
+                                                    <div className="w-full mr-4">
+                                                        <CustomInput
+                                                            label="Meteran Awal"
+                                                            id="start_meter"
+                                                            value={
+                                                                data.start_meter ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                setData(
+                                                                    "start_meter",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                            }}
+                                                            type="number"
+                                                            errors={
+                                                                errors.start_meter
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <CustomInput
+                                                            label="Meteran Akhir"
+                                                            id="end_meter"
+                                                            value={
+                                                                data.end_meter ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                setData(
+                                                                    "end_meter",
+                                                                    e.target
+                                                                        .value
+                                                                );
+                                                            }}
+                                                            type="number"
+                                                            errors={
+                                                                errors.end_meter
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <CustomInput
+                                                            disabled={true}
+                                                            label="Total Meteran"
+                                                            id="meter_reading"
+                                                            value={
+                                                                data.meter_reading ||
+                                                                ""
+                                                            }
+                                                            type="number"
+                                                            errors={
+                                                                errors.meter_reading
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                <div className="w-full mr-4 tablet:mt-8">
                                                     <CustomInput
-                                                        label="Meteran Awal"
-                                                        id="start_meter"
+                                                        label={
+                                                            billingType ===
+                                                            "Air"
+                                                                ? "Harga / m3"
+                                                                : "Harga / KWh"
+                                                        }
+                                                        id="unit_price"
                                                         value={
-                                                            data.start_meter ||
+                                                            data.unit_price ||
                                                             ""
                                                         }
-                                                        onChange={(e) => {
+                                                        onChange={(e) =>
                                                             setData(
-                                                                "start_meter",
+                                                                "unit_price",
                                                                 e.target.value
-                                                            );
-                                                        }}
+                                                            )
+                                                        }
                                                         type="number"
                                                         errors={
-                                                            errors.start_meter
+                                                            errors.unit_price
                                                         }
                                                     />
                                                 </div>
                                                 <div className="w-full mr-4 tablet:mt-8">
                                                     <CustomInput
-                                                        label="Meteran Akhir"
-                                                        id="end_meter"
+                                                        label="Minimum Charge"
+                                                        id="minimum_charge"
                                                         value={
-                                                            data.end_meter || ""
-                                                        }
-                                                        onChange={(e) => {
-                                                            setData(
-                                                                "end_meter",
-                                                                e.target.value
-                                                            );
-                                                        }}
-                                                        type="number"
-                                                        errors={
-                                                            errors.end_meter
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <CustomInput
-                                                        disabled={true}
-                                                        label="Total Meteran"
-                                                        id="meter_reading"
-                                                        value={
-                                                            data.meter_reading ||
+                                                            data.minimum_charge ||
                                                             ""
                                                         }
                                                         type="number"
-                                                        errors={
-                                                            errors.meter_reading
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "minimum_charge",
+                                                                e.target.value
+                                                            )
                                                         }
-                                                    />
+                                                        errors={
+                                                            errors.minimum_charge
+                                                        }
+                                                    ></CustomInput>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                    {billingType === "Listrik" ? (
-                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                            <div className="w-full mr-4 tablet:mt-8">
-                                                <CustomInput
-                                                    label="Harga / KWh"
-                                                    id="unit_price"
-                                                    value={
-                                                        data.unit_price || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            "unit_price",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    type="number"
-                                                    errors={errors.unit_price}
-                                                />
-                                            </div>
-                                            <div className="w-full mr-4 tablet:mt-8">
-                                                <CustomInput
-                                                    label="Minimum Charge"
-                                                    id="minimum_charge"
-                                                    value={
-                                                        data.minimum_charge ||
-                                                        ""
-                                                    }
-                                                    type="number"
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            "minimum_charge",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    errors={
-                                                        errors.minimum_charge
-                                                    }
-                                                ></CustomInput>
-                                            </div>
-                                        </div>
+                                        </>
                                     ) : null}
-
                                     <div
                                         className={`flex flex-row justify-start tablet:flex-col 
                                             ${
@@ -385,7 +379,7 @@ export default function Edit({
                                             } `}
                                     >
                                         {billingType === "Maintenance" && (
-                                            <div className="w-full mr-4 tablet:mb-8">
+                                            <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8">
                                                 <Select
                                                     label="Jenis Maintenance"
                                                     id="maintenance_type"
@@ -412,11 +406,17 @@ export default function Edit({
                                                         }
                                                     )}
                                                 </Select>
+                                                {errors.maintenance_type && (
+                                                    <p className="mt-3 ml-0 text-sm text-red-500">
+                                                        {
+                                                            errors.maintenance_type
+                                                        }
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
-
                                         {billingType === "Parkir" && (
-                                            <div className="w-full mr-4 tablet:mb-8">
+                                            <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8 ">
                                                 <Select
                                                     label="Jenis Kendaraan"
                                                     id="vehicle_type"
@@ -440,10 +440,25 @@ export default function Edit({
                                                         }
                                                     )}
                                                 </Select>
+                                                {errors.vehicle_type_parking && (
+                                                    <p className="mt-3 ml-0 text-sm text-red-500">
+                                                        {
+                                                            errors.vehicle_type_parking
+                                                        }
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
-                                        <div className="w-full mr-4">
-                                            {billingType === "Listrik" ? (
+                                        <div
+                                            className={`${
+                                                billingType === "Maintenance" ||
+                                                billingType === "Parkir"
+                                                    ? "mt-8 tablet:mt-0"
+                                                    : "mt-0"
+                                            } w-full mr-4`}
+                                        >
+                                            {billingType === "Air" ||
+                                            billingType === "Listrik" ? (
                                                 <Typography
                                                     variant="paragraph"
                                                     className="mb-2 text-base font-semibold "
@@ -456,55 +471,38 @@ export default function Edit({
                                                 id="billing_fee"
                                                 value={data.billing_fee || ""}
                                                 type="number"
-                                                {...(data.billing_type ===
-                                                    "Listrik" ||
-                                                data.billing_type ===
-                                                    "Maintenance" ||
-                                                data.billing_type === "Parkir"
-                                                    ? { disabled: true }
-                                                    : {
-                                                          onChange: (e) =>
-                                                              setData(
-                                                                  "billing_fee",
-                                                                  e.target.value
-                                                              ),
-                                                      })}
+                                                disabled={true}
                                                 errors={errors.billing_fee}
                                             />
                                         </div>
                                     </div>
-                                    {billingType === "Listrik" ||
-                                    billingType === "Maintenance" ||
-                                    billingType === "Parkir" ? (
-                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                            <div className="mr-4 w-fit tablet:mt-8">
-                                                <Button
-                                                    variant="filled"
-                                                    onClick={handleCountBilling}
-                                                    className="bg-orange-500"
-                                                    loading={
-                                                        isLoading ===
-                                                        "count-billing"
-                                                    }
-                                                >
-                                                    Hitung Tagihan
-                                                </Button>
-                                            </div>
-                                            <div className="mr-4 w-fit tablet:mt-8">
-                                                <Button
-                                                    variant="filled"
-                                                    onClick={
-                                                        handleClearCountBilling
-                                                    }
-                                                    className="flex items-center justify-center gap-2 bg-red-600 "
-                                                >
-                                                    <TrashIcon className="w-4 h-4" />{" "}
-                                                    <span>Clear</span>
-                                                </Button>
-                                            </div>
+                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={handleCountBilling}
+                                                className="bg-orange-500"
+                                                loading={
+                                                    isLoading ===
+                                                    "count-billing"
+                                                }
+                                            >
+                                                Hitung Tagihan
+                                            </Button>
                                         </div>
-                                    ) : null}
-
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={
+                                                    handleClearCountBilling
+                                                }
+                                                className="flex items-center justify-center gap-2 bg-red-600 "
+                                            >
+                                                <TrashIcon className="w-4 h-4" />{" "}
+                                                <span>Clear</span>
+                                            </Button>
+                                        </div>
+                                    </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tanggal Tagihan Dibuat"
@@ -534,7 +532,6 @@ export default function Edit({
                                             className="tablet:mt-8"
                                             type="date"
                                         />
-
                                         <CustomInput
                                             label="Biaya Denda Jika Lewat Batas Tagihan"
                                             id="fine"
@@ -572,7 +569,6 @@ export default function Edit({
                                                 </p>
                                             )}
                                         </div>
-
                                         {status === "Success" && (
                                             <div className="flex flex-col w-full mr-4">
                                                 <CustomInput

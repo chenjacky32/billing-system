@@ -232,13 +232,9 @@ class BillingController extends Controller
             'status' => 'required|string|in:Success,Cancel,Pending',
         ];
 
-        // Conditionally add the meter_reading validation if billing_type is Air or Listrik
-        if (in_array($request->input('billing_type'), ['Air', 'Listrik'])) {
-            $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
-        }
-
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
-        if(in_array($request->input('billing_type'), ['Listrik'])){
+        if(in_array($request->input('billing_type'), ['Listrik','Air'])){
+            $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
             $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
