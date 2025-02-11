@@ -45,7 +45,7 @@ class BillingController extends Controller
 
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
-
+        
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartmentId);
             $categoryBillingQuery->where('apartment_id', $apartmentId);
@@ -58,7 +58,15 @@ class BillingController extends Controller
             ->prepend(['label' => 'Pilih Owner', 'value' => ''])
             ->values()
             ->toArray();
-        
+
+        $room_number = $ownerQuery->pluck('room_no', 'id')
+            ->map(function ($roomNumber, $ownerId) {
+                return ['label' => $roomNumber, 'value' => $ownerId];
+            })
+            ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
+            ->values()
+            ->toArray();
+
             $category_billing_data = $categoryBillingQuery
             ->get(['id','billing_type','category_name','unit_price'])
             ->groupBy('billing_type')
@@ -80,7 +88,8 @@ class BillingController extends Controller
 
         return Inertia::render("Billing/AddBilling", [
             'ownerData' => $owner_data,
-            'billingCategory'=>$category_billing_data
+            'billingCategory'=>$category_billing_data,
+            'roomNumber' => $room_number
         ]);
     }
 
@@ -94,6 +103,7 @@ class BillingController extends Controller
             'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
             'billing_fee' => 'required|integer|min:1|max:999999999999999',
             'owner_id' => 'required|integer',
+            'room_no' => 'required|integer|min:1|max:999999999999999',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
@@ -103,6 +113,14 @@ class BillingController extends Controller
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Listrik'])) {
+            $rules['electric_type']= 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Air'])) {
+            $rules['water_type'] = 'required|integer|min:1|max:999999999999999';
         }
 
         if(in_array($request->input('billing_type'), ['Maintenance'])) {
@@ -120,12 +138,25 @@ class BillingController extends Controller
         $validatedData['created_by'] = Auth::id();
         
         // Retrieve the billing category ID based on billing_type
-        if ($request->input('billing_type') === 'Maintenance') {
+        if($request->input('billing_type') === 'Air') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Air',
+                'id' => $request->input('water_type')
+            ])->first();
+        } 
+        elseif ($request->input('billing_type') === 'Listrik') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Listrik',
+                'id' => $request->input('electric_type')
+            ])->first();
+        } 
+        elseif ($request->input('billing_type') === 'Maintenance') {
             $billingCategory = BillingsCategory::where([
                 'billing_type' => 'Maintenance',
                 'id' => $request->input('maintenance_type')
             ])->first();
-        } elseif ($request->input('billing_type') === 'Parkir') {
+        } 
+        elseif ($request->input('billing_type') === 'Parkir') {
             $billingCategory = BillingsCategory::where([
                 'billing_type' => 'Parkir',
                 'id' => $request->input('vehicle_type_parking')
@@ -177,6 +208,14 @@ class BillingController extends Controller
             ->prepend(['label' => 'Pilih Owner', 'value' => ''])
             ->values()
             ->toArray();
+        
+        $room_number = $ownerQuery->pluck('room_no', 'id')
+            ->map(function ($roomNumber, $ownerId) {
+                return ['label' => $roomNumber, 'value' => $ownerId];
+            })
+            ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
+            ->values()
+            ->toArray();
 
             $category_billing_data = $categoryBillingQuery
             ->get(['id','billing_type','category_name','unit_price'])
@@ -204,6 +243,7 @@ class BillingController extends Controller
                 "billingData" => $billing->find($request->id),
                 'ownerData' => $owner_data,
                 'billingCategory' => $category_billing_data,
+                'roomNumber' => $room_number,
             ]);
         } else {
             if ($apartment_id == $billingApartmentId) {
@@ -211,6 +251,7 @@ class BillingController extends Controller
                     "billingData" => $billing->find($request->id),
                     'ownerData' => $owner_data,
                     'billingCategory' => $category_billing_data,
+                    'roomNumber' => $room_number,
                 ]);
             } else {
                 return redirect('/unauthorized');
@@ -229,6 +270,7 @@ class BillingController extends Controller
             'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
             'billing_fee' => 'required|integer|min:1|max:999999999999999',
             'owner_id' => 'required|integer',
+            'room_no' => 'required|integer|min:1|max:999999999999999',
             'status' => 'required|string|in:Success,Cancel,Pending',
         ];
 
@@ -239,6 +281,14 @@ class BillingController extends Controller
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Listrik'])) {
+            $rules['electric_type']= 'required|integer|min:1|max:999999999999999';
+        }
+
+        if(in_array($request->input('billing_type'), ['Air'])) {
+            $rules['water_type'] = 'required|integer|min:1|max:999999999999999';
         }
 
         if(in_array($request->input('billing_type'), ['Maintenance'])) {
@@ -274,7 +324,19 @@ class BillingController extends Controller
         }
 
         // Retrieve the billing category ID based on billing_type
-        if ($request->input('billing_type') === 'Maintenance') {
+        if($request->input('billing_type') === 'Air') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Air',
+                'id' => $request->input('water_type')
+            ])->first();
+        } 
+        elseif ($request->input('billing_type') === 'Listrik') {
+            $billingCategory = BillingsCategory::where([
+                'billing_type' => 'Listrik',
+                'id' => $request->input('electric_type')
+            ])->first();
+        } 
+        elseif ($request->input('billing_type') === 'Maintenance') {
             $billingCategory = BillingsCategory::where([
                 'billing_type' => 'Maintenance',
                 'id' => $request->input('maintenance_type')

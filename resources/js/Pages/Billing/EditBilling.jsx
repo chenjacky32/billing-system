@@ -10,24 +10,42 @@ import {
     Button,
     Card,
     CardBody,
-    Input,
     Option,
     Select,
     Typography,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
+import { set } from "lodash";
 
 export default function Edit({
     auth,
     ownerData,
     billingData,
     billingCategory,
+    roomNumber,
 }) {
+    const mappedRoomNumber = roomNumber.map((number) => ({
+        ...number,
+        label: `No - ${number.label}`,
+    }));
+
+    const findRoomNumber = mappedRoomNumber.find(
+        (item) => item.value == billingData.owner_id
+    );
+    console.log(findRoomNumber);
+
+    const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
     const [owner, setOwner] = useState(
         ownerData.find((item) => item.value === billingData.owner_id)
     );
     const [billingType, setBillingType] = useState(billingData.billing_type);
     const [status, setStatus] = useState(billingData.status);
+    const [waterTypeSelected, setWaterTypeSelected] = useState(
+        billingData.billing_category_id?.toString() || ""
+    );
+    const [electricTypeSelected, setElectricTypeSelected] = useState(
+        billingData.billing_category_id?.toString() || ""
+    );
     const [maintenanceTypeSelected, setMaintenanceTypeSelected] = useState(
         billingData.billing_category_id?.toString() || ""
     );
@@ -48,6 +66,9 @@ export default function Edit({
         meter_reading: billingData.meter_reading || flash?.meter_reading,
         billing_date: billingData.billing_date,
         billing_type: billingData.billing_type,
+        water_type: waterTypeSelected,
+        electric_type: electricTypeSelected,
+        room_no: room.value,
         status: billingData.status,
         paid_date: billingData.paid_date,
         owner_id: billingData.owner_id,
@@ -74,6 +95,47 @@ export default function Edit({
 
     const maintenanceOptions = getOptionsForType("Maintenance");
     const vehicleOptions = getOptionsForType("Parkir");
+    const electricOptions = getOptionsForType("Listrik");
+    const waterOptions = getOptionsForType("Air");
+    const OptionsCategory =
+        billingType === "Listrik" ? electricOptions : waterOptions;
+
+    const categoryError =
+        billingType === "Listrik" ? errors.electric_type : errors.water_type;
+
+    const handleChangeWaterOrElectricType = (value) => {
+        if (billingType === "Air") {
+            setWaterTypeSelected(value);
+            const findBilling = billingCategory.find(
+                (type) => type.billing_type === "Air"
+            );
+            const findCategoryPrice =
+                findBilling?.categories.find((items) => items.value == value)
+                    ?.price || "";
+
+            setData((prevValues) => ({
+                ...prevValues,
+                water_type: value,
+                unit_price: findCategoryPrice,
+            }));
+        } else if (billingType === "Listrik") {
+            setElectricTypeSelected(value);
+            const findBilling = billingCategory.find(
+                (type) => type.billing_type === "Listrik"
+            );
+            const findCategoryPrice =
+                findBilling?.categories.find((items) => items.value == value)
+                    ?.price || "";
+
+            setData((prevValues) => ({
+                ...prevValues,
+                electric_type: value,
+                unit_price: findCategoryPrice,
+            }));
+        } else {
+            return;
+        }
+    };
 
     const handleChangeMaintenanceType = (value) => {
         setMaintenanceTypeSelected(value);
@@ -111,13 +173,30 @@ export default function Edit({
         }));
     };
 
+    const handleRoomChange = (value) => {
+        setRoom(value);
+        setData((prevValue) => ({
+            ...prevValue,
+            room_no: value.value,
+            owner_id: value.value,
+        }));
+    };
+
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
+        setWaterTypeSelected("");
+        setElectricTypeSelected("");
+        setMaintenanceTypeSelected("");
+        setVehicleTypeSelected("");
         setData((prevValues) => ({
             ...prevValues,
             billing_type: value,
             meter_reading: null,
             billing_fee: null,
+            water_type: null,
+            electric_type: null,
+            maintenance_type: null,
+            vehicle_type_parking: null,
         }));
     };
 
@@ -221,15 +300,13 @@ export default function Edit({
                                     <div className="flex flex-row justify-start tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
                                             <InputSelect
-                                                value={owner}
-                                                onChange={
-                                                    handleOwnerChangeChange
-                                                }
-                                                options={ownerData}
+                                                value={room}
+                                                onChange={handleRoomChange}
+                                                options={mappedRoomNumber}
                                             />
-                                            {errors.owner_id && (
+                                            {errors.room_no && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.owner_id}
+                                                    {errors.room_no}
                                                 </p>
                                             )}
                                         </div>
@@ -262,6 +339,52 @@ export default function Edit({
                                             <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                                 <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
                                                     <div className="w-full mr-4">
+                                                        <Select
+                                                            label="Kategori / Jenis Tagihan"
+                                                            id={
+                                                                billingType ===
+                                                                "Listrik"
+                                                                    ? "electric_type"
+                                                                    : "water_type"
+                                                            }
+                                                            value={
+                                                                billingType ===
+                                                                "Listrik"
+                                                                    ? electricTypeSelected
+                                                                    : waterTypeSelected
+                                                            }
+                                                            onChange={
+                                                                handleChangeWaterOrElectricType
+                                                            }
+                                                        >
+                                                            {OptionsCategory.map(
+                                                                (
+                                                                    items,
+                                                                    index
+                                                                ) => {
+                                                                    return (
+                                                                        <Option
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            value={items.value.toString()}
+                                                                        >
+                                                                            {
+                                                                                items.label
+                                                                            }
+                                                                        </Option>
+                                                                    );
+                                                                }
+                                                            )}
+                                                        </Select>
+                                                        {categoryError && (
+                                                            <p className="mt-3 ml-0 text-sm text-red-500">
+                                                                {categoryError}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="w-full mr-4 tablet:mt-8">
                                                         <CustomInput
                                                             label="Meteran Awal"
                                                             id="start_meter"
@@ -334,12 +457,7 @@ export default function Edit({
                                                             data.unit_price ||
                                                             ""
                                                         }
-                                                        onChange={(e) =>
-                                                            setData(
-                                                                "unit_price",
-                                                                e.target.value
-                                                            )
-                                                        }
+                                                        disabled={true}
                                                         type="number"
                                                         errors={
                                                             errors.unit_price

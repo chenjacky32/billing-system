@@ -9,7 +9,6 @@ import {
     Button,
     Card,
     CardBody,
-    Input,
     Option,
     Select,
     Typography,
@@ -17,15 +16,27 @@ import {
 import { useEffect, useState } from "react";
 import { TypeBilling } from "@/utils/constant";
 
-export default function AddBiling({ auth, ownerData, billingCategory }) {
-    const [owner, setOwner] = useState(ownerData[0]);
+export default function AddBiling({
+    auth,
+    ownerData,
+    billingCategory,
+    roomNumber,
+}) {
+    //mapping roomNumber props and change label to string
+    const mappedRoomNumber = roomNumber.map((number) => ({
+        ...number,
+        label: `No - ${number.label}`,
+    }));
+
+    // const [owner, setOwner] = useState(ownerData[0]);
+    const [room, setRoom] = useState(mappedRoomNumber[0]);
     const [billingType, setBillingType] = useState("Air");
+    const [waterTypeSelected, setWaterTypeSelected] = useState("");
+    const [electricTypeSelected, setElectricTypeSelected] = useState("");
     const [maintenanceTypeSelected, setMaintenanceTypeSelected] = useState("");
     const [vehicleTypeSelected, setVehicleTypeSelected] = useState("");
     const [isLoading, setIsLoading] = useState(null);
     const { flash } = usePage().props;
-
-    console.log(billingType);
 
     const { data, setData, post, processing, errors } = useForm({
         billing_fee: flash?.billing_fee || "",
@@ -38,6 +49,8 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
         start_meter: "",
         end_meter: "",
         unit_price: "",
+        water_type: waterTypeSelected,
+        electric_type: electricTypeSelected,
         maintenance_type: maintenanceTypeSelected,
         vehicle_type_parking: vehicleTypeSelected,
     });
@@ -62,6 +75,47 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
 
     const maintenanceOptions = getOptionsForType("Maintenance");
     const vehicleOptions = getOptionsForType("Parkir");
+    const electricOptions = getOptionsForType("Listrik");
+    const waterOptions = getOptionsForType("Air");
+    const OptionsCategory =
+        billingType === "Listrik" ? electricOptions : waterOptions;
+
+    const categoryError =
+        billingType === "Listrik" ? errors.electric_type : errors.water_type;
+
+    const handleChangeWaterOrElectricType = (value) => {
+        if (billingType === "Air") {
+            setWaterTypeSelected(value);
+            const findBilling = billingCategory.find(
+                (type) => type.billing_type === "Air"
+            );
+            const findCategoryPrice =
+                findBilling?.categories.find((items) => items.value == value)
+                    ?.price || "";
+
+            setData((prevValues) => ({
+                ...prevValues,
+                water_type: value,
+                unit_price: findCategoryPrice,
+            }));
+        } else if (billingType === "Listrik") {
+            setElectricTypeSelected(value);
+            const findBilling = billingCategory.find(
+                (type) => type.billing_type === "Listrik"
+            );
+            const findCategoryPrice =
+                findBilling?.categories.find((items) => items.value == value)
+                    ?.price || "";
+
+            setData((prevValues) => ({
+                ...prevValues,
+                electric_type: value,
+                unit_price: findCategoryPrice,
+            }));
+        } else {
+            return;
+        }
+    };
 
     const handleChangeMaintenanceType = (value) => {
         setMaintenanceTypeSelected(value);
@@ -87,6 +141,15 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
         }));
     };
 
+    const handleRoomChange = (value) => {
+        setRoom(value);
+        setData((prevValue) => ({
+            ...prevValue,
+            room_no: value.value,
+            owner_id: value.value,
+        }));
+    };
+
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
         setData((prevValues) => ({
@@ -94,6 +157,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
             billing_type: value,
             meter_reading: null,
             billing_fee: "",
+            unit_price: "",
         }));
     };
 
@@ -127,6 +191,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                 unit_price: "",
                 minimum_charge: "",
                 billing_fee: "",
+                unit_price: "",
             }));
         } else if (billingType === "Maintenance" || billingType === "Parkir") {
             setData((prevValues) => ({
@@ -193,15 +258,13 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                     <div className="flex flex-row justify-start tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
                                             <InputSelect
-                                                value={owner}
-                                                onChange={
-                                                    handleOwnerChangeChange
-                                                }
-                                                options={ownerData}
+                                                value={room}
+                                                onChange={handleRoomChange}
+                                                options={mappedRoomNumber}
                                             />
-                                            {errors.owner_id && (
+                                            {errors.room_no && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.owner_id}
+                                                    {errors.room_no}
                                                 </p>
                                             )}
                                         </div>
@@ -234,6 +297,46 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                             <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                                 <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
                                                     <div className="w-full mr-4">
+                                                        <Select
+                                                            label="Kategori / Jenis Tagihan"
+                                                            id={
+                                                                billingType ===
+                                                                "Listrik"
+                                                                    ? "electric_type"
+                                                                    : "water_type"
+                                                            }
+                                                            onChange={
+                                                                handleChangeWaterOrElectricType
+                                                            }
+                                                        >
+                                                            {OptionsCategory.map(
+                                                                (
+                                                                    items,
+                                                                    index
+                                                                ) => {
+                                                                    return (
+                                                                        <Option
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            value={items.value.toString()}
+                                                                        >
+                                                                            {
+                                                                                items.label
+                                                                            }
+                                                                        </Option>
+                                                                    );
+                                                                }
+                                                            )}
+                                                        </Select>
+                                                        {categoryError && (
+                                                            <p className="mt-3 ml-0 text-sm text-red-500">
+                                                                {categoryError}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="w-full mr-4 tablet:mt-8">
                                                         <CustomInput
                                                             label="Meteran Awal"
                                                             id="start_meter"
@@ -306,12 +409,7 @@ export default function AddBiling({ auth, ownerData, billingCategory }) {
                                                             data.unit_price ||
                                                             ""
                                                         }
-                                                        onChange={(e) =>
-                                                            setData(
-                                                                "unit_price",
-                                                                e.target.value
-                                                            )
-                                                        }
+                                                        disabled={true}
                                                         type="number"
                                                         errors={
                                                             errors.unit_price
