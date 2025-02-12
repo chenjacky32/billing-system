@@ -27,6 +27,7 @@ import BillingRow from "@/Components/BillingRow";
 
 const TABLE_HEAD = [
     "Nama Owner",
+    "Nomor Room",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Tanggal Tagihan Dibuat",
@@ -41,6 +42,8 @@ export default function Billing({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+
+    console.log(data.data);
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -203,7 +206,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                 buttonLabel={"Tambah Billing"}
                                 icon={buttonIcon}
                                 addRoute={"billing.add"}
-                                label="Cari Nama Unit Owner"
+                                label="Cari Nama Unit Owner / Room"
                                 hasFilter={true}
                             />
                             <div className="mt-5">
@@ -328,6 +331,18 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                 >
                                                                     {
                                                                         owner.owner_name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        owner.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>

@@ -1,8 +1,11 @@
-import { MagnifyingGlassIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { UserPlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import CardTotals from "./CardTotals";
+import CardWrapper from "./CardWrapper";
 import { Link } from "@inertiajs/react";
 import {
     Button,
     CardHeader,
+    CardBody,
     Input,
     Typography,
 } from "@material-tailwind/react";
@@ -13,11 +16,19 @@ export default function PageHeader({
     description,
     buttonLabel,
     icon,
+    showCard = false,
     showSearch = true,
     addRoute = "users",
     hasFilter = false,
     label = "Search",
+    isFine = false,
     showAddButton = true,
+    countBilling = 0,
+    countPaidorUnpaid = 0,
+    countFine = 0,
+    labelBilling = "",
+    labelPaidorUnpaid = "",
+    labelFine = "",
 }) {
     return (
         <CardHeader
@@ -38,6 +49,27 @@ export default function PageHeader({
                     <div className="flex flex-col gap-2 shrink-0 sm:flex-row "></div>
                 </div>
             </div>
+            {showCard ? (
+                <CardWrapper>
+                    <CardTotals
+                        value={`Rp. ${countBilling}`}
+                        label={labelBilling}
+                        variant="blue"
+                    />
+                    {isFine === true ? (
+                        <CardTotals
+                            value={`Rp. ${countFine}`}
+                            label={labelFine}
+                            variant="red"
+                        />
+                    ) : null}
+                    <CardTotals
+                        value={`${countPaidorUnpaid}`}
+                        label={labelPaidorUnpaid}
+                        variant="yellow"
+                    />
+                </CardWrapper>
+            ) : null}
             {showSearch ? (
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row tablet:items-start">
                     <div

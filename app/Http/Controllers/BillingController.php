@@ -24,7 +24,8 @@ class BillingController extends Controller
                 ->when($request->has('search'), function ($query) use ($request) {
                     $searchTerm = $request->input('search');
                     $query->whereHas('owner', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('owner_name', 'like', "%$searchTerm%");
+                        $subQuery->where('owner_name', 'like', "%$searchTerm%")
+                        ->orWhere('room_no', 'like', "%$searchTerm%");
                     });
                 })
                 ->when($request->filled('status'), function ($query) use ($request) {  // Check if 'status' is not only present but also filled

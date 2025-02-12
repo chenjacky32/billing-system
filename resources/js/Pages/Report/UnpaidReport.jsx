@@ -76,12 +76,17 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
         return url;
     }
 
+    const dataIsUnPaid = data.data.map((items) => items.billing_fee);
+    const sumDataIsUnPaid = dataIsUnPaid.reduce((acc, currentValue) => {
+        return acc + currentValue;
+    }, 0);
+
     return (
         <AuthenticatedLayout
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Unpaid Billings
                 </h2>
             }
@@ -89,7 +94,7 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
             <Head title="Billing List" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -99,14 +104,14 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                         </Link>
                         <Link
                             href={route("billing.unpaid.index")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Unpaid Billing
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 handleSearch={(event) =>
                                     handleInputChange(
@@ -124,10 +129,17 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                 label="Cari Nama Unit Owner"
                                 hasFilter={true}
                                 showAddButton={false}
+                                showCard={true}
+                                labelBilling={"Total Tagihan yang Belum Lunas"}
+                                labelPaidorUnpaid={
+                                    "Jumlah Pembayaran yang Belum Lunas"
+                                }
+                                countBilling={sumDataIsUnPaid}
+                                countPaidorUnpaid={dataIsUnPaid.length}
                             />
                             <div className="mt-5">
-                                <div className=" flex flex-wrap">
-                                    {/* <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                <div className="flex flex-wrap ">
+                                    {/* <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Dari Tanggal</InputLabel>
                                         <CustomInput
                                             id="from_date"
@@ -141,7 +153,7 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                             type="date"
                                         />
                                     </div>
-                                    <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Sampai Tanggal</InputLabel>
                                         <CustomInput
                                             id="until_date"
@@ -157,9 +169,9 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                     </div> */}
                                 </div>
                             </div>
-                            <CardBody className="overflow-scroll px-0">
+                            <CardBody className="px-0 overflow-scroll">
                                 <table
-                                    className="mt-4 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -170,7 +182,7 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="border-y  bg-primary py-4 pl-4"
+                                                    className="py-4 pl-4 border-y bg-primary"
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -208,7 +220,7 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                                 return (
                                                     <tr
                                                         key={id}
-                                                        className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                        className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
