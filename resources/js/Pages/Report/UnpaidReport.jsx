@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
     "Nama Owner",
+    "Nomor Room",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Tanggal Tagihan Dibuat",
@@ -24,7 +25,14 @@ const TABLE_HEAD = [
     // "Dibuat Oleh",
 ];
 
-export default function UnpaidReport({ auth, errors, data, filters }) {
+export default function UnpaidReport({
+    auth,
+    errors,
+    data,
+    filters,
+    totalBillingIsUnpaid,
+    totalCountPending,
+}) {
     const [search, setSearch] = useState("");
 
     function getStatusColor(status) {
@@ -134,8 +142,8 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                 labelPaidorUnpaid={
                                     "Jumlah Pembayaran yang Belum Lunas"
                                 }
-                                countBilling={sumDataIsUnPaid}
-                                countPaidorUnpaid={dataIsUnPaid.length}
+                                countBilling={totalBillingIsUnpaid}
+                                countPaidorUnpaid={totalCountPending}
                             />
                             <div className="mt-5">
                                 <div className="flex flex-wrap ">
@@ -230,6 +238,19 @@ export default function UnpaidReport({ auth, errors, data, filters }) {
                                                                 >
                                                                     {
                                                                         owner.owner_name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        owner.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>

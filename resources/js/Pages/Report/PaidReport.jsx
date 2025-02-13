@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
     "Nama Owner",
+    "Nomor Room",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Tanggal Tagihan Dibayar",
@@ -23,7 +24,14 @@ const TABLE_HEAD = [
     // "Dibuat Oleh",
 ];
 
-export default function PaidReport({ auth, errors, data, filters }) {
+export default function PaidReport({
+    auth,
+    errors,
+    data,
+    filters,
+    totalBillingIsPaid,
+    totalCountSuccess,
+}) {
     const [search, setSearch] = useState("");
 
     function getStatusColor(status) {
@@ -74,11 +82,6 @@ export default function PaidReport({ auth, errors, data, filters }) {
 
         return url;
     }
-
-    const dataIsPaid = data.data.map((items) => items.billing_fee);
-    const sumDataIsPaid = dataIsPaid.reduce((acc, currentValue) => {
-        return acc + currentValue;
-    }, 0);
 
     return (
         <AuthenticatedLayout
@@ -131,8 +134,8 @@ export default function PaidReport({ auth, errors, data, filters }) {
                                 showCard={true}
                                 labelBilling={"Total Tagihan Lunas"}
                                 labelPaidorUnpaid={"Jumlah Pembayaran Lunas"}
-                                countBilling={sumDataIsPaid}
-                                countPaidorUnpaid={dataIsPaid.length}
+                                countBilling={totalBillingIsPaid}
+                                countPaidorUnpaid={totalCountSuccess}
                             />
                             <div className="mt-5">
                                 <div className="flex flex-wrap ">
@@ -226,6 +229,19 @@ export default function PaidReport({ auth, errors, data, filters }) {
                                                                 >
                                                                     {
                                                                         owner.owner_name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        owner.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>

@@ -52,13 +52,19 @@ export default function PageHeader({
             {showCard ? (
                 <CardWrapper>
                     <CardTotals
-                        value={`Rp. ${countBilling}`}
+                        value={new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                        }).format(countBilling)}
                         label={labelBilling}
                         variant="blue"
                     />
                     {isFine === true ? (
                         <CardTotals
-                            value={`Rp. ${countFine}`}
+                            value={new Intl.NumberFormat("id-ID", {
+                                style: "currency",
+                                currency: "IDR",
+                            }).format(countFine)}
                             label={labelFine}
                             variant="red"
                         />

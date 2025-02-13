@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
     "Nama Owner",
+    "Nomor Room",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Denda",
@@ -25,9 +26,16 @@ const TABLE_HEAD = [
     // "Dibuat Oleh",
 ];
 
-export default function PenaltiesReport({ auth, errors, data, filters }) {
+export default function PenaltiesReport({
+    auth,
+    errors,
+    data,
+    filters,
+    BillingFee,
+    BillingWithPenalties,
+    totalFine,
+}) {
     const [search, setSearch] = useState("");
-
     function getStatusColor(status) {
         switch (status) {
             case "Pending":
@@ -145,9 +153,9 @@ export default function PenaltiesReport({ auth, errors, data, filters }) {
                                     "Jumlah Pembayaran yang Belum Lunas dan Terkena Denda"
                                 }
                                 labelFine={"Total Denda"}
-                                countBilling={sumDataWithPenalties}
-                                countPaidorUnpaid={dataWithPenalties.length}
-                                countFine={sumDataFine}
+                                countBilling={BillingFee}
+                                countPaidorUnpaid={BillingWithPenalties}
+                                countFine={totalFine}
                                 isFine={true}
                             />
 
@@ -244,6 +252,19 @@ export default function PenaltiesReport({ auth, errors, data, filters }) {
                                                                 >
                                                                     {
                                                                         owner.owner_name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        owner.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>

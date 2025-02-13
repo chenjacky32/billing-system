@@ -16,6 +16,15 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+
+        $queryBySuccess = Billing::where('status', 'success');
+
+        if($role !== 'SUPER ADMIN'){
+            $queryBySuccess->where('apartment_id', $user->apartment_id);
+        }
+        $totalCountSuccess = $queryBySuccess->count();
+        $totalBillingFee = $queryBySuccess->sum('billing_fee');
+    
         return Inertia::render('Report/PaidReport', [
             'filters' => $request->only('search'),
             'data' => Billing::with(['owner', 'createdBy'])
@@ -31,6 +40,8 @@ class ReportController extends Controller
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
+            'totalBillingIsPaid' => $totalBillingFee,
+            'totalCountSuccess' => $totalCountSuccess
         ]);
     }
 
@@ -38,6 +49,15 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+
+        $queryByPending = Billing::where('status', 'pending')->where('due_date', '>=', today());
+
+        if($role !== 'SUPER ADMIN'){
+            $queryByPending->where('apartment_id', $user->apartment_id);
+        }
+        $totalCountPending = $queryByPending->count();
+        $totalBillingFee = $queryByPending->sum('billing_fee');
+
         return Inertia::render('Report/UnpaidReport', [
             'filters' => $request->only('search'),  // Remove 'status' from the filters
             'data' => Billing::with(['owner', 'createdBy'])
@@ -54,6 +74,9 @@ class ReportController extends Controller
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
+                
+            'totalBillingIsUnpaid' => $totalBillingFee,
+            'totalCountPending' => $totalCountPending
         ]);
     }
 
@@ -61,6 +84,16 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+
+        $queryByPenalties = Billing::where('status', 'pending')->where('due_date', '<', today());
+
+        if($role !== 'SUPER ADMIN'){
+            $queryByPenalties->where('apartment_id', $user->apartment_id);
+        }
+        $totalBillingWithPenalties = $queryByPenalties->count();
+        $totalBillingFee = $queryByPenalties->sum('billing_fee');
+        $totalFine = $queryByPenalties->sum('fine');
+    
         return Inertia::render('Report/PenaltiesReport', [
             'filters' => $request->only('search'),  // Remove 'status' from the filters
             'data' => Billing::with(['owner', 'createdBy'])
@@ -77,6 +110,10 @@ class ReportController extends Controller
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
+
+            'BillingFee' => $totalBillingFee,
+            'BillingWithPenalties' => $totalBillingWithPenalties,
+            'totalFine' => $totalFine
         ]);
     }
 
