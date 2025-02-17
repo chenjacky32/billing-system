@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\BillingCreated;
+use App\Events\BillingPaid;
+use App\Listeners\SendInvoiceEmail;
+use App\Listeners\SendPaymentSuccessEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +21,13 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        //register for send Invoice to Email when billing created and Updated billing to success
+        BillingCreated::class => [
+            SendInvoiceEmail::class,
+        ],
+        BillingPaid::class => [
+            SendPaymentSuccessEmail::class,
         ],
     ];
 

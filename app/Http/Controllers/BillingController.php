@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BillingCreated;
+use App\Events\BillingPaid;
 use App\Models\ApartmentOwner;
 use App\Models\Billing;
 use App\Models\BillingsCategory;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -182,7 +185,11 @@ class BillingController extends Controller
         // Store the validated data in the billing table
         $billing = Billing::create($validatedData);
 
-        // dd($billing);
+        $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
+        $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
+        $pdf->save($pdfPath);
+        
+        event(new BillingCreated($billing,$pdfPath));
         return redirect('/billing')->with('success', 'New Billing has been created!');
     }
 
@@ -365,6 +372,10 @@ class BillingController extends Controller
 
         // Update the billing record
         $billing->update($validatedData);
+
+        if ($request->input('status') === 'Success') {
+            event(new BillingPaid($billing));
+        }
 
         return redirect('/billing')->with('success', 'Billing data has been updated!');
     }
