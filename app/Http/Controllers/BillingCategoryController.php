@@ -110,6 +110,7 @@ class BillingCategoryController extends Controller
             'apartment_id' => 'required|integer|exists:apartments,id',
             'billing_type' => 'required|string|max:255',
             'unit_price' => 'required|integer|min:1|max:999999999999999',
+            'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
 
         $validateData['created_by'] = Auth::id();
@@ -127,6 +128,7 @@ class BillingCategoryController extends Controller
             'category_name'=>'required|string|max:255',
             'unit_price'=>'required|integer|min:1|max:999999999999999',
             'apartment_id' => 'required|integer|exists:apartments,id',
+            'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
         $validatedData['created_by'] = Auth::id();
 

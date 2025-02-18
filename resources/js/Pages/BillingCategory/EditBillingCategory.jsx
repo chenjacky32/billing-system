@@ -26,6 +26,7 @@ export default function EditBillingCategory({
     const { data, setData, post, processing, errors } = useForm({
         billing_type: billingCategoryData.billing_type,
         category_name: billingCategoryData.category_name,
+        minimum_charge: billingCategoryData.minimum_charge,
         unit_price: billingCategoryData.unit_price,
         apartment_id:
             role === "SUPER ADMIN"
@@ -177,6 +178,20 @@ export default function EditBillingCategory({
                                                 )
                                             }
                                             errors={errors.unit_price}
+                                            className="tablet:mt-8"
+                                        />
+                                        <CustomInput
+                                            type="number"
+                                            label="Minimum Charge"
+                                            id="minimum_charge"
+                                            value={data.minimum_charge}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "minimum_charge",
+                                                    e.target.value
+                                                )
+                                            }
+                                            errors={errors.minimum_charge}
                                             className="tablet:mt-8"
                                         />
                                     </div>

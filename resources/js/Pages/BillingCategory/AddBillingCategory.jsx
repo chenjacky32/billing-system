@@ -28,6 +28,7 @@ export default function AddBillingCategory({
         billing_type: billingType,
         category_name: "",
         unit_price: "",
+        minimum_charge: "",
         apartment_id: role === "SUPER ADMIN" ? "" : apartmentId,
     });
 
@@ -169,6 +170,20 @@ export default function AddBillingCategory({
                                                 )
                                             }
                                             errors={errors.unit_price}
+                                            className="tablet:mt-8"
+                                        />
+                                        <CustomInput
+                                            type="number"
+                                            label="Minimum Charge"
+                                            id="minimum_charge"
+                                            value={data.minimum_charge}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "minimum_charge",
+                                                    e.target.value
+                                                )
+                                            }
+                                            errors={errors.minimum_charge}
                                             className="tablet:mt-8"
                                         />
                                     </div>
