@@ -25,6 +25,7 @@ const TABLE_HEAD = [
     "Nama Kategori",
     "Jenis Tagihan",
     "Harga",
+    "Minimum Charge",
     "Apartement",
     "Dibuat Oleh",
     "Edit",
@@ -137,6 +138,7 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                     category_name,
                                                     billing_type,
                                                     unit_price,
+                                                    minimum_charge,
                                                     apartment,
                                                     created_by,
                                                     id,
@@ -194,8 +196,35 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    Rp.{" "}
-                                                                    {unit_price}
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        unit_price
+                                                                    )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        minimum_charge
+                                                                    )}
                                                                 </Typography>
                                                             </div>
                                                         </td>
