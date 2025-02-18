@@ -89,28 +89,30 @@ export default function AddBiling({
             const findBilling = billingCategory.find(
                 (type) => type.billing_type === "Air"
             );
-            const findCategoryPrice =
-                findBilling?.categories.find((items) => items.value == value)
-                    ?.price || "";
+            const findCategory = findBilling?.categories.find(
+                (items) => items.value == value
+            );
 
             setData((prevValues) => ({
                 ...prevValues,
                 water_type: value,
-                unit_price: findCategoryPrice,
+                unit_price: findCategory?.price,
+                minimum_charge: findCategory?.minimum_charge,
             }));
         } else if (billingType === "Listrik") {
             setElectricTypeSelected(value);
             const findBilling = billingCategory.find(
                 (type) => type.billing_type === "Listrik"
             );
-            const findCategoryPrice =
-                findBilling?.categories.find((items) => items.value == value)
-                    ?.price || "";
+            const findCategory = findBilling?.categories.find(
+                (items) => items.value == value
+            );
 
             setData((prevValues) => ({
                 ...prevValues,
                 electric_type: value,
-                unit_price: findCategoryPrice,
+                unit_price: findCategory?.price,
+                minimum_charge: findCategory?.minimum_charge,
             }));
         } else {
             return;
@@ -154,6 +156,7 @@ export default function AddBiling({
         setBillingType(value);
         setData((prevValues) => ({
             ...prevValues,
+            minimum_charge: 0,
             billing_type: value,
             meter_reading: null,
             billing_fee: "",
@@ -421,16 +424,11 @@ export default function AddBiling({
                                                         label="Minimum Charge"
                                                         id="minimum_charge"
                                                         value={
-                                                            data.minimum_charge ||
-                                                            ""
+                                                            data.minimum_charge ??
+                                                            0
                                                         }
                                                         type="number"
-                                                        onChange={(e) =>
-                                                            setData(
-                                                                "minimum_charge",
-                                                                e.target.value
-                                                            )
-                                                        }
+                                                        disabled={true}
                                                         errors={
                                                             errors.minimum_charge
                                                         }

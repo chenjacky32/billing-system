@@ -15,7 +15,6 @@ import {
     Typography,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
-import { set } from "lodash";
 
 export default function Edit({
     auth,
@@ -32,7 +31,6 @@ export default function Edit({
     const findRoomNumber = mappedRoomNumber.find(
         (item) => item.value == billingData.owner_id
     );
-    console.log(findRoomNumber);
 
     const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
     const [owner, setOwner] = useState(
@@ -109,28 +107,30 @@ export default function Edit({
             const findBilling = billingCategory.find(
                 (type) => type.billing_type === "Air"
             );
-            const findCategoryPrice =
-                findBilling?.categories.find((items) => items.value == value)
-                    ?.price || "";
+            const findCategory = findBilling?.categories.find(
+                (items) => items.value == value
+            );
 
             setData((prevValues) => ({
                 ...prevValues,
                 water_type: value,
-                unit_price: findCategoryPrice,
+                unit_price: findCategory?.price,
+                minimum_charge: findCategory?.minimum_charge,
             }));
         } else if (billingType === "Listrik") {
             setElectricTypeSelected(value);
             const findBilling = billingCategory.find(
                 (type) => type.billing_type === "Listrik"
             );
-            const findCategoryPrice =
-                findBilling?.categories.find((items) => items.value == value)
-                    ?.price || "";
+            const findCategory = findBilling?.categories.find(
+                (items) => items.value == value
+            );
 
             setData((prevValues) => ({
                 ...prevValues,
                 electric_type: value,
-                unit_price: findCategoryPrice,
+                unit_price: findCategory?.price,
+                minimum_charge: findCategory?.minimum_charge,
             }));
         } else {
             return;
@@ -197,6 +197,8 @@ export default function Edit({
             electric_type: null,
             maintenance_type: null,
             vehicle_type_parking: null,
+            minimum_charge: 0,
+            unit_price: "",
         }));
     };
 
@@ -469,16 +471,11 @@ export default function Edit({
                                                         label="Minimum Charge"
                                                         id="minimum_charge"
                                                         value={
-                                                            data.minimum_charge ||
-                                                            ""
+                                                            data.minimum_charge ??
+                                                            0
                                                         }
                                                         type="number"
-                                                        onChange={(e) =>
-                                                            setData(
-                                                                "minimum_charge",
-                                                                e.target.value
-                                                            )
-                                                        }
+                                                        disabled={true}
                                                         errors={
                                                             errors.minimum_charge
                                                         }

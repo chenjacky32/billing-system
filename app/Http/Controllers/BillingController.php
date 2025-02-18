@@ -72,7 +72,7 @@ class BillingController extends Controller
             ->toArray();
 
             $category_billing_data = $categoryBillingQuery
-            ->get(['id','billing_type','category_name','unit_price'])
+            ->get(['id','billing_type','category_name','unit_price','minimum_charge'])
             ->groupBy('billing_type')
             ->map(function ($categories, $billingType) {
                 return [
@@ -82,6 +82,7 @@ class BillingController extends Controller
                             'label' => $category->category_name,
                             'value' => $category->id,
                             'price' => $category->unit_price,
+                            'minimum_charge' => $category->minimum_charge
                         ];
                     })->values(),
                 ];
@@ -116,7 +117,7 @@ class BillingController extends Controller
             $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
-            $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
+            $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
         }
 
         if(in_array($request->input('billing_type'), ['Listrik'])) {
@@ -226,7 +227,7 @@ class BillingController extends Controller
             ->toArray();
 
             $category_billing_data = $categoryBillingQuery
-            ->get(['id','billing_type','category_name','unit_price'])
+            ->get(['id','billing_type','category_name','unit_price','minimum_charge'])
             ->groupBy('billing_type')
             ->map(function ($categories, $billingType) {
                 return [
@@ -236,6 +237,7 @@ class BillingController extends Controller
                             'label' => $category->category_name,
                             'value' => $category->id,
                             'price' => $category->unit_price,
+                            'minimum_charge' => $category->minimum_charge
                         ];
                     })->values(),
                 ];
@@ -288,7 +290,7 @@ class BillingController extends Controller
             $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
-            $rules['minimum_charge'] = 'required|integer|min:1|max:999999999999999';
+            $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
         }
 
         if(in_array($request->input('billing_type'), ['Listrik'])) {
@@ -321,7 +323,7 @@ class BillingController extends Controller
             $validatedData['start_meter'] = null;
             $validatedData['end_meter'] = null;
             $validatedData['unit_price'] = null;
-            $validatedData['minimum_charge'] = null;
+            $validatedData['minimum_charge'] = 0;
         }
 
         if ($request->input('status') !== 'Success') {
@@ -387,13 +389,13 @@ class BillingController extends Controller
         return redirect('/billing')->with('success', 'Billing data has been deleted!');
     }
 
-    //count electric bill
+    //count electric and water bill
     public function calculateBill(Request $request){
         $request->validate ([
                 'start_meter' => 'required|integer|min:1|max:999999999999999',
                 'end_meter' => 'required|integer|min:1|max:999999999999999',
                 'unit_price' => 'required|integer|min:1|max:999999999999999',
-                'minimum_charge'=>'required|integer|min:1|max:999999999999999',
+                'minimum_charge'=>'required|numeric|min:0|max:999999999999999',
         ]);
 
         $startMeter = $request->input('start_meter');
