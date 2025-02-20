@@ -6,7 +6,7 @@ use App\Models\Apartment;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Storage;
 
 class ApartementController extends Controller
 {
@@ -76,15 +76,31 @@ class ApartementController extends Controller
         $user = Auth::user();
 
         $role = $user->role;
-
-
         $apartment = Apartment::findOrFail($id);
 
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:100'],
             'total_room' => ['required', 'integer', 'min:10', 'max:99999'],
+            // 'logo_company' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
+        // handle image upload
+        // if($request->hasFile('logo_company')) { 
+        //     if($apartment->logo_company){
+        //         Storage::delete('public/'.$apartment->logo_company);
+        //     }
+
+            // $fileName = time().'.'.$request->file('logo_company')->extension();  
+            // $request->file->move(storage_path('public/apartments'), $fileName);
+        //     $imagePath = $request->file('logo_company')->store('apartments' , 'public');
+        //     $validatedData['logo_company'] = $imagePath;
+        // }
+        
+        // $apartment->update($request->except(['logo_company']) + [
+        //     'logo_company' => $apartment->logo_company,
+        // ]);
+
         $apartment->update($validatedData);
 
         if ($role === 'SUPER ADMIN') {

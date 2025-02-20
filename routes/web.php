@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartementController;
+use App\Http\Controllers\ApartementTower;
 use App\Http\Controllers\BillingCategoryController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
@@ -74,6 +75,15 @@ Route::middleware('auth')->group(function () {
     // !Apartement
     Route::get('/apartement/{id}/edit', [ApartementController::class, 'edit'])->name('apartement.edit');
     Route::post('/apartement/{id}/update', [ApartementController::class, 'update'])->name('apartement.update');
+
+    
+    // !Apartement Tower
+    Route::get('/apartement-tower', [ApartementTower::class, 'index'])->name('apartementTower.index');
+    Route::get('/apartement-tower/add',[ApartementTower::class,'add'])->name('apartementTower.add');
+    Route::get('/apartement-tower/{id}/edit', [ApartementTower::class, 'edit'])->name('apartementTower.edit');
+    Route::post('/apartement-tower/store', [ApartementTower::class, 'store'])->name('apartementTower.store');
+    Route::post('/apartement-tower/{id}/update', [ApartementTower::class, 'update'])->name('apartementTower.update');
+    Route::post('/apartement-tower/delete', [ApartementTower::class, 'destroy'])->name('apartementTower.delete');
 
 
     // !Unit Owner

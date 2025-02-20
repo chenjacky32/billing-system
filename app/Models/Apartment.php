@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Apartment extends Model
 {
-    protected $fillable = ['name', 'address', 'created_by', 'total_room'];
+    protected $fillable = ['name', 'address', 'created_by', 'total_room', 'logo_company'];
 
     public function user()
     {

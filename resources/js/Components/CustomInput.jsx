@@ -26,7 +26,7 @@ export default function CustomInput({
                 />
             </div>
             {errors && (
-                <p className="text-red-500 text-sm ml-0 mt-3">{errors}</p>
+                <p className="mt-3 ml-0 text-sm text-red-500">{errors}</p>
             )}
         </div>
     );

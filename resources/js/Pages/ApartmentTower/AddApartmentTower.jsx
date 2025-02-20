@@ -1,28 +1,39 @@
+import React from "react";
 import CustomInput from "@/Components/CustomInput";
 import PageHeader from "@/Components/PageHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import InputUpload from "@/Components/InputUpload";
-import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
-import {
-    Breadcrumbs,
-    Button,
-    Card,
-    CardBody,
-    Input,
-} from "@material-tailwind/react";
+import { Head, Link, useForm } from "@inertiajs/react";
+import InputSelect from "@/Components/InputSelect";
+import { Breadcrumbs, Button, Card, CardBody } from "@material-tailwind/react";
+import { useState } from "react";
 
-export default function AddApartement({ auth }) {
+const AddApartmentTower = ({
+    auth,
+    apartmentData,
+    apartmentName,
+    apartmentId,
+}) => {
+    const role = auth.user.role;
+    const [apartment, setApartment] = useState(apartmentData[0]);
+
     const { data, setData, post, processing, errors } = useForm({
-        name: "",
-        address: "",
+        tower_name: "",
         total_room: "",
+        apartment_id: role === "SUPER ADMIN" ? "" : apartmentId,
     });
 
-    // ! Handle submit
-    function handleSubmit(e) {
+    const handleApartmentChange = (value) => {
+        setApartment(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            apartment_id: value.value,
+        }));
+    };
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        post("/apartement/store");
-    }
+        post("/apartement-tower/store");
+    };
 
     return (
         <AuthenticatedLayout
@@ -30,14 +41,19 @@ export default function AddApartement({ auth }) {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Add Apartment
+                    Add Apartment Tower
                 </h2>
             }
         >
-            <Head title="Add Apartement" />
-
+            <Head title="Add Apartment Tower" />
             <div className="py-12">
-                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
+                <div
+                    className={`${
+                        role === "SUPER ADMIN"
+                            ? "h-[35rem] tablet:h-[55rem]"
+                            : "null"
+                    } w-full mx-auto max-w-1xl sm:px-6 lg:px-8`}
+                >
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -46,58 +62,66 @@ export default function AddApartement({ auth }) {
                             Dashboard
                         </Link>
                         <Link
-                            href={route("apartement.index")}
-                            className="opacity-60 text-primaryHover "
-                        >
-                            Apartment
-                        </Link>
-                        <Link
-                            href={route("apartement.add")}
+                            href={route("apartementTower.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add Apartment
+                            Apartment Tower
+                        </Link>
+                        <Link
+                            href={route("apartementTower.add")}
+                            className="font-bold opacity-100 text-primary"
+                        >
+                            Add
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"New Apartement Data"}
+                                title={"New Apartment Tower"}
                                 description={
-                                    "Tambah Informasi Apartemen yang Baru"
+                                    "Tambah Informasi Data Tower Apartemen yang Baru"
                                 }
-                                label="Cari Nama Apartemen"
                                 showSearch={false}
                             />
                             <CardBody className="h-full px-0 ">
-                                <form onSubmit={handleSubmit}>
+                                <form>
                                     <div className="flex flex-row justify-start tablet:flex-col">
+                                        {role === "SUPER ADMIN" ? (
+                                            <InputSelect
+                                                value={apartment}
+                                                onChange={handleApartmentChange}
+                                                options={apartmentData}
+                                            />
+                                        ) : (
+                                            <CustomInput
+                                                label="Nama Apartemen"
+                                                value={apartmentName}
+                                                className=""
+                                                disabled={true}
+                                            />
+                                        )}
+                                        {errors.apartment_id && (
+                                            <p className="mt-3 ml-0 text-sm text-red-500">
+                                                {errors.apartment_id}
+                                            </p>
+                                        )}
                                         <CustomInput
-                                            label="Nama Apartemen"
-                                            id="name"
-                                            value={data.name}
-                                            onChange={(e) =>
-                                                setData("name", e.target.value)
-                                            }
-                                            errors={errors.name}
-                                        />
-
-                                        <CustomInput
-                                            label="Alamat"
-                                            id="address"
-                                            value={data.address}
+                                            label="Nama Tower Apartment"
+                                            id="tower_name"
+                                            value={data.tower_name}
                                             onChange={(e) =>
                                                 setData(
-                                                    "address",
+                                                    "tower_name",
                                                     e.target.value
                                                 )
                                             }
-                                            errors={errors.address}
+                                            errors={errors.tower_name}
                                             className="tablet:mt-8"
                                         />
                                         <CustomInput
                                             type="number"
-                                            label="Total Kamar"
+                                            label="Total Room"
                                             id="total_room"
                                             value={data.total_room}
                                             onChange={(e) =>
@@ -110,13 +134,10 @@ export default function AddApartement({ auth }) {
                                             className="tablet:mt-8"
                                         />
                                     </div>
-                                    {/* <div className="mt-8 mr-4 tablet:mr-0">
-                                        <InputUpload className="tablet:mt-8" />
-                                    </div> */}
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button
-                                                variant="fill"
+                                                variant="filled"
                                                 onClick={handleSubmit}
                                                 className="bg-green-500"
                                                 loading={processing}
@@ -133,4 +154,6 @@ export default function AddApartement({ auth }) {
             </div>
         </AuthenticatedLayout>
     );
-}
+};
+
+export default AddApartmentTower;
