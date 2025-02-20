@@ -16,6 +16,7 @@ export default function AddApartement({ auth }) {
         name: "",
         address: "",
         total_room: "",
+        logo_company: null,
     });
 
     // ! Handle submit
@@ -110,9 +111,16 @@ export default function AddApartement({ auth }) {
                                             className="tablet:mt-8"
                                         />
                                     </div>
-                                    {/* <div className="mt-8 mr-4 tablet:mr-0">
-                                        <InputUpload className="tablet:mt-8" />
-                                    </div> */}
+                                    <div className="mt-8 mr-4 tablet:mr-0">
+                                        <InputUpload
+                                            className="tablet:mt-8"
+                                            onChange={(file) =>
+                                                setData("logo_company", file)
+                                            }
+                                            errors={errors.logo_company}
+                                            currentImage={data.logo_company}
+                                        />
+                                    </div>
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button

@@ -19,7 +19,7 @@ export default function EditApartement({ auth, apartementData }) {
         name: apartementData.name,
         address: apartementData.address,
         total_room: apartementData.total_room,
-        // logo_company: apartementData.logo_company,
+        logo_company: apartementData.logo_company,
     });
 
     const { flash } = usePage().props;
@@ -128,7 +128,7 @@ export default function EditApartement({ auth, apartementData }) {
                                             className="tablet:mt-8"
                                         />
                                     </div>
-                                    {/* <div className="mt-8 mr-4 tablet:mr-0">
+                                    <div className="mt-8 mr-4 tablet:mr-0">
                                         <InputUpload
                                             className="tablet:mt-8"
                                             onChange={(file) =>
@@ -139,7 +139,7 @@ export default function EditApartement({ auth, apartementData }) {
                                                 apartementData.logo_company
                                             }
                                         />
-                                    </div> */}
+                                    </div>
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button

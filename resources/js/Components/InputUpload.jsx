@@ -2,39 +2,40 @@ import React, { useState } from "react";
 import { XCircleIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
 
 const InputUpload = ({ className, onChange, error, currentImage }) => {
-    const [dragActive, setDragActive] = useState(false);
-    const [fileName, setFileName] = useState("");
-    const [preview, setPreview] = useState(
-        currentImage ? `/storage/public/apartment/${currentImage}` : null
-    );
+    const imageUrl = new URL(`/storage/${currentImage}`, window.location.origin)
+        .href;
 
-    const handleDrag = (e) => {
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [fileName, setFileName] = useState("");
+    const [preview, setPreview] = useState(currentImage ? imageUrl : null);
+
+    const handleDragFile = (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (e.type === "dragenter" || e.type === "dragover") {
-            setDragActive(true);
+            setIsDragActive(true);
         } else if (e.type === "dragleave") {
-            setDragActive(false);
+            setIsDragActive(false);
         }
     };
 
-    const handleDrop = (e) => {
+    const handleDropFile = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setDragActive(false);
+        setIsDragActive(false);
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFile(e.dataTransfer.files[0]);
+            handleCheckingTypeFile(e.dataTransfer.files[0]);
         }
     };
 
-    const handleChange = (e) => {
+    const handleChangeFile = (e) => {
         if (e.target.files && e.target.files[0]) {
-            handleFile(e.target.files[0]);
+            handleCheckingTypeFile(e.target.files[0]);
         }
     };
 
-    const handleFile = (file) => {
+    const handleCheckingTypeFile = (file) => {
         // Validate file type
         if (!file.type.match("image.*")) {
             alert("Please upload an image file");
@@ -58,7 +59,7 @@ const InputUpload = ({ className, onChange, error, currentImage }) => {
         reader.readAsDataURL(file);
     };
 
-    const removeFile = () => {
+    const handleRemoveFile = () => {
         setFileName("");
         setPreview(null);
         onChange?.(null);
@@ -82,7 +83,7 @@ const InputUpload = ({ className, onChange, error, currentImage }) => {
                     />
                     <button
                         type="button"
-                        onClick={removeFile}
+                        onClick={handleRemoveFile}
                         className="absolute bg-white rounded-full top-2 right-2"
                     >
                         <XCircleIcon className="w-6 h-6 text-red-500 hover:text-red-600 stroke-white" />
@@ -92,36 +93,36 @@ const InputUpload = ({ className, onChange, error, currentImage }) => {
                 <div
                     className={`relative w-full h-32 border-2 border-dashed rounded-lg transition-all
                         ${
-                            dragActive
+                            isDragActive
                                 ? "border-blue-500 bg-blue-50"
                                 : "border-gray-300 bg-gray-50"
                         }
                         ${error ? "mt-3 ml-0 text-sm text-red-500" : ""}
                         hover:border-blue-400 hover:bg-blue-50`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
+                    onDragEnter={handleDragFile}
+                    onDragLeave={handleDragFile}
+                    onDragOver={handleDragFile}
+                    onDrop={handleDropFile}
                 >
                     <input
                         type="file"
                         id="file_input"
                         className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
-                        onChange={handleChange}
+                        onChange={handleChangeFile}
                         accept="image/png,image/jpeg,image/jpg"
                     />
                     <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                         <CloudArrowUpIcon
                             className={`w-8 h-8 mb-2
                                 ${
-                                    dragActive
+                                    isDragActive
                                         ? "text-blue-500"
                                         : "text-gray-400"
                                 }`}
                         />
                         <span
                             className={`text-sm font-medium ${
-                                dragActive ? "text-blue-500" : "text-gray-600"
+                                isDragActive ? "text-blue-500" : "text-gray-600"
                             }`}
                         >
                             {fileName
