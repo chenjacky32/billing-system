@@ -43,8 +43,6 @@ export default function Billing({ auth, errors, data, filters }) {
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
 
-    console.log(data.data);
-
     const handleStatusChange = (value) => {
         setStatus(value);
     };

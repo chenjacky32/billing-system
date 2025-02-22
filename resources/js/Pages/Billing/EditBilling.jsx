@@ -391,17 +391,26 @@ export default function Edit({
                                                             label="Meteran Awal"
                                                             id="start_meter"
                                                             value={
-                                                                data.start_meter ||
-                                                                ""
+                                                                data.start_meter
+                                                                    ? data.start_meter
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : ""
                                                             }
                                                             onChange={(e) => {
+                                                                const unformattedValue =
+                                                                    e.target.value.replace(
+                                                                        /\./g,
+                                                                        ""
+                                                                    );
                                                                 setData(
                                                                     "start_meter",
-                                                                    e.target
-                                                                        .value
+                                                                    unformattedValue
                                                                 );
                                                             }}
-                                                            type="number"
                                                             errors={
                                                                 errors.start_meter
                                                             }
@@ -412,17 +421,26 @@ export default function Edit({
                                                             label="Meteran Akhir"
                                                             id="end_meter"
                                                             value={
-                                                                data.end_meter ||
-                                                                ""
+                                                                data.end_meter
+                                                                    ? data.end_meter
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : ""
                                                             }
                                                             onChange={(e) => {
+                                                                const unformattedValue =
+                                                                    e.target.value.replace(
+                                                                        /\./g,
+                                                                        ""
+                                                                    );
                                                                 setData(
                                                                     "end_meter",
-                                                                    e.target
-                                                                        .value
+                                                                    unformattedValue
                                                                 );
                                                             }}
-                                                            type="number"
                                                             errors={
                                                                 errors.end_meter
                                                             }
@@ -434,10 +452,15 @@ export default function Edit({
                                                             label="Total Meteran"
                                                             id="meter_reading"
                                                             value={
-                                                                data.meter_reading ||
-                                                                ""
+                                                                data.meter_reading
+                                                                    ? data.meter_reading
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : ""
                                                             }
-                                                            type="number"
                                                             errors={
                                                                 errors.meter_reading
                                                             }
@@ -451,16 +474,21 @@ export default function Edit({
                                                         label={
                                                             billingType ===
                                                             "Air"
-                                                                ? "Harga / m3"
-                                                                : "Harga / KWh"
+                                                                ? "Harga / m2"
+                                                                : "Harga / kWh"
                                                         }
                                                         id="unit_price"
                                                         value={
-                                                            data.unit_price ||
-                                                            ""
+                                                            data.unit_price
+                                                                ? data.unit_price
+                                                                      .toString()
+                                                                      .replace(
+                                                                          /\B(?=(\d{3})+(?!\d))/g,
+                                                                          "."
+                                                                      )
+                                                                : ""
                                                         }
                                                         disabled={true}
-                                                        type="number"
                                                         errors={
                                                             errors.unit_price
                                                         }
@@ -471,10 +499,15 @@ export default function Edit({
                                                         label="Minimum Charge"
                                                         id="minimum_charge"
                                                         value={
-                                                            data.minimum_charge ??
-                                                            0
+                                                            data.minimum_charge
+                                                                ? data.minimum_charge
+                                                                      .toString()
+                                                                      .replace(
+                                                                          /\B(?=(\d{3})+(?!\d))/g,
+                                                                          "."
+                                                                      )
+                                                                : 0
                                                         }
-                                                        type="number"
                                                         disabled={true}
                                                         errors={
                                                             errors.minimum_charge
@@ -584,7 +617,16 @@ export default function Edit({
                                             <CustomInput
                                                 label="Biaya Tagihan"
                                                 id="billing_fee"
-                                                value={data.billing_fee || ""}
+                                                value={
+                                                    data.billing_fee
+                                                        ? data.billing_fee
+                                                              .toString()
+                                                              .replace(
+                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                  "."
+                                                              )
+                                                        : ""
+                                                }
                                                 type="number"
                                                 disabled={true}
                                                 errors={errors.billing_fee}
@@ -650,11 +692,28 @@ export default function Edit({
                                         <CustomInput
                                             label="Biaya Denda Jika Lewat Batas Tagihan"
                                             id="fine"
-                                            value={data.fine}
-                                            onChange={(e) =>
-                                                setData("fine", e.target.value)
+                                            value={
+                                                data.fine
+                                                    ? data.fine
+                                                          .toString()
+                                                          .replace(
+                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                              "."
+                                                          )
+                                                    : ""
                                             }
-                                            type="number"
+                                            onChange={(e) => {
+                                                const unformattedValue =
+                                                    e.target.value.replace(
+                                                        /\./g,
+                                                        ""
+                                                    );
+                                                setData(
+                                                    "fine",
+                                                    unformattedValue
+                                                );
+                                            }}
+                                            type="text"
                                             errors={errors.fine}
                                             className="tablet:mt-8"
                                         />
