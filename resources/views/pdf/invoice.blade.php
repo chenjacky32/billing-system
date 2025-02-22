@@ -109,7 +109,7 @@
     <table class="header-table">
       <tr>
         <td class="logo-cell">
-          <img src="{{ storage_path('app/images/okgo.png') }}" alt="OKGO" width="200" style="background: #f8f9fa; border: 3px solid #f1f5f9; padding: 6px;" />
+          <img src="{{ storage_path('app/public/' . $billing->apartment->logo_company) }}" alt="Apartment Logo" width="200">
         </td>
         <td class="invoice-id">
           Invoice ID: {{ $billing->id }}
