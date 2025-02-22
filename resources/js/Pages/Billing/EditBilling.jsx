@@ -627,9 +627,46 @@ export default function Edit({
                                                               )
                                                         : ""
                                                 }
-                                                type="number"
                                                 disabled={true}
                                                 errors={errors.billing_fee}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Biaya Denda
+                                            </Typography>
+                                            <CustomInput
+                                                label="Biaya Denda Jika Lewat Batas Tagihan"
+                                                id="fine"
+                                                value={
+                                                    data.fine
+                                                        ? data.fine
+                                                              .toString()
+                                                              .replace(
+                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                  "."
+                                                              )
+                                                        : ""
+                                                }
+                                                onChange={(e) => {
+                                                    const unformattedValue =
+                                                        e.target.value.replace(
+                                                            /\./g,
+                                                            ""
+                                                        );
+                                                    setData(
+                                                        "fine",
+                                                        unformattedValue
+                                                    );
+                                                }}
+                                                type="text"
+                                                errors={errors.fine}
+                                                className="tablet:mt-0"
                                             />
                                         </div>
                                     </div>
@@ -688,34 +725,6 @@ export default function Edit({
                                             errors={errors.due_date}
                                             className="tablet:mt-8"
                                             type="date"
-                                        />
-                                        <CustomInput
-                                            label="Biaya Denda Jika Lewat Batas Tagihan"
-                                            id="fine"
-                                            value={
-                                                data.fine
-                                                    ? data.fine
-                                                          .toString()
-                                                          .replace(
-                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                              "."
-                                                          )
-                                                    : ""
-                                            }
-                                            onChange={(e) => {
-                                                const unformattedValue =
-                                                    e.target.value.replace(
-                                                        /\./g,
-                                                        ""
-                                                    );
-                                                setData(
-                                                    "fine",
-                                                    unformattedValue
-                                                );
-                                            }}
-                                            type="text"
-                                            errors={errors.fine}
-                                            className="tablet:mt-8"
                                         />
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
