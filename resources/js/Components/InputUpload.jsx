@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { XCircleIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
+import { toast } from "react-toastify";
 
 const InputUpload = ({ className, onChange, error, currentImage }) => {
     const imageUrl = new URL(`/storage/${currentImage}`, window.location.origin)
@@ -38,13 +39,13 @@ const InputUpload = ({ className, onChange, error, currentImage }) => {
     const handleCheckingTypeFile = (file) => {
         // Validate file type
         if (!file.type.match("image.*")) {
-            alert("Please upload an image file");
+            toast.error("Please upload an image file");
             return;
         }
 
         // Validate file size (2MB)
         if (file.size > 2 * 1024 * 1024) {
-            alert("File size should be less than 2MB");
+            toast.error("File size should be less than 2MB");
             return;
         }
 

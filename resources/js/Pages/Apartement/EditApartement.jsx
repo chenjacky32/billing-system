@@ -135,15 +135,13 @@ export default function EditApartement({ auth, apartementData }) {
                                                 setData("logo_company", file)
                                             }
                                             errors={errors.logo_company}
-                                            currentImage={
-                                                apartementData.logo_company
-                                            }
+                                            currentImage={data.logo_company}
                                         />
                                     </div>
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button
-                                                variant="fill"
+                                                variant="filled"
                                                 onClick={handleSubmit}
                                                 className="bg-green-500"
                                                 loading={processing}

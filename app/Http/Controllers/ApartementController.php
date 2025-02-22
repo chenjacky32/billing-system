@@ -94,21 +94,22 @@ class ApartementController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:100'],
             'total_room' => ['required', 'integer', 'min:10', 'max:99999'],
-            'logo_company' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-
         // handle image upload
         if($request->hasFile('logo_company')) { 
-            // delete old image
+            $request->validate([
+                'logo_company' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                    ]);
             if($apartment->logo_company){
                 Storage::delete('public/'. $apartment->logo_company);
             }
-                // generate format file img 
-                $fileName = 'apartments-logo/' . time() . '.' . $request->file('logo_company')->extension();
-
-                // Save new image
-                $imagePath = $request->file('logo_company')->storeAs('public' , $fileName);
-                $validatedData['logo_company'] = $fileName;
+            
+            // generate format file img 
+            $fileName = 'apartments-logo/' . time() . '.' . $request->file('logo_company')->extension();
+    
+            // Save new image
+            $imagePath = $request->file('logo_company')->storeAs('public' , $fileName);
+            $validatedData['logo_company'] = $fileName;
             } else {
                 if(is_null($request->logo_company)){
                     if ($apartment->logo_company) {
@@ -116,12 +117,12 @@ class ApartementController extends Controller
                     }
                     // Set logo_company to null in the database
                     $validatedData['logo_company'] = null;
-                } else{
-                    // if no new image uploaded use old image
-                    unset($validatedData['logo_company']);
+                    } else{
+                        // if no new image uploaded use old image
+                        unset($validatedData['logo_company']);
+                    }
                 }
-            }
-
+                
         $apartment->update($validatedData);
 
         if ($role === 'SUPER ADMIN') {
