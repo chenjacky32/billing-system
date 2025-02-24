@@ -26,13 +26,14 @@ import InputLabel from "@/Components/InputLabel";
 import BillingRow from "@/Components/BillingRow";
 
 const TABLE_HEAD = [
-    "Nama Owner",
     "Nomor Room",
+    "Nama Owner",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Tanggal Tagihan Dibuat",
     "Tanggal Jatuh Tempo",
     "Status Pembayaran",
+    "Tanggal dibayar",
     "Dibuat Oleh",
     "Edit",
     "Delete",
@@ -305,6 +306,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                     status,
                                                     billing_date,
                                                     due_date,
+                                                    paid_date,
                                                     fine,
                                                 },
                                                 index
@@ -328,11 +330,12 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner.owner_name
+                                                                        owner.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>
                                                         </td>
+
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -340,7 +343,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner.room_no
+                                                                        owner.owner_name
                                                                     }
                                                                 </Typography>
                                                             </div>
@@ -420,6 +423,22 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     {status}
                                                                 </Typography>
                                                             </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="font-normal"
+                                                            >
+                                                                {paid_date ===
+                                                                null
+                                                                    ? "-"
+                                                                    : moment(
+                                                                          paid_date
+                                                                      ).format(
+                                                                          "LL"
+                                                                      )}
+                                                            </Typography>
                                                         </td>
 
                                                         <td className={classes}>
