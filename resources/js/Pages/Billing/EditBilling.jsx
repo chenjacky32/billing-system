@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
+import MonthYearPicker from "@/Components/MonthYearPicker";
 
 export default function Edit({
     auth,
@@ -68,11 +69,20 @@ export default function Edit({
         electric_type: electricTypeSelected,
         room_no: room.value,
         status: billingData.status,
+        period: billingData.period,
         paid_date: billingData.paid_date,
         owner_id: billingData.owner_id,
         fine: billingData.fine,
         due_date: billingData.due_date,
     });
+
+    function formattedDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+    console.log(data.period);
 
     useEffect(() => {
         if (flash?.billing_fee || flash?.meter_reading) {
@@ -300,6 +310,29 @@ export default function Edit({
                             <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col ">
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Periode Bulan
+                                            </Typography>
+                                            <MonthYearPicker
+                                                className="w-full rounded-lg"
+                                                placeholderText={
+                                                    "Pilih Periode Bulan"
+                                                }
+                                                startDate={data.period}
+                                                onChange={(date) =>
+                                                    setData(
+                                                        "period",
+                                                        formattedDate(date)
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
                                             <InputSelect
                                                 value={room}

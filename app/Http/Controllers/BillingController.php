@@ -11,6 +11,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use PgSql\Lob;
 
 class BillingController extends Controller
 {
@@ -113,6 +115,7 @@ class BillingController extends Controller
             'billing_fee' => 'required|integer|min:1|max:999999999999999',
             'owner_id' => 'required|integer',
             'room_no' => 'required|integer|min:1|max:999999999999999',
+            'period' => 'required|date',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
@@ -298,6 +301,7 @@ class BillingController extends Controller
             'owner_id' => 'required|integer',
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'status' => 'required|string|in:Success,Cancel,Pending',
+            'period' => 'required|date',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
