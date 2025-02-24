@@ -10,6 +10,7 @@ import {
     CardBody,
     Input,
 } from "@material-tailwind/react";
+import { set } from "lodash";
 import { useState } from "react";
 
 export default function AddUnitOwner({
@@ -17,25 +18,38 @@ export default function AddUnitOwner({
     apartmenetData,
     apartId,
     apartName,
+    apartmentTower,
 }) {
     const role = auth.user.role;
 
+    const [tower, setTower] = useState(apartmentTower[0]);
     const { data, setData, post, processing, errors } = useForm({
         owner_name: "",
         phone: "",
         email: "",
         identity_no: "",
         room_no: "",
+        tower_id: "",
         apartment_id: role === "SUPER ADMIN" ? "" : apartId,
     });
 
     const [apartment, setApartment] = useState(apartmenetData[0]);
+
+    console.log(data.tower_id);
 
     const handleApartmentChange = (value) => {
         setApartment(value);
         setData((prevValues) => ({
             ...prevValues,
             apartment_id: value.value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            tower_id: value.value,
         }));
     };
 
@@ -50,7 +64,7 @@ export default function AddUnitOwner({
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Add Unit Owner Data
                 </h2>
             }
@@ -74,14 +88,14 @@ export default function AddUnitOwner({
                         </Link>
                         <Link
                             href={route("unitowner.add")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Add Unit Owner
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 title={"New Unit Owner Data"}
                                 description={
@@ -89,7 +103,7 @@ export default function AddUnitOwner({
                                 }
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col">
                                         <CustomInput
@@ -128,7 +142,7 @@ export default function AddUnitOwner({
                                         />
                                     </div>
 
-                                    <div className="flex flex-row justify-start tablet:flex-col mt-8">
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
                                         <div className="flex flex-col w-full mr-4">
                                             {role === "SUPER ADMIN" ? (
                                                 <InputSelect
@@ -147,8 +161,21 @@ export default function AddUnitOwner({
                                                 />
                                             )}
                                             {errors.apartment_id && (
-                                                <p className="text-red-500 text-sm ml-0 mt-3">
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.apartment_id}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                            <InputSelect
+                                                value={tower}
+                                                onChange={handleTowerChange}
+                                                options={apartmentTower}
+                                            />
+                                            {errors.tower_id && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.tower_id}
                                                 </p>
                                             )}
                                         </div>
@@ -183,9 +210,9 @@ export default function AddUnitOwner({
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
-                                                variant="fill"
+                                                variant="filled"
                                                 onClick={handleSubmit}
                                                 className="bg-green-500"
                                                 loading={processing}

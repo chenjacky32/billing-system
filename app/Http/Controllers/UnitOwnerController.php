@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Apartment;
 use App\Models\ApartmentOwner;
+use App\Models\ApartmentTower;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class UnitOwnerController extends Controller
         $user = Auth::user();
         $role = $user->role;
 
-        $query = ApartmentOwner::with(['apartment', 'createdBy'])
+        $query = ApartmentOwner::with(['apartment', 'createdBy','tower'])   
             ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                 return $query->where('apartment_id', $user->apartment_id);
             })
@@ -34,6 +35,7 @@ class UnitOwnerController extends Controller
     public function add()
     {
         $user = Auth::user();
+        $role = $user->role;
         $apartId = $user->apartment_id;
         $apar = Apartment::find($apartId);
 
@@ -45,16 +47,27 @@ class UnitOwnerController extends Controller
             $apartName = 'Apartment not found';
         }
 
+        $apartmentTower = ApartmentTower::Query();
+        if($role !== 'SUPER ADMIN'){
+            $apartmentTower->where('apartment_id', $apartId);
+        }
 
         $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
             return ['label' => $apartmentName, 'value' => $apartementId];
         })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
 
+        $apartmentTower = $apartmentTower->get()->map(function ($apartmentTower) {
+            return [
+                'label' => $apartmentTower->tower_name,
+                'value' => $apartmentTower->id
+            ];
+        })->prepend(['label' => 'Pilih Tower', 'value' => ''])->values()->toArray();
 
         return Inertia::render("Unit Owner/AddUnitOwner", [
             'apartmenetData' => $apartment,
             'apartId' => $apartId,
             'apartName' => $apartName,
+            'apartmentTower' => $apartmentTower
         ]);
     }
 
@@ -70,6 +83,7 @@ class UnitOwnerController extends Controller
             'identity_no' => 'required|integer|min:1', // Adjust the max value as per your requirement
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'apartment_id' => 'required|integer|exists:apartments,id',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
         ]);
 
         // Add user_id to the validated data from the authenticated user
@@ -83,6 +97,7 @@ class UnitOwnerController extends Controller
 
     public function edit(ApartmentOwner $apartmentOwner, Request $request)
     {
+
         $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
             return ['label' => $apartmentName, 'value' => $apartementId];
         })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
@@ -96,6 +111,18 @@ class UnitOwnerController extends Controller
 
         $apartId = $user->apartment_id;
         $apar = Apartment::find($apartId);
+
+        $apartmentTower = ApartmentTower::Query();
+        if($role !== 'SUPER ADMIN'){
+            $apartmentTower->where('apartment_id', $apartId);
+        }
+
+        $apartmentTower = $apartmentTower->get()->map(function ($apartmentTower) {
+            return [
+                'label' => $apartmentTower->tower_name,
+                'value' => $apartmentTower->id
+            ];
+        })->prepend(['label' => 'Pilih Tower', 'value' => ''])->values()->toArray();
 
         // Check if apartment is found
         if ($apar) {
@@ -111,6 +138,7 @@ class UnitOwnerController extends Controller
                 'apartmenetData' => $apartment,
                 'apartId' => $apartId,
                 'apartName' => $apartName,
+                'apartmentTower' => $apartmentTower
             ]);
         } else {
             if ($userApartmentId == $unitOwnerApartmentData) {
@@ -119,6 +147,7 @@ class UnitOwnerController extends Controller
                     'apartmenetData' => $apartment,
                     'apartId' => $apartId,
                     'apartName' => $apartName,
+                    'apartmentTower' => $apartmentTower
                 ]);
             } else {
                 return redirect('/unauthorized');
@@ -139,6 +168,7 @@ class UnitOwnerController extends Controller
             'identity_no' => 'required|integer|min:1', // Adjust the max value as per your requirement
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'apartment_id' => 'required|integer|exists:apartments,id',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
         ]);
 
         $apartmentOwner->update($validatedData);

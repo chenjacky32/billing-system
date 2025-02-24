@@ -22,6 +22,7 @@ const TABLE_HEAD = [
     "Nama Owner",
     "Nomor HP",
     "Apartemen",
+    "Tower",
     "No Apartemen",
     "Dibuat Pada Tanggal",
     "Dibuat Oleh",
@@ -137,6 +138,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                     apartment,
                                                     room_no,
                                                     created_at,
+                                                    tower,
                                                     id,
                                                     created_by,
                                                 },
@@ -197,6 +199,19 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     {
                                                                         apartment.name
                                                                     }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {tower.tower_name
+                                                                        ? tower.tower_name
+                                                                        : "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

@@ -18,6 +18,7 @@ export default function EditUnitOwner({
     unitOwnerData,
     apartId,
     apartName,
+    apartmentTower,
 }) {
     const role = auth.user.role;
 
@@ -27,6 +28,7 @@ export default function EditUnitOwner({
         email: unitOwnerData.email,
         identity_no: unitOwnerData.identity_no,
         room_no: unitOwnerData.room_no,
+        tower_id: unitOwnerData.tower_id,
         apartment_id:
             role === "SUPER ADMIN" ? unitOwnerData.apartment_id : apartId,
     });
@@ -46,12 +48,23 @@ export default function EditUnitOwner({
 
     // Set the initial state
     const [apartment, setApartment] = useState(initialApartment);
+    const [tower, setTower] = useState(
+        apartmentTower.find((tower) => tower.value === unitOwnerData.tower_id)
+    );
 
     const handleApartmentChange = (value) => {
         setApartment(value);
         setData((prevValues) => ({
             ...prevValues,
             apartment_id: value.value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            tower_id: value.value,
         }));
     };
 
@@ -167,6 +180,19 @@ export default function EditUnitOwner({
                                             {errors.apartment_id && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.apartment_id}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                            <InputSelect
+                                                value={tower}
+                                                onChange={handleTowerChange}
+                                                options={apartmentTower}
+                                            />
+                                            {errors.tower_id && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.tower_id}
                                                 </p>
                                             )}
                                         </div>

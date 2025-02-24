@@ -63,13 +63,17 @@ class BillingController extends Controller
             ->values()
             ->toArray();
 
-        $room_number = $ownerQuery->pluck('room_no', 'id')
-            ->map(function ($roomNumber, $ownerId) {
-                return ['label' => $roomNumber, 'value' => $ownerId];
-            })
-            ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
-            ->values()
-            ->toArray();
+        $room_number = $ownerQuery->get()->map( function ($owner) {
+            return [
+                'label' => $owner->room_no,
+                'value' => $owner->id,
+                'tower_name' => $owner->tower->tower_name,
+            ];
+        })->prepend([
+            'label' => 'Pilih Room Number',
+            'value' => '',
+            'tower_name' => '',
+        ])->values()->toArray();
 
             $category_billing_data = $categoryBillingQuery
             ->get(['id','billing_type','category_name','unit_price','minimum_charge'])
@@ -94,7 +98,7 @@ class BillingController extends Controller
         return Inertia::render("Billing/AddBilling", [
             'ownerData' => $owner_data,
             'billingCategory'=>$category_billing_data,
-            'roomNumber' => $room_number
+            'roomNumber' => $room_number,
         ]);
     }
 
@@ -218,13 +222,25 @@ class BillingController extends Controller
             ->values()
             ->toArray();
         
-        $room_number = $ownerQuery->pluck('room_no', 'id')
-            ->map(function ($roomNumber, $ownerId) {
-                return ['label' => $roomNumber, 'value' => $ownerId];
-            })
-            ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
-            ->values()
-            ->toArray();
+        // $room_number = $ownerQuery->pluck('room_no', 'id')
+        //     ->map(function ($roomNumber, $ownerId) {
+        //         return ['label' => $roomNumber, 'value' => $ownerId];
+        //     })
+        //     ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
+        //     ->values()
+        //     ->toArray();
+
+            $room_number = $ownerQuery->get()->map( function ($owner) {
+                return [
+                    'label' => $owner->room_no,
+                    'value' => $owner->id,
+                    'tower_name' => $owner->tower->tower_name,
+                ];
+            })->prepend([
+                'label' => 'Pilih Room Number',
+                'value' => '',
+                'tower_name' => '',
+            ])->values()->toArray();
 
             $category_billing_data = $categoryBillingQuery
             ->get(['id','billing_type','category_name','unit_price','minimum_charge'])
