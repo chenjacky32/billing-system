@@ -227,6 +227,8 @@ export default function AddBiling({
         }
     }
 
+    const isAirOrListrik = billingType === "Air" ? "Harga / m2" : "Harga / kWh";
+
     return (
         <AuthenticatedLayout
             auth={auth}
@@ -282,7 +284,7 @@ export default function AddBiling({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Periode Bulan
+                                                Sub Periode Tagihan
                                             </Typography>
                                             <CustomDatePicker
                                                 value={
@@ -299,6 +301,13 @@ export default function AddBiling({
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
                                         <div className="flex flex-col w-full mr-4">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Nomor Room
+                                            </Typography>
+
                                             <InputSelect
                                                 value={room}
                                                 onChange={handleRoomChange}
@@ -311,6 +320,12 @@ export default function AddBiling({
                                             )}
                                         </div>
                                         <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tipe Billing
+                                            </Typography>
                                             <Select
                                                 label="Tipe Billing"
                                                 id="billing_type"
@@ -339,6 +354,13 @@ export default function AddBiling({
                                             <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                                 <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
                                                     <div className="w-full mr-4">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Kategori / Jenis
+                                                            Tagihan
+                                                        </Typography>
                                                         <Select
                                                             label="Kategori / Jenis Tagihan"
                                                             id={
@@ -379,6 +401,13 @@ export default function AddBiling({
                                                     </div>
 
                                                     <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Meteran Awal
+                                                        </Typography>
+
                                                         <CustomInput
                                                             label="Meteran Awal"
                                                             id="start_meter"
@@ -409,6 +438,12 @@ export default function AddBiling({
                                                         />
                                                     </div>
                                                     <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Meteran Akhir
+                                                        </Typography>
                                                         <CustomInput
                                                             label="Meteran Akhir"
                                                             id="end_meter"
@@ -439,6 +474,12 @@ export default function AddBiling({
                                                         />
                                                     </div>
                                                     <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Total Meteran
+                                                        </Typography>
                                                         <CustomInput
                                                             disabled={true}
                                                             label="Total Meteran"
@@ -462,13 +503,14 @@ export default function AddBiling({
                                             </div>
                                             <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
                                                 <div className="w-full mr-4 tablet:mt-8">
+                                                    <Typography
+                                                        variant="paragraph"
+                                                        className="mb-2 text-base font-semibold "
+                                                    >
+                                                        {isAirOrListrik}
+                                                    </Typography>
                                                     <CustomInput
-                                                        label={
-                                                            billingType ===
-                                                            "Air"
-                                                                ? "Harga / m2"
-                                                                : "Harga / kWh"
-                                                        }
+                                                        label={isAirOrListrik}
                                                         id="unit_price"
                                                         value={
                                                             data.unit_price
@@ -487,6 +529,12 @@ export default function AddBiling({
                                                     />
                                                 </div>
                                                 <div className="w-full mr-4 tablet:mt-8">
+                                                    <Typography
+                                                        variant="paragraph"
+                                                        className="mb-2 text-base font-semibold "
+                                                    >
+                                                        Minimum Charge
+                                                    </Typography>
                                                     <CustomInput
                                                         label="Minimum Charge"
                                                         id="minimum_charge"
@@ -520,8 +568,15 @@ export default function AddBiling({
                                     >
                                         {billingType === "Maintenance" && (
                                             <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8">
+                                                <Typography
+                                                    variant="paragraph"
+                                                    className="mb-2 text-base font-semibold "
+                                                >
+                                                    Tipe Unit
+                                                </Typography>
+
                                                 <Select
-                                                    label="Jenis Maintenance"
+                                                    label="Tipe Unit"
                                                     id="maintenance_type"
                                                     value={
                                                         maintenanceTypeSelected
@@ -557,6 +612,13 @@ export default function AddBiling({
                                         )}
                                         {billingType === "Parkir" && (
                                             <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8">
+                                                <Typography
+                                                    variant="paragraph"
+                                                    className="mb-2 text-base font-semibold "
+                                                >
+                                                    Jenis Kendaraan
+                                                </Typography>
+
                                                 <Select
                                                     label="Jenis Kendaraan"
                                                     id="vehicle_type"
@@ -597,15 +659,12 @@ export default function AddBiling({
                                                     : "mt-0"
                                             } w-full mr-4`}
                                         >
-                                            {billingType === "Air" ||
-                                            billingType === "Listrik" ? (
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Total Tagihan
-                                                </Typography>
-                                            ) : null}
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Biaya Tagihan
+                                            </Typography>
                                             <CustomInput
                                                 label="Biaya Tagihan"
                                                 id="billing_fee"
@@ -631,10 +690,10 @@ export default function AddBiling({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Biaya Denda
+                                                Denda Tagihan Periode Sebelumnya
                                             </Typography>
                                             <CustomInput
-                                                label="Biaya Denda Jika Lewat Batas Tagihan"
+                                                label="Denda Tagihan Periode Sebelumnya"
                                                 id="fine"
                                                 value={
                                                     data.fine
@@ -689,36 +748,49 @@ export default function AddBiling({
                                             </Button>
                                         </div>
                                     </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        <CustomInput
-                                            label="Tanggal Tagihan Dibuat"
-                                            id="billing_date"
-                                            value={data.billing_date}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "billing_date",
-                                                    e.target.value
-                                                )
-                                            }
-                                            errors={errors.billing_date}
-                                            className="tablet:mt-8"
-                                            type="date"
-                                        />
-
-                                        <CustomInput
-                                            label="Tanggal Batas Pembayaran"
-                                            id="due_date"
-                                            value={data.due_date}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "due_date",
-                                                    e.target.value
-                                                )
-                                            }
-                                            errors={errors.due_date}
-                                            className="tablet:mt-8"
-                                            type="date"
-                                        />
+                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tanggal Tagihan
+                                            </Typography>
+                                            <CustomInput
+                                                label="Tanggal Tagihan Dibuat"
+                                                id="billing_date"
+                                                value={data.billing_date}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "billing_date",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                errors={errors.billing_date}
+                                                type="date"
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tanggal Batas Pembayaran
+                                            </Typography>
+                                            <CustomInput
+                                                label="Tanggal Batas Pembayaran"
+                                                id="due_date"
+                                                value={data.due_date}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "due_date",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                errors={errors.due_date}
+                                                type="date"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
