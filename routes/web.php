@@ -4,7 +4,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartementController;
 use App\Http\Controllers\ApartementTower;
 use App\Http\Controllers\BillingCategoryController;
+use App\Http\Controllers\BillingFineRules;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\BillingFineRulesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -102,6 +104,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing-category/delete', [BillingCategoryController::class, 'destroy'])->name('billingCategory.delete');
     Route::post('/billing-category/{id}/update', [BillingCategoryController::class, 'update'])->name('billingCategory.update');
 
+    //!Billing Fine Rules
+    Route::get('/billing-fine-rules', [BillingFineRulesController::class, 'index'])->name('billingFineRules.index');
+    Route::get('/billing-fine-rules/add', [BillingFineRulesController::class, 'add'])->name('billingFineRules.add');
+    Route::get('/billing-fine-rules/{id}/edit', [BillingFineRulesController::class, 'edit'])->name('billingFineRules.edit');
+    Route::post('/billing-fine-rules/store', [BillingFineRulesController::class, 'store'])->name('billingFineRules.store');
+    Route::post('/billing-fine-rules/delete', [BillingFineRulesController::class, 'destroy'])->name('billingFineRules.delete');
+    Route::post('/billing-fine-rules/{id}/update', [BillingFineRulesController::class, 'update'])->name('billingFineRules.update');
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');

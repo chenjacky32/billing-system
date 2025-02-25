@@ -141,6 +141,17 @@ export default function Sidebar({ user, classname, auth }) {
                                     Billing Category
                                 </ListItem>
                             </Link>
+                            <Link href={route("billingFineRules.index")}>
+                                <ListItem className="hover:text-primary">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Billing Fine Rules
+                                </ListItem>
+                            </Link>
                         </List>
                     </AccordionBody>
                 </Accordion>
