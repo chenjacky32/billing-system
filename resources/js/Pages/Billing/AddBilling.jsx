@@ -15,7 +15,8 @@ import {
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { TypeBilling } from "@/utils/constant";
-import MonthYearPicker from "@/Components/MonthYearPicker";
+import CustomDatePicker from "@/Components/CustomDatePicker";
+import dayjs from "dayjs";
 
 export default function AddBiling({
     auth,
@@ -50,7 +51,7 @@ export default function AddBiling({
         start_meter: "",
         end_meter: "",
         unit_price: "",
-        period: "" | null,
+        period: null,
         water_type: waterTypeSelected,
         electric_type: electricTypeSelected,
         maintenance_type: maintenanceTypeSelected,
@@ -58,6 +59,7 @@ export default function AddBiling({
     });
 
     function formattedDate(date) {
+        if (!date) return null;
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
@@ -73,6 +75,14 @@ export default function AddBiling({
             }));
         }
     }, [flash?.billing_fee, flash?.meter_reading]);
+
+    const handleChangePeriod = (value) => {
+        const firstDate = value.date(1);
+        setData((prevValues) => ({
+            ...prevValues,
+            period: formattedDate(firstDate.$d),
+        }));
+    };
 
     //handle for filter option select category
     const getOptionsForType = (type) => {
@@ -267,25 +277,23 @@ export default function AddBiling({
                             <CardBody className="h-full px-0">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col ">
-                                        <div className="mr-4 w-fit tablet:mt-8">
+                                        <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
                                                 Periode Bulan
                                             </Typography>
-                                            <MonthYearPicker
-                                                className="w-full rounded-lg"
+                                            <CustomDatePicker
+                                                value={
+                                                    data.period
+                                                        ? dayjs(data.period)
+                                                        : null
+                                                }
                                                 placeholderText={
                                                     "Pilih Periode Bulan"
                                                 }
-                                                startDate={data.period}
-                                                onChange={(date) =>
-                                                    setData(
-                                                        "period",
-                                                        formattedDate(date)
-                                                    )
-                                                }
+                                                onChange={handleChangePeriod}
                                             />
                                         </div>
                                     </div>

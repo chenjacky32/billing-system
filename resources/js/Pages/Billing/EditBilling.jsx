@@ -15,7 +15,8 @@ import {
     Typography,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
-import MonthYearPicker from "@/Components/MonthYearPicker";
+import CustomDatePicker from "@/Components/CustomDatePicker";
+import dayjs from "dayjs";
 
 export default function Edit({
     auth,
@@ -77,12 +78,12 @@ export default function Edit({
     });
 
     function formattedDate(date) {
+        if (!date) return null;
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
     }
-    console.log(data.period);
 
     useEffect(() => {
         if (flash?.billing_fee || flash?.meter_reading) {
@@ -93,6 +94,14 @@ export default function Edit({
             }));
         }
     }, [flash?.billing_fee, flash?.meter_reading]);
+
+    const handleChangePeriod = (value) => {
+        const firstDate = value.date(1);
+        setData((prevValues) => ({
+            ...prevValues,
+            period: formattedDate(firstDate.$d),
+        }));
+    };
 
     const getOptionsForType = (type) => {
         const filteredCategory = billingCategory.find(
@@ -310,25 +319,23 @@ export default function Edit({
                             <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-row justify-start tablet:flex-col ">
-                                        <div className="mr-4 w-fit tablet:mt-8">
+                                        <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
                                                 Periode Bulan
                                             </Typography>
-                                            <MonthYearPicker
-                                                className="w-full rounded-lg"
+                                            <CustomDatePicker
+                                                value={
+                                                    data.period
+                                                        ? dayjs(data.period)
+                                                        : null
+                                                }
                                                 placeholderText={
                                                     "Pilih Periode Bulan"
                                                 }
-                                                startDate={data.period}
-                                                onChange={(date) =>
-                                                    setData(
-                                                        "period",
-                                                        formattedDate(date)
-                                                    )
-                                                }
+                                                onChange={handleChangePeriod}
                                             />
                                         </div>
                                     </div>
