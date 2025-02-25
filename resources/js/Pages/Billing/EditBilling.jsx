@@ -24,6 +24,7 @@ export default function Edit({
     billingData,
     billingCategory,
     roomNumber,
+    towerData,
 }) {
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
@@ -35,6 +36,9 @@ export default function Edit({
     );
 
     const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
+    const [tower, setTower] = useState(
+        towerData.find((items) => items.value === billingData.tower_id)
+    );
     const [owner, setOwner] = useState(
         ownerData.find((item) => item.value === billingData.owner_id)
     );
@@ -71,6 +75,7 @@ export default function Edit({
         room_no: room.value,
         status: billingData.status,
         period: billingData.period,
+        tower_id: billingData.tower_id,
         paid_date: billingData.paid_date,
         owner_id: billingData.owner_id,
         fine: billingData.fine,
@@ -198,6 +203,14 @@ export default function Edit({
             ...prevValue,
             room_no: value.value,
             owner_id: value.value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValue) => ({
+            ...prevValue,
+            tower_id: value.value,
         }));
     };
 
@@ -339,6 +352,27 @@ export default function Edit({
                                                 }
                                                 onChange={handleChangePeriod}
                                             />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
+                                        <div className="flex flex-col w-full mr-4 ">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Nama Tower
+                                            </Typography>
+
+                                            <InputSelect
+                                                value={tower}
+                                                onChange={handleTowerChange}
+                                                options={towerData}
+                                            />
+                                            {errors.tower_id && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.tower_id}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">

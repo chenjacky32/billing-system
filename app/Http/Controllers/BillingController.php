@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\BillingCreated;
 use App\Events\BillingPaid;
 use App\Models\ApartmentOwner;
+use App\Models\ApartmentTower;
 use App\Models\Billing;
 use App\Models\BillingsCategory;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -12,7 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use PgSql\Lob;
+
 
 class BillingController extends Controller
 {
@@ -22,7 +23,7 @@ class BillingController extends Controller
         $role = $user->role;
         return Inertia::render('Billing/Billing', [
             'filters' => $request->only('search', 'status'),  // Include 'status' in the filters
-            'data' => Billing::with(['owner', 'createdBy'])
+            'data' => Billing::with(['owner', 'createdBy','tower'])
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                     return $query->where('apartment_id', $user->apartment_id);
                 })
@@ -51,10 +52,12 @@ class BillingController extends Controller
 
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
+        $towerQuery = ApartmentTower::query();
         
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartmentId);
             $categoryBillingQuery->where('apartment_id', $apartmentId);
+            $towerQuery->where('apartment_id', $apartmentId);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -69,15 +72,13 @@ class BillingController extends Controller
             return [
                 'label' => $owner->room_no,
                 'value' => $owner->id,
-                'tower_name' => $owner->tower->tower_name,
             ];
         })->prepend([
             'label' => 'Pilih Room Number',
             'value' => '',
-            'tower_name' => '',
         ])->values()->toArray();
 
-            $category_billing_data = $categoryBillingQuery
+        $category_billing_data = $categoryBillingQuery
             ->get(['id','billing_type','category_name','unit_price','minimum_charge'])
             ->groupBy('billing_type')
             ->map(function ($categories, $billingType) {
@@ -89,18 +90,29 @@ class BillingController extends Controller
                             'value' => $category->id,
                             'price' => $category->unit_price,
                             'minimum_charge' => $category->minimum_charge
-                        ];
-                    })->values(),
-                ];
-            })
-            ->values()
-            ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
-            ->toArray();
+                            ];
+                })->values(),
+            ];
+        })
+        ->values()
+        ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
+        ->toArray();
+
+       $tower_data = $towerQuery->get()->map( function ($tower) {
+        return [
+            'label' => $tower->tower_name,
+            'value' => $tower->id
+        ];
+    })->prepend([
+        'label' => 'Pilih Tower',
+        'value' => '',
+    ])->values()->toArray();
 
         return Inertia::render("Billing/AddBilling", [
             'ownerData' => $owner_data,
             'billingCategory'=>$category_billing_data,
             'roomNumber' => $room_number,
+            'towerData' => $tower_data
         ]);
     }
 
@@ -116,6 +128,7 @@ class BillingController extends Controller
             'owner_id' => 'required|integer',
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'period' => 'required|date',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
@@ -211,10 +224,12 @@ class BillingController extends Controller
 
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
+        $towerQuery = ApartmentTower::query();
 
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartment_id);
             $categoryBillingQuery->where('apartment_id', $apartment_id);
+            $towerQuery->where('apartment_id', $apartment_id);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -224,25 +239,15 @@ class BillingController extends Controller
             ->prepend(['label' => 'Pilih Owner', 'value' => ''])
             ->values()
             ->toArray();
-        
-        // $room_number = $ownerQuery->pluck('room_no', 'id')
-        //     ->map(function ($roomNumber, $ownerId) {
-        //         return ['label' => $roomNumber, 'value' => $ownerId];
-        //     })
-        //     ->prepend(['label' => 'Pilih Room Number', 'value' => ''])
-        //     ->values()
-        //     ->toArray();
 
             $room_number = $ownerQuery->get()->map( function ($owner) {
                 return [
                     'label' => $owner->room_no,
                     'value' => $owner->id,
-                    'tower_name' => $owner->tower->tower_name,
                 ];
             })->prepend([
                 'label' => 'Pilih Room Number',
                 'value' => '',
-                'tower_name' => '',
             ])->values()->toArray();
 
             $category_billing_data = $categoryBillingQuery
@@ -265,7 +270,15 @@ class BillingController extends Controller
             ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
             ->toArray();
 
-        
+            $tower_data = $towerQuery->get()->map( function ($tower) {
+                return [
+                    'label' => $tower->tower_name,
+                    'value' => $tower->id
+                ];
+            })->prepend([
+                'label' => 'Pilih Tower',
+                'value' => '',
+            ])->values()->toArray();
 
         if ($role === 'SUPER ADMIN') {
             return Inertia::render('Billing/EditBilling', [
@@ -273,6 +286,7 @@ class BillingController extends Controller
                 'ownerData' => $owner_data,
                 'billingCategory' => $category_billing_data,
                 'roomNumber' => $room_number,
+                'towerData' => $tower_data
             ]);
         } else {
             if ($apartment_id == $billingApartmentId) {
@@ -281,6 +295,7 @@ class BillingController extends Controller
                     'ownerData' => $owner_data,
                     'billingCategory' => $category_billing_data,
                     'roomNumber' => $room_number,
+                    'towerData' => $tower_data
                 ]);
             } else {
                 return redirect('/unauthorized');
@@ -302,6 +317,7 @@ class BillingController extends Controller
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'status' => 'required|string|in:Success,Cancel,Pending',
             'period' => 'required|date',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik

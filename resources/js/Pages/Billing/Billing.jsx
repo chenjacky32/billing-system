@@ -28,8 +28,10 @@ import BillingRow from "@/Components/BillingRow";
 const TABLE_HEAD = [
     "Nomor Room",
     "Nama Owner",
+    "Nama Tower",
     "Jenis Tagihan",
     "Biaya Tagihan",
+    "Periode",
     "Tanggal Tagihan Dibuat",
     "Tanggal Jatuh Tempo",
     "Status Pembayaran",
@@ -43,6 +45,8 @@ export default function Billing({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+
+    console.log(data.data);
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -302,6 +306,8 @@ export default function Billing({ auth, errors, data, filters }) {
                                                     owner,
                                                     billing_type,
                                                     billing_fee,
+                                                    period,
+                                                    tower,
                                                     created_by,
                                                     status,
                                                     billing_date,
@@ -355,6 +361,19 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
+                                                                    {tower
+                                                                        ? tower.tower_name
+                                                                        : "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
                                                                     {
                                                                         billing_type
                                                                     }
@@ -386,6 +405,23 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     ).format(
                                                                         billing_fee
                                                                     )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {period
+                                                                        ? moment(
+                                                                              period
+                                                                          ).format(
+                                                                              "MMMM, YYYY"
+                                                                          )
+                                                                        : "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

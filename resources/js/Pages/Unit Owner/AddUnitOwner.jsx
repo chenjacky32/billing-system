@@ -10,7 +10,6 @@ import {
     CardBody,
     Input,
 } from "@material-tailwind/react";
-import { set } from "lodash";
 import { useState } from "react";
 
 export default function AddUnitOwner({
@@ -34,8 +33,6 @@ export default function AddUnitOwner({
     });
 
     const [apartment, setApartment] = useState(apartmenetData[0]);
-
-    console.log(data.tower_id);
 
     const handleApartmentChange = (value) => {
         setApartment(value);

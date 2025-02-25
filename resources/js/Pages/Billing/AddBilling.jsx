@@ -23,6 +23,7 @@ export default function AddBiling({
     ownerData,
     billingCategory,
     roomNumber,
+    towerData,
 }) {
     //mapping roomNumber props and change label to string
     const mappedRoomNumber = roomNumber.map((number) => ({
@@ -32,6 +33,7 @@ export default function AddBiling({
 
     // const [owner, setOwner] = useState(ownerData[0]);
     const [room, setRoom] = useState(mappedRoomNumber[0]);
+    const [tower, setTower] = useState(towerData[0]);
     const [billingType, setBillingType] = useState("Air");
     const [waterTypeSelected, setWaterTypeSelected] = useState("");
     const [electricTypeSelected, setElectricTypeSelected] = useState("");
@@ -52,6 +54,7 @@ export default function AddBiling({
         end_meter: "",
         unit_price: "",
         period: null,
+        tower_id: "",
         water_type: waterTypeSelected,
         electric_type: electricTypeSelected,
         maintenance_type: maintenanceTypeSelected,
@@ -168,6 +171,14 @@ export default function AddBiling({
             ...prevValue,
             room_no: value.value,
             owner_id: value.value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValue) => ({
+            ...prevValue,
+            tower_id: value.value,
         }));
     };
 
@@ -297,6 +308,27 @@ export default function AddBiling({
                                                 }
                                                 onChange={handleChangePeriod}
                                             />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
+                                        <div className="flex flex-col w-full mr-4 ">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Nama Tower
+                                            </Typography>
+
+                                            <InputSelect
+                                                value={tower}
+                                                onChange={handleTowerChange}
+                                                options={towerData}
+                                            />
+                                            {errors.tower_id && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.tower_id}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
