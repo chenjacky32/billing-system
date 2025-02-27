@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountActivationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartementController;
 use App\Http\Controllers\ApartementTower;
@@ -111,6 +112,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing-fine-rules/store', [BillingFineRulesController::class, 'store'])->name('billingFineRules.store');
     Route::post('/billing-fine-rules/delete', [BillingFineRulesController::class, 'destroy'])->name('billingFineRules.delete');
     Route::post('/billing-fine-rules/{id}/update', [BillingFineRulesController::class, 'update'])->name('billingFineRules.update');
+
+    // !Account Activation
+    Route::get('/account-pending', [AccountActivationController::class, 'index'])->name('accountActivation.index');
+    Route::get('/account-pending/{id}/edit', [AccountActivationController::class, 'edit'])->name('accountActivation.edit');
+    Route::post('/account-pending/{id}/update', [AccountActivationController::class, 'update'])->name('accountActivation.update');
+
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');

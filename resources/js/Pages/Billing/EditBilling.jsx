@@ -25,6 +25,7 @@ export default function Edit({
     billingCategory,
     roomNumber,
     towerData,
+    residenceData,
 }) {
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
@@ -39,6 +40,11 @@ export default function Edit({
     const [tower, setTower] = useState(
         towerData.find((items) => items.value === billingData.tower_id)
     );
+
+    const [residence, setResidence] = useState(
+        residenceData.find((item) => item.value === billingData.residence_id)
+    );
+
     const [owner, setOwner] = useState(
         ownerData.find((item) => item.value === billingData.owner_id)
     );
@@ -75,6 +81,7 @@ export default function Edit({
         room_no: room.value,
         status: billingData.status,
         period: billingData.period,
+        residence_id: billingData.residence_id,
         tower_id: billingData.tower_id,
         paid_date: billingData.paid_date,
         owner_id: billingData.owner_id,
@@ -211,6 +218,14 @@ export default function Edit({
         setData((prevValue) => ({
             ...prevValue,
             tower_id: value.value,
+        }));
+    };
+
+    const handleResidenceChange = (value) => {
+        setResidence(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            residence_id: value.value,
         }));
     };
 
@@ -371,6 +386,25 @@ export default function Edit({
                                             {errors.tower_id && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.tower_id}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Nama Penghuni
+                                            </Typography>
+
+                                            <InputSelect
+                                                value={residence}
+                                                onChange={handleResidenceChange}
+                                                options={residenceData}
+                                            />
+                                            {errors.residence_id && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.residence_id}
                                                 </p>
                                             )}
                                         </div>

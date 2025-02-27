@@ -25,7 +25,9 @@ const EditBillingFineRules = ({
     const role = auth.user.role;
 
     const { data, setData, post, processing, errors } = useForm({
-        fine_rate_per_day: fineRulesData.fine_rate_per_day,
+        fine_rate_per_day: fineRulesData.fine_rate_per_day
+            ? fineRulesData.fine_rate_per_day
+            : 0,
         billing_type: fineRulesData.billing_type,
         max_fine: fineRulesData.max_fine ? fineRulesData.max_fine : 0,
         percentage:
@@ -100,16 +102,16 @@ const EditBillingFineRules = ({
                             href={route("billingFineRules.add")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add
+                            Edit
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Billing Fine Rules List"}
+                                title={"Ediit Billing Fine Rules"}
                                 description={
-                                    "Tambah Informasi Data Ketentuan Denda yang Baru"
+                                    "Edit Informasi Data Ketentuan Denda"
                                 }
                                 showSearch={false}
                             />

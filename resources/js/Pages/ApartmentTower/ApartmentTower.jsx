@@ -28,7 +28,6 @@ const TABLE_HEAD = [
     "Total Room",
     "Dibuat Oleh",
     "Edit",
-    "Hapus",
 ];
 
 const ApartmentTower = ({ auth, errors, data, filters }) => {
@@ -241,44 +240,6 @@ const ApartmentTower = ({ auth, errors, data, filters }) => {
                                                                     </IconButton>
                                                                 </Link>
                                                             </Tooltip>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "apartementTower.delete",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="post"
-                                                                data={{
-                                                                    id: undefined,
-                                                                }}
-                                                                as="button"
-                                                            >
-                                                                <Tooltip
-                                                                    content="Delete Billing Category"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
-                                                                    }}
-                                                                    className="bg-red-600"
-                                                                >
-                                                                    <IconButton
-                                                                        color="red"
-                                                                        variant="filled"
-                                                                    >
-                                                                        <TrashIcon className="w-4 h-4" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
                                                         </td>
                                                     </tr>
                                                 );

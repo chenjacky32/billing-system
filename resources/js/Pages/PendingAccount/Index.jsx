@@ -7,50 +7,74 @@ import {
     IconButton,
     Tooltip,
     Breadcrumbs,
+    Select,
+    Option,
 } from "@material-tailwind/react";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { router, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
-import moment from "moment";
+import { useState, useEffect } from "react";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InputLabel from "@/Components/InputLabel";
 
 const TABLE_HEAD = [
+    "No",
     "No Identitas",
-    "Nama Owner",
+    "Nama",
     "Nomor HP",
+    "Email",
     "Apartemen",
     "Tower",
-    "No Apartemen",
-    "Dibuat Pada Tanggal",
-    "Dibuat Oleh",
-    "Edit",
+    "status",
+    "Active",
 ];
 
-export default function UnitOwner({ auth, errors, data, filters }) {
+const PendingAccountList = ({ auth, data, filters, errors }) => {
     const { flash } = usePage().props;
+    const [status, setStatus] = useState("");
+    const [search, setSearch] = useState("");
 
-    function handleSearch(event) {
+    const handleInputChange = (value, type) => {
+        if (type === "search") {
+            setSearch(value);
+        } else if (type === "status") {
+            setStatus(value);
+        }
+
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            {
+                search: type === "search" ? value : search,
+                status: type === "status" ? value : status,
+            },
             {
                 preserveState: true,
                 replace: true,
             }
         );
-    }
+    };
 
-    function getPaginationUrl(baseUrl, searchQuery) {
+    function getPaginationUrl(baseUrl, searchQuery, statusQuery) {
+        let url = baseUrl;
+        const params = [];
+
         if (searchQuery) {
-            // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
-        } else {
-            // Don't include the search query
-            return baseUrl;
+            params.push(`search=${encodeURIComponent(searchQuery)}`);
         }
+        if (statusQuery) {
+            params.push(`status=${encodeURIComponent(statusQuery)}`);
+        }
+
+        // Check if baseUrl already has a query parameter
+        if (baseUrl.includes("?")) {
+            url += "&" + params.join("&");
+        } else {
+            url += "?" + params.join("&");
+        }
+
+        return url;
     }
 
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
@@ -61,17 +85,27 @@ export default function UnitOwner({ auth, errors, data, filters }) {
         }
     }, [flash.message]);
 
+    function getStatusColor(status) {
+        switch (status) {
+            case 0:
+                return "bg-orange-500"; // Yellow background for pending status
+            case 1:
+                return "bg-green-500"; // Green background for success status
+            default:
+                return ""; // Default background color
+        }
+    }
     return (
         <AuthenticatedLayout
             auth={auth}
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unit Owner
+                    Account Pending List
                 </h2>
             }
         >
-            <Head title="Unit Owner" />
+            <Head title=" Account Pending List" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -83,26 +117,51 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                             Dashboard
                         </Link>
                         <Link
-                            href={route("unitowner.index")}
+                            href={route("accountActivation.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Unit Owner
+                            Account List
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                handleSearch={handleSearch}
-                                title={"Unit Owner List"}
-                                description={
-                                    "Informasi Data Unit Owner pada Apartemen"
+                                handleSearch={(e) =>
+                                    handleInputChange(e.target.value, "search")
                                 }
-                                buttonLabel={"Tambah Unit Owner"}
-                                icon={buttonIcon}
-                                addRoute={"unitowner.add"}
-                                label="Cari Nama Unit Owner"
+                                title={"Account Pending List"}
+                                description={"Informasi Data Akun Pending List"}
+                                showAddButton={false}
+                                label="Cari Account Pending List"
+                                hasFilter={true}
                             />
+                            <div className="mt-5">
+                                <div className="flex flex-wrap ">
+                                    <div className="w-[21rem] mr-4 tablet:w-full">
+                                        <InputLabel>
+                                            Status Aktivasi Akun
+                                        </InputLabel>
+                                        <Select
+                                            id="status"
+                                            color="blue"
+                                            value={status}
+                                            onChange={(value) =>
+                                                handleInputChange(
+                                                    value,
+                                                    "status"
+                                                )
+                                            }
+                                        >
+                                            <Option value="">
+                                                Status Aktivasi Akun
+                                            </Option>
+                                            <Option value="0">Inactive</Option>
+                                            <Option value="1">Active</Option>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
                             <CardBody className="px-0 overflow-scroll">
                                 <table
                                     className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
@@ -132,21 +191,17 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                         {data?.data?.map(
                                             (
                                                 {
-                                                    identity_no,
-                                                    owner_name,
-                                                    phone,
-                                                    apartment,
-                                                    room_no,
-                                                    created_at,
-                                                    tower,
                                                     id,
-                                                    created_by,
+                                                    userId,
+                                                    user,
+                                                    apartmentTower,
+                                                    active,
                                                 },
-                                                index
+                                                index,
+                                                array
                                             ) => {
                                                 const isLast =
-                                                    index ===
-                                                    data.data.length - 1;
+                                                    index === array.length - 1;
                                                 const classes = isLast
                                                     ? "pl-4"
                                                     : "pl-4 border-b border-blue-gray-150";
@@ -162,9 +217,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {
-                                                                        identity_no
-                                                                    }
+                                                                    {index + 1}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -175,17 +228,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {owner_name}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {phone}
+                                                                    {userId}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -197,7 +240,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        apartment.name
+                                                                        user.fullname
                                                                     }
                                                                 </Typography>
                                                             </div>
@@ -209,9 +252,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {tower?.tower_name
-                                                                        ? tower.tower_name
-                                                                        : "-"}
+                                                                    {user.phone}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -222,37 +263,59 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {room_no}
+                                                                    {user.email}
                                                                 </Typography>
                                                             </div>
                                                         </td>
 
                                                         <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {moment(
-                                                                    created_at
-                                                                ).format("LL")}
-                                                            </Typography>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {apartmentTower
+                                                                        ? apartmentTower
+                                                                              .apartment
+                                                                              .name
+                                                                        : "No Apartment"}
+                                                                </Typography>
+                                                            </div>
                                                         </td>
 
                                                         <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {
-                                                                    created_by.name
-                                                                }
-                                                            </Typography>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {apartmentTower
+                                                                        ? apartmentTower.tower_name
+                                                                        : "No Tower"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className={`font-bold capitalize  ${getStatusColor(
+                                                                        active
+                                                                    )} text-white rounded-2xl w-20 flex justify-center`}
+                                                                >
+                                                                    {active ===
+                                                                    1
+                                                                        ? "Active"
+                                                                        : "Inactive"}
+                                                                </Typography>
+                                                            </div>
                                                         </td>
 
                                                         <td className={classes}>
                                                             <Link
                                                                 href={route(
-                                                                    "unitowner.edit",
+                                                                    "accountActivation.edit",
                                                                     {
                                                                         id: id,
                                                                     }
@@ -264,7 +327,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 as="button"
                                                             >
                                                                 <Tooltip
-                                                                    content="Edit Unit Owner"
+                                                                    content="Aktifkan Akun"
                                                                     animate={{
                                                                         mount: {
                                                                             scale: 1,
@@ -279,7 +342,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                     className="bg-green-600"
                                                                 >
                                                                     <IconButton
-                                                                        variant="fill"
+                                                                        variant="filled"
                                                                         color="green"
                                                                     >
                                                                         <PencilIcon className="w-4 h-4" />
@@ -300,7 +363,14 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                 prev_page_url={data.prev_page_url}
                                 next_page_url={data.next_page_url}
                                 search={filters.search}
-                                getPaginationUrl={getPaginationUrl}
+                                status={filters.status}
+                                getPaginationUrl={(baseUrl) =>
+                                    getPaginationUrl(
+                                        baseUrl,
+                                        filters.search,
+                                        filters.status
+                                    )
+                                }
                             />
                         </Card>
                     </div>
@@ -309,4 +379,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
             <ToastContainer />
         </AuthenticatedLayout>
     );
-}
+};
+
+export default PendingAccountList;

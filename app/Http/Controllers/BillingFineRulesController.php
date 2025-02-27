@@ -109,6 +109,12 @@ class BillingFineRulesController extends Controller
         ]);
 
         $validateData['created_by'] = Auth::id();
+
+        
+        if (!isset($validatedData['fine_rate_per_day'])) {
+            $validatedData['fine_rate_per_day'] = 0;
+        }
+
         if (isset($validateData['percentage'])) {
             $validateData['percentage'] = $validateData['percentage'] / 100;
         } else {
@@ -134,6 +140,10 @@ class BillingFineRulesController extends Controller
 
         if (!isset($validatedData['max_fine'])) {
             $validatedData['max_fine'] = 0;
+        }
+
+        if (!isset($validatedData['fine_rate_per_day'])) {
+            $validatedData['fine_rate_per_day'] = 0;
         }
 
         if (isset($validatedData['percentage'])) {

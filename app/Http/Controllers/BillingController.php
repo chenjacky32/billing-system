@@ -8,6 +8,7 @@ use App\Models\ApartmentOwner;
 use App\Models\ApartmentTower;
 use App\Models\Billing;
 use App\Models\BillingsCategory;
+use App\Models\UserApartmentOkgo;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class BillingController extends Controller
         $role = $user->role;
         return Inertia::render('Billing/Billing', [
             'filters' => $request->only('search', 'status'),  // Include 'status' in the filters
-            'data' => Billing::with(['owner', 'createdBy','tower'])
+            'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user'])
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                     return $query->where('apartment_id', $user->apartment_id);
                 })
@@ -53,11 +54,19 @@ class BillingController extends Controller
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
         $towerQuery = ApartmentTower::query();
+        $userApartmentsQuery = UserApartmentOkgo::with(['user']);
+
         
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartmentId);
             $categoryBillingQuery->where('apartment_id', $apartmentId);
             $towerQuery->where('apartment_id', $apartmentId);
+            
+            $apartmentTowerIds = ApartmentTower::where('apartment_id', $user->apartment_id)
+            ->pluck('id')
+            ->toArray();
+
+            $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -108,11 +117,22 @@ class BillingController extends Controller
         'value' => '',
     ])->values()->toArray();
 
+        $userOkgo = $userApartmentsQuery->get()->map(function ($userApartment) {
+            return [
+                'label' => $userApartment->user->fullname,
+                'value' => $userApartment->id
+            ];
+        })->prepend([
+            'label' => 'Pilih Residence',
+            'value' => '',
+        ])->values()->toArray();
+
         return Inertia::render("Billing/AddBilling", [
             'ownerData' => $owner_data,
             'billingCategory'=>$category_billing_data,
             'roomNumber' => $room_number,
-            'towerData' => $tower_data
+            'towerData' => $tower_data,
+            'residenceData'=>$userOkgo,
         ]);
     }
 
@@ -122,13 +142,13 @@ class BillingController extends Controller
         $rules = [
             'billing_date' => 'required|date',
             'due_date' => 'required|date',
-            'fine' => 'required|integer|min:1|max:999999999999999',
+            'fine' => 'required|integer|min:0|max:999999999999999',
             'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
             'billing_fee' => 'required|integer|min:1|max:999999999999999',
             'owner_id' => 'required|integer',
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'period' => 'required|date',
-            'tower_id' => 'required|integer|exists:apartment_tower,id',
+            'residence_id' => 'nullable|integer|min:0|max:999999999999999',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
@@ -204,13 +224,13 @@ class BillingController extends Controller
         $validatedData['apartment_id'] = $apartmentId;
 
         // Store the validated data in the billing table
-        $billing = Billing::create($validatedData);
+        // $billing = Billing::create($validatedData);
 
-        $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
-        $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
-        $pdf->save($pdfPath);
+        // $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
+        // $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
+        // $pdf->save($pdfPath);
         
-        event(new BillingCreated($billing,$pdfPath));
+        // event(new BillingCreated($billing,$pdfPath));
         return redirect('/billing')->with('success', 'New Billing has been created!');
     }
 
@@ -225,11 +245,20 @@ class BillingController extends Controller
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
         $towerQuery = ApartmentTower::query();
+        $userApartmentsQuery = UserApartmentOkgo::with(['user']);
+
 
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartment_id);
             $categoryBillingQuery->where('apartment_id', $apartment_id);
             $towerQuery->where('apartment_id', $apartment_id);
+            
+               
+            $apartmentTowerIds = ApartmentTower::where('apartment_id', $user->apartment_id)
+            ->pluck('id')
+            ->toArray();
+
+            $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -280,13 +309,25 @@ class BillingController extends Controller
                 'value' => '',
             ])->values()->toArray();
 
+            $userOkgo = $userApartmentsQuery->get()->map(function ($userApartment) {
+                return [
+                    'label' => $userApartment->user->fullname,
+                    'value' => $userApartment->id
+                ];
+            })->prepend([
+                'label' => 'Pilih Residence',
+                'value' => '',
+            ])->values()->toArray();
+    
+
         if ($role === 'SUPER ADMIN') {
             return Inertia::render('Billing/EditBilling', [
                 "billingData" => $billing->find($request->id),
                 'ownerData' => $owner_data,
                 'billingCategory' => $category_billing_data,
                 'roomNumber' => $room_number,
-                'towerData' => $tower_data
+                'towerData' => $tower_data,
+                'residenceData'=>$userOkgo,
             ]);
         } else {
             if ($apartment_id == $billingApartmentId) {
@@ -295,7 +336,8 @@ class BillingController extends Controller
                     'ownerData' => $owner_data,
                     'billingCategory' => $category_billing_data,
                     'roomNumber' => $room_number,
-                    'towerData' => $tower_data
+                    'towerData' => $tower_data,
+                    'residenceData'=>$userOkgo,
                 ]);
             } else {
                 return redirect('/unauthorized');
@@ -310,7 +352,7 @@ class BillingController extends Controller
         $rules = [
             'billing_date' => 'required|date',
             'due_date' => 'required|date',
-            'fine' => 'required|integer|min:1|max:999999999999999',
+            'fine' => 'required|integer|min:0|max:999999999999999',
             'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
             'billing_fee' => 'required|integer|min:1|max:999999999999999',
             'owner_id' => 'required|integer',
@@ -318,6 +360,7 @@ class BillingController extends Controller
             'status' => 'required|string|in:Success,Cancel,Pending',
             'period' => 'required|date',
             'tower_id' => 'required|integer|exists:apartment_tower,id',
+            'residence_id' => 'nullable|integer|min:0|max:999999999999999',
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
@@ -411,9 +454,9 @@ class BillingController extends Controller
         // Update the billing record
         $billing->update($validatedData);
 
-        if ($request->input('status') === 'Success') {
-            event(new BillingPaid($billing));
-        }
+        // if ($request->input('status') === 'Success') {
+        //     event(new BillingPaid($billing));
+        // }
 
         return redirect('/billing')->with('success', 'Billing data has been updated!');
     }
@@ -453,7 +496,6 @@ class BillingController extends Controller
         ]);
     }
 
-    //get billing fee category from billing_category
     public function fetchBillingFee($id){
         $billingCategory = BillingsCategory::find($id);
 

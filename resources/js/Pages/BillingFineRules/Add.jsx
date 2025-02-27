@@ -27,7 +27,7 @@ const AddBillingFineRules = ({
     const [billingType, setBillingType] = useState("Air");
 
     const { data, setData, post, processing, errors } = useForm({
-        fine_rate_per_day: "",
+        fine_rate_per_day: 0,
         billing_type: billingType,
         max_fine: 0,
         percentage: 0,

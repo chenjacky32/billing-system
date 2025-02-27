@@ -29,6 +29,7 @@ const TABLE_HEAD = [
     "Nomor Room",
     "Nama Owner",
     "Nama Tower",
+    "Nama Penghuni",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Periode",
@@ -45,8 +46,6 @@ export default function Billing({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
-
-    console.log(data.data);
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -313,6 +312,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                     billing_date,
                                                     due_date,
                                                     paid_date,
+                                                    residence,
                                                     fine,
                                                 },
                                                 index
@@ -364,6 +364,20 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     {tower
                                                                         ? tower.tower_name
                                                                         : "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {residence
+                                                                        ?.user
+                                                                        ?.fullname ??
+                                                                        "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

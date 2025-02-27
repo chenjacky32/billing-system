@@ -63,6 +63,20 @@ return [
             ]) : [],
         ],
 
+      'okgo' => [
+        'driver' => 'mysql',
+        'host' => env('OKGO_DB_HOST'),
+        'port' => env('OKGO_DB_PORT'),
+        'database' => env('OKGO_DB_DATABASE'),
+        'username' => env('OKGO_DB_USERNAME'),
+        'password' => env('OKGO_DB_PASSWORD'),
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix' => '',
+        'strict' => true,
+        'engine' => null,
+    ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

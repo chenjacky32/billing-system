@@ -47,7 +47,6 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
             }
         );
     }
-    console.log(data.data);
 
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
