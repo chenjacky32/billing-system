@@ -25,6 +25,9 @@ export default function AddBiling({
     roomNumber,
     towerData,
     residenceData,
+    WaterPriceData,
+    WaterPriceMinimumCharge,
+    waterPriceId,
 }) {
     //mapping roomNumber props and change label to string
     const mappedRoomNumber = roomNumber.map((number) => ({
@@ -58,11 +61,13 @@ export default function AddBiling({
         unit_price: "",
         period: null,
         tower_id: "",
-        water_type: waterTypeSelected,
+        water_type: "",
         electric_type: electricTypeSelected,
         maintenance_type: maintenanceTypeSelected,
         vehicle_type_parking: vehicleTypeSelected,
     });
+
+    const role = auth.user.role;
 
     function formattedDate(date) {
         if (!date) return null;
@@ -81,6 +86,16 @@ export default function AddBiling({
             }));
         }
     }, [flash?.billing_fee, flash?.meter_reading]);
+
+    useEffect(() => {
+        if (billingType === "Air" && WaterPriceData) {
+            setData((prevValues) => ({
+                ...prevValues,
+                unit_price: WaterPriceData,
+                minimum_charge: WaterPriceMinimumCharge,
+            }));
+        }
+    }, []);
 
     const handleChangePeriod = (value) => {
         const firstDate = value.date(1);
@@ -102,46 +117,80 @@ export default function AddBiling({
     const vehicleOptions = getOptionsForType("Parkir");
     const electricOptions = getOptionsForType("Listrik");
     const waterOptions = getOptionsForType("Air");
-    const OptionsCategory =
-        billingType === "Listrik" ? electricOptions : waterOptions;
 
-    const categoryError =
-        billingType === "Listrik" ? errors.electric_type : errors.water_type;
+    const handleChangeWater = (value) => {
+        setWaterTypeSelected(value);
+        const findBilling = billingCategory.find(
+            (type) => type.billing_type === "Air"
+        );
+        const findCategory = findBilling?.categories.find(
+            (items) => items.value == value
+        );
+        setData((prevValues) => ({
+            ...prevValues,
+            water_type: value,
+            unit_price: findCategory?.price,
+            minimum_charge: findCategory?.minimum_charge,
+        }));
+    };
 
-    const handleChangeWaterOrElectricType = (value) => {
-        if (billingType === "Air") {
-            setWaterTypeSelected(value);
-            const findBilling = billingCategory.find(
-                (type) => type.billing_type === "Air"
-            );
-            const findCategory = findBilling?.categories.find(
-                (items) => items.value == value
-            );
+    // const OptionsCategory =
+    //     billingType === "Listrik" ? electricOptions : waterOptions;
 
-            setData((prevValues) => ({
-                ...prevValues,
-                water_type: value,
-                unit_price: findCategory?.price,
-                minimum_charge: findCategory?.minimum_charge,
-            }));
-        } else if (billingType === "Listrik") {
-            setElectricTypeSelected(value);
-            const findBilling = billingCategory.find(
-                (type) => type.billing_type === "Listrik"
-            );
-            const findCategory = findBilling?.categories.find(
-                (items) => items.value == value
-            );
+    // const categoryError =
+    //     billingType === "Listrik" ? errors.electric_type : errors.water_type;
 
-            setData((prevValues) => ({
-                ...prevValues,
-                electric_type: value,
-                unit_price: findCategory?.price,
-                minimum_charge: findCategory?.minimum_charge,
-            }));
-        } else {
-            return;
-        }
+    // const handleChangeWaterOrElectricType = (value) => {
+    //     if (billingType === "Air") {
+    //         setWaterTypeSelected(value);
+    //         const findBilling = billingCategory.find(
+    //             (type) => type.billing_type === "Air"
+    //         );
+    //         const findCategory = findBilling?.categories.find(
+    //             (items) => items.value == value
+    //         );
+
+    //         setData((prevValues) => ({
+    //             ...prevValues,
+    //             water_type: value,
+    //             unit_price: findCategory?.price,
+    //             minimum_charge: findCategory?.minimum_charge,
+    //         }));
+    //     } else if (billingType === "Listrik") {
+    //         setElectricTypeSelected(value);
+    //         const findBilling = billingCategory.find(
+    //             (type) => type.billing_type === "Listrik"
+    //         );
+    //         const findCategory = findBilling?.categories.find(
+    //             (items) => items.value == value
+    //         );
+
+    //         setData((prevValues) => ({
+    //             ...prevValues,
+    //             electric_type: value,
+    //             unit_price: findCategory?.price,
+    //             minimum_charge: findCategory?.minimum_charge,
+    //         }));
+    //     } else {
+    //         return;
+    //     }
+    // };
+
+    const handleElectricChange = (value) => {
+        setElectricTypeSelected(value);
+        const findBilling = billingCategory.find(
+            (type) => type.billing_type === "Listrik"
+        );
+        const findCategory = findBilling?.categories.find(
+            (items) => items.value == value
+        );
+
+        setData((prevValues) => ({
+            ...prevValues,
+            electric_type: value,
+            unit_price: findCategory?.price,
+            minimum_charge: findCategory?.minimum_charge,
+        }));
     };
 
     const handleChangeMaintenanceType = (value) => {
@@ -195,14 +244,24 @@ export default function AddBiling({
 
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
-        setData((prevValues) => ({
-            ...prevValues,
-            minimum_charge: 0,
-            billing_type: value,
-            meter_reading: null,
-            billing_fee: "",
-            unit_price: "",
-        }));
+        if (value === "Air" && WaterPriceData) {
+            setData((prevValues) => ({
+                ...prevValues,
+                billing_type: value,
+                unit_price: WaterPriceData,
+                minimum_charge: WaterPriceMinimumCharge,
+                water_type: waterPriceId,
+            }));
+        } else {
+            setData((prevValues) => ({
+                ...prevValues,
+                minimum_charge: 0,
+                billing_type: value,
+                meter_reading: null,
+                billing_fee: "",
+                unit_price: "",
+            }));
+        }
     };
 
     // ! Handle submit
@@ -249,7 +308,16 @@ export default function AddBiling({
         }
     }
 
-    const isAirOrListrik = billingType === "Air" ? "Harga / m2" : "Harga / kWh";
+    // const isAirOrListrik = billingType === "Air" ?  : "Harga / kWh";
+    const isAirOrListrik = () => {
+        if (billingType === "Air") {
+            return "Harga / m3";
+        } else if (billingType === "Listrik") {
+            return "Harga / kWh";
+        } else {
+            return "Harga / Unit";
+        }
+    };
 
     return (
         <AuthenticatedLayout
@@ -346,7 +414,7 @@ export default function AddBiling({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Nama Penghuni
+                                                Nama Owner
                                             </Typography>
 
                                             <InputSelect
@@ -410,7 +478,45 @@ export default function AddBiling({
                                             </Select>
                                         </div>
                                     </div>
-                                    {billingType === "Listrik" ||
+                                    {role === "SUPER ADMIN" &&
+                                        billingType === "Air" && (
+                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                                <div className="flex flex-col justify-start w-full tablet:flex-col tablet:mt-8">
+                                                    <Typography
+                                                        variant="paragraph"
+                                                        className="mb-2 text-base font-semibold"
+                                                    >
+                                                        Kategori / Jenis Tagihan
+                                                    </Typography>
+                                                    <Select
+                                                        label="Kategori / Jenis Tagihan"
+                                                        id="water_type" // ID untuk water_type
+                                                        onChange={
+                                                            handleChangeWater
+                                                        }
+                                                    >
+                                                        {waterOptions.map(
+                                                            (items, index) => (
+                                                                <Option
+                                                                    key={index}
+                                                                    value={items.value.toString()}
+                                                                >
+                                                                    {
+                                                                        items.label
+                                                                    }
+                                                                </Option>
+                                                            )
+                                                        )}
+                                                    </Select>
+                                                    {errors.water_type && (
+                                                        <p className="mt-3 ml-0 text-sm text-red-500">
+                                                            {errors.water_type}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    {/* {billingType === "Listrik" ||
                                     billingType === "Air" ? (
                                         <>
                                             <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
@@ -618,7 +724,230 @@ export default function AddBiling({
                                                 </div>
                                             </div>
                                         </>
-                                    ) : null}
+                                    ) : null} */}
+                                    <>
+                                        <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                            <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
+                                                {billingType === "Listrik" && (
+                                                    <div className="w-full mr-4">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Kategori / Jenis
+                                                            Tagihan
+                                                        </Typography>
+                                                        <Select
+                                                            label="Kategori / Jenis Tagihan"
+                                                            value={
+                                                                electricTypeSelected
+                                                            }
+                                                            id="electric_type"
+                                                            onChange={
+                                                                handleElectricChange
+                                                            }
+                                                        >
+                                                            {electricOptions.map(
+                                                                (
+                                                                    items,
+                                                                    index
+                                                                ) => {
+                                                                    return (
+                                                                        <Option
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            value={items.value.toString()}
+                                                                        >
+                                                                            {
+                                                                                items.label
+                                                                            }
+                                                                        </Option>
+                                                                    );
+                                                                }
+                                                            )}
+                                                        </Select>
+                                                        {errors.electric_type && (
+                                                            <p className="mt-3 ml-0 text-sm text-red-500">
+                                                                {
+                                                                    errors.electric_type
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {billingType === "Listrik" ||
+                                                billingType === "Air" ? (
+                                                    <>
+                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                            <Typography
+                                                                variant="paragraph"
+                                                                className="mb-2 text-base font-semibold "
+                                                            >
+                                                                Meteran Awal
+                                                            </Typography>
+
+                                                            <CustomInput
+                                                                label="Meteran Awal"
+                                                                id="start_meter"
+                                                                value={
+                                                                    data.start_meter
+                                                                        ? data.start_meter
+                                                                              .toString()
+                                                                              .replace(
+                                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                                  "."
+                                                                              )
+                                                                        : ""
+                                                                }
+                                                                onChange={(
+                                                                    e
+                                                                ) => {
+                                                                    const unformattedValue =
+                                                                        e.target.value.replace(
+                                                                            /\./g,
+                                                                            ""
+                                                                        );
+                                                                    setData(
+                                                                        "start_meter",
+                                                                        unformattedValue
+                                                                    );
+                                                                }}
+                                                                errors={
+                                                                    errors.start_meter
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                            <Typography
+                                                                variant="paragraph"
+                                                                className="mb-2 text-base font-semibold "
+                                                            >
+                                                                Meteran Akhir
+                                                            </Typography>
+                                                            <CustomInput
+                                                                label="Meteran Akhir"
+                                                                id="end_meter"
+                                                                value={
+                                                                    data.end_meter
+                                                                        ? data.end_meter
+                                                                              .toString()
+                                                                              .replace(
+                                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                                  "."
+                                                                              )
+                                                                        : ""
+                                                                }
+                                                                onChange={(
+                                                                    e
+                                                                ) => {
+                                                                    const unformattedValue =
+                                                                        e.target.value.replace(
+                                                                            /\./g,
+                                                                            ""
+                                                                        );
+                                                                    setData(
+                                                                        "end_meter",
+                                                                        unformattedValue
+                                                                    );
+                                                                }}
+                                                                errors={
+                                                                    errors.end_meter
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                            <Typography
+                                                                variant="paragraph"
+                                                                className="mb-2 text-base font-semibold "
+                                                            >
+                                                                Total Meteran
+                                                            </Typography>
+                                                            <CustomInput
+                                                                disabled={true}
+                                                                label="Total Meteran"
+                                                                id="meter_reading"
+                                                                value={
+                                                                    data.meter_reading
+                                                                        ? data.meter_reading
+                                                                              .toString()
+                                                                              .replace(
+                                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                                  "."
+                                                                              )
+                                                                        : ""
+                                                                }
+                                                                errors={
+                                                                    errors.meter_reading
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                            {billingType === "Air" ||
+                                            billingType === "Listrik" ? (
+                                                <>
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            {isAirOrListrik()}
+                                                        </Typography>
+                                                        <CustomInput
+                                                            label={isAirOrListrik()}
+                                                            id="unit_price"
+                                                            value={
+                                                                data.unit_price
+                                                                    ? data.unit_price
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : ""
+                                                            }
+                                                            disabled={true}
+                                                            errors={
+                                                                errors.unit_price
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Minimum Charge
+                                                        </Typography>
+                                                        <CustomInput
+                                                            label="Minimum Charge"
+                                                            id="minimum_charge"
+                                                            value={
+                                                                data.minimum_charge
+                                                                    ? data.minimum_charge
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : 0
+                                                            }
+                                                            disabled={true}
+                                                            errors={
+                                                                errors.minimum_charge
+                                                            }
+                                                        ></CustomInput>
+                                                    </div>
+                                                </>
+                                            ) : null}
+                                        </div>
+                                    </>
+
                                     <div
                                         className={`flex flex-row justify-start tablet:flex-col 
                                             ${

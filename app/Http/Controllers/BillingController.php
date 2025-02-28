@@ -51,6 +51,21 @@ class BillingController extends Controller
         $role = $user->role;
         $apartmentId = $user->apartment_id;
 
+        // query to get the water price
+        $WaterPrice = BillingsCategory::where('apartment_id', $apartmentId)
+        ->where('billing_type','Air')
+        ->where('category_name','PDAM')
+        ->first();
+
+        if($WaterPrice){
+            $WaterPriceData = $WaterPrice->unit_price;
+            $waterPriceId = $WaterPrice->id;
+            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge;
+        } else{
+            $WaterPriceData = 'Price Water not found';
+        }
+
+
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
         $towerQuery = ApartmentTower::query();
@@ -127,13 +142,29 @@ class BillingController extends Controller
             'value' => '',
         ])->values()->toArray();
 
-        return Inertia::render("Billing/AddBilling", [
-            'ownerData' => $owner_data,
-            'billingCategory'=>$category_billing_data,
-            'roomNumber' => $room_number,
-            'towerData' => $tower_data,
-            'residenceData'=>$userOkgo,
+
+        if($role === "SUPER ADMIN") {
+            return Inertia::render("Billing/AddBilling", [
+                'ownerData' => $owner_data,
+                'billingCategory'=>$category_billing_data,
+                'roomNumber' => $room_number,
+                'towerData' => $tower_data,
+                'residenceData'=>$userOkgo,
+            ]);
+        } else {
+            return Inertia::render("Billing/AddBilling", [
+                'ownerData' => $owner_data,
+                'billingCategory'=>$category_billing_data,
+                'roomNumber' => $room_number,
+                'towerData' => $tower_data,
+                'residenceData'=>$userOkgo,
+                'WaterPriceData'=>$WaterPriceData,
+                'WaterPriceMinimumCharge'=>$WaterPriceMinimumCharge,
+                'waterPriceId' => $waterPriceId
         ]);
+            }
+
+       
     }
 
     public function store(Request $request)
@@ -148,6 +179,7 @@ class BillingController extends Controller
             'owner_id' => 'required|integer',
             'room_no' => 'required|integer|min:1|max:999999999999999',
             'period' => 'required|date',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
             'residence_id' => 'nullable|integer|min:0|max:999999999999999',
         ];
 
@@ -224,7 +256,7 @@ class BillingController extends Controller
         $validatedData['apartment_id'] = $apartmentId;
 
         // Store the validated data in the billing table
-        // $billing = Billing::create($validatedData);
+        $billing = Billing::create($validatedData);
 
         // $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
         // $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
@@ -242,6 +274,20 @@ class BillingController extends Controller
         $billingData = $billing->find($request->id);
         $billingApartmentId = $billingData->apartment_id;
 
+                // query to get the water price
+        $WaterPrice = BillingsCategory::where('apartment_id', $apartment_id)
+        ->where('billing_type','Air')
+        ->where('category_name','PDAM')
+        ->first();
+        
+        if($WaterPrice){
+            $WaterPriceData = $WaterPrice->unit_price;
+            $waterPriceId = $WaterPrice->id;
+            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge;
+        } else{
+            $WaterPriceData = 'Price Water not found';
+        }
+        
         $ownerQuery = ApartmentOwner::query();
         $categoryBillingQuery = BillingsCategory::query();
         $towerQuery = ApartmentTower::query();
@@ -338,6 +384,9 @@ class BillingController extends Controller
                     'roomNumber' => $room_number,
                     'towerData' => $tower_data,
                     'residenceData'=>$userOkgo,
+                    'WaterPriceData'=>$WaterPriceData,
+                    'WaterPriceMinimumCharge'=>$WaterPriceMinimumCharge,
+                    'waterPriceId' => $waterPriceId
                 ]);
             } else {
                 return redirect('/unauthorized');

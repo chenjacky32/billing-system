@@ -26,15 +26,17 @@ import InputLabel from "@/Components/InputLabel";
 import BillingRow from "@/Components/BillingRow";
 
 const TABLE_HEAD = [
-    "Nomor Room",
-    "Nama Owner",
-    "Nama Tower",
-    "Nama Penghuni",
-    "Jenis Tagihan",
-    "Biaya Tagihan",
+    "No Unit",
+    "Nama Pemilik",
+    "Tower",
+    "Tipe Unit",
     "Periode",
+    "Jenis Tagihan",
+    "Denda",
+    "Biaya Tagihan",
     "Tanggal Tagihan Dibuat",
     "Tanggal Jatuh Tempo",
+    "Total Tagihan",
     "Status Pembayaran",
     "Tanggal dibayar",
     "Dibuat Oleh",
@@ -348,9 +350,10 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {
-                                                                        owner.owner_name
-                                                                    }
+                                                                    {residence
+                                                                        ?.user
+                                                                        ?.fullname ??
+                                                                        "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -374,51 +377,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {residence
-                                                                        ?.user
-                                                                        ?.fullname ??
-                                                                        "-"}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        billing_type
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        {/* <BillingRow
-                                                            billing_fee={
-                                                                billing_fee
-                                                            }
-                                                            fine={fine}
-                                                            due_date={due_date}
-                                                            classes={classes}
-                                                        /> */}
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {new Intl.NumberFormat(
-                                                                        "id-ID",
-                                                                        {
-                                                                            style: "currency",
-                                                                            currency:
-                                                                                "IDR",
-                                                                        }
-                                                                    ).format(
-                                                                        billing_fee
-                                                                    )}
+                                                                    -
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -441,6 +400,59 @@ export default function Billing({ auth, errors, data, filters }) {
                                                         </td>
 
                                                         <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        billing_type
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        fine
+                                                                    )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        billing_fee
+                                                                    )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
                                                             <Typography
                                                                 variant="small"
                                                                 className="font-normal"
@@ -451,6 +463,15 @@ export default function Billing({ auth, errors, data, filters }) {
                                                             </Typography>
                                                         </td>
 
+                                                        {/* <BillingRow
+                                                            billing_fee={
+                                                                billing_fee
+                                                            }
+                                                            fine={fine}
+                                                            due_date={due_date}
+                                                            classes={classes}
+                                                        /> */}
+
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
@@ -459,6 +480,25 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                 {moment(
                                                                     due_date
                                                                 ).format("LL")}
+                                                            </Typography>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="font-normal"
+                                                            >
+                                                                {new Intl.NumberFormat(
+                                                                    "id-ID",
+                                                                    {
+                                                                        style: "currency",
+                                                                        currency:
+                                                                            "IDR",
+                                                                    }
+                                                                ).format(
+                                                                    billing_fee +
+                                                                        fine
+                                                                )}
                                                             </Typography>
                                                         </td>
 
