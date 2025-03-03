@@ -58,9 +58,9 @@ class BillingController extends Controller
         ->first();
 
         if($WaterPrice){
-            $WaterPriceData = $WaterPrice->unit_price;
-            $waterPriceId = $WaterPrice->id;
-            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge;
+            $WaterPriceData = $WaterPrice->unit_price ?? null;
+            $waterPriceId = $WaterPrice->id ?? null;
+            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge ?? null;
         } else{
             $WaterPriceData = 'Price Water not found';
         }
@@ -281,9 +281,9 @@ class BillingController extends Controller
         ->first();
         
         if($WaterPrice){
-            $WaterPriceData = $WaterPrice->unit_price;
-            $waterPriceId = $WaterPrice->id;
-            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge;
+            $WaterPriceData = $WaterPrice->unit_price ?? null;
+            $waterPriceId = $WaterPrice->id ?? null;
+            $WaterPriceMinimumCharge = $WaterPrice->minimum_charge ?? null;
         } else{
             $WaterPriceData = 'Price Water not found';
         }

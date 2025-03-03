@@ -1,20 +1,27 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link } from "@inertiajs/react";
 import {
     Card,
     Typography,
     CardBody,
     IconButton,
+    Button,
     Tooltip,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
     Breadcrumbs,
 } from "@material-tailwind/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { router, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { router, usePage, Head, Link, useForm } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
+import ModalCustom from "@/Components/ModalCustom";
+import InputSelect from "@/Components/InputSelect";
+import CustomInput from "@/Components/CustomInput";
 import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
@@ -29,8 +36,102 @@ const TABLE_HEAD = [
     "Edit",
 ];
 
-export default function UnitOwner({ auth, errors, data, filters }) {
+export default function UnitOwner({
+    auth,
+    UnitOwnerData,
+    filters,
+    apartmenetData,
+    apartId,
+    apartName,
+    apartmentTower,
+}) {
+    const role = auth.user.role;
     const { flash } = usePage().props;
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [ownerId, setOwnerId] = useState(null);
+    const [ownerData, setOwnerData] = useState(
+        UnitOwnerData.data.find((item) => item.id === ownerId) || null
+    );
+
+    const { data, setData, post, processing, errors } = useForm({
+        owner_name: ownerData?.owner_name,
+        phone: ownerData?.phone,
+        email: ownerData?.email,
+        identity_no: ownerData?.identity_no,
+        room_no: ownerData?.room_no,
+        tower_id: ownerData?.tower_id,
+        apartment_id:
+            role === "SUPER ADMIN" ? ownerData?.apartment_id : apartId,
+    });
+
+    const initialApartment = apartmenetData.find(
+        (apartment) => apartment.value === ownerData?.apartment_id
+    );
+    const [apartment, setApartment] = useState(initialApartment);
+    const [tower, setTower] = useState(
+        apartmentTower.find(
+            (tower) => tower.value === ownerData?.tower_id || null
+        )
+    );
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setOwnerId(null);
+        setOwnerData(null);
+        setTower(null);
+    };
+
+    const handleEditClick = (id) => {
+        const ownerSelected = UnitOwnerData.data.find((item) => item.id === id);
+        setOwnerId(id);
+        setOwnerData(ownerSelected);
+        setTower(
+            apartmentTower.find((item) => item.value === ownerSelected.tower_id)
+        );
+        if (ownerSelected) {
+            setData({
+                owner_name: ownerSelected.owner_name,
+                phone: ownerSelected.phone,
+                email: ownerSelected.email,
+                identity_no: ownerSelected.identity_no,
+                room_no: ownerSelected.room_no,
+                tower_id: ownerSelected.tower_id,
+                apartment_id:
+                    role === "SUPER ADMIN"
+                        ? ownerSelected.apartment_id
+                        : apartId,
+            });
+        }
+        setIsModalOpen(true);
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValue) => ({
+            ...prevValue,
+            tower_id: value.value,
+        }));
+    };
+
+    const handleApartmentChange = (value) => {
+        setApartment(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            apartment_id: value.value,
+        }));
+    };
+
+    const dataID = ownerData?.id;
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(`/unit-owner/${dataID}/update`, {
+            onSuccess: () => {
+                handleModalClose();
+            },
+        });
+    };
 
     function handleSearch(event) {
         router.get(
@@ -129,7 +230,7 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {data?.data?.map(
+                                        {UnitOwnerData.data.map(
                                             (
                                                 {
                                                     identity_no,
@@ -146,7 +247,8 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                             ) => {
                                                 const isLast =
                                                     index ===
-                                                    data.data.length - 1;
+                                                    UnitOwnerData.data.length -
+                                                        1;
                                                 const classes = isLast
                                                     ? "pl-4"
                                                     : "pl-4 border-b border-blue-gray-150";
@@ -168,7 +270,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -189,7 +290,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -202,7 +302,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -215,7 +314,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -226,7 +324,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
@@ -237,7 +334,6 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                                 ).format("LL")}
                                                             </Typography>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
@@ -250,42 +346,33 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                                         </td>
 
                                                         <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "unitowner.edit",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="get"
-                                                                data={{
-                                                                    id: undefined,
+                                                            <Tooltip
+                                                                content="Edit Unit Owner"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
                                                                 }}
-                                                                as="button"
+                                                                className="bg-green-600"
                                                             >
-                                                                <Tooltip
-                                                                    content="Edit Unit Owner"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
-                                                                    }}
-                                                                    className="bg-green-600"
+                                                                <Button
+                                                                    size="md"
+                                                                    onClick={() =>
+                                                                        handleEditClick(
+                                                                            id
+                                                                        )
+                                                                    }
+                                                                    variant="gradient"
+                                                                    color="green"
                                                                 >
-                                                                    <IconButton
-                                                                        variant="fill"
-                                                                        color="green"
-                                                                    >
-                                                                        <PencilIcon className="w-4 h-4" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
+                                                                    <PencilIcon className="w-4 h-4" />
+                                                                </Button>
+                                                            </Tooltip>
                                                         </td>
                                                     </tr>
                                                 );
@@ -293,6 +380,219 @@ export default function UnitOwner({ auth, errors, data, filters }) {
                                         )}
                                     </tbody>
                                 </table>
+                                {isModalOpen && ownerData && (
+                                    <ModalCustom
+                                        isOpen={isModalOpen}
+                                        onClose={handleModalClose}
+                                    >
+                                        <DialogHeader className="relative block m-0">
+                                            <PageHeader
+                                                title={"Edit Unit Owner Data"}
+                                                description={
+                                                    "Edit Informasi Unit Owner"
+                                                }
+                                                showSearch={false}
+                                            />
+                                            <IconButton
+                                                size="sm"
+                                                variant="text"
+                                                className="!absolute right-3.5 top-3.5"
+                                                onClick={handleModalClose}
+                                            >
+                                                <XMarkIcon className="w-4 h-4 stroke-2" />
+                                            </IconButton>
+                                        </DialogHeader>
+                                        <section className="overflow-scroll tablet:max-h-[50vh]">
+                                            <DialogBody className="h-full pb-6 space-y-4">
+                                                <form onSubmit={handleSubmit}>
+                                                    <div className="flex flex-row justify-start w-full tablet:flex-col">
+                                                        <div className="flex flex-col w-full mr-4">
+                                                            <Typography
+                                                                variant="h3"
+                                                                className="mb-2 text-base font-semibold tablet:mb-0 "
+                                                            >
+                                                                ID:{" "}
+                                                                {ownerData?.id}
+                                                            </Typography>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-row justify-start w-full tablet:flex-col">
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                            {role ===
+                                                            "SUPER ADMIN" ? (
+                                                                <InputSelect
+                                                                    value={
+                                                                        apartment
+                                                                    }
+                                                                    onChange={
+                                                                        handleApartmentChange
+                                                                    }
+                                                                    options={
+                                                                        apartmenetData
+                                                                    }
+                                                                />
+                                                            ) : (
+                                                                <CustomInput
+                                                                    label="Nama Apartemen"
+                                                                    value={
+                                                                        apartName
+                                                                    }
+                                                                    className=""
+                                                                    disabled={
+                                                                        true
+                                                                    }
+                                                                />
+                                                            )}
+                                                            {errors.apartment_id && (
+                                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                                    {
+                                                                        errors.apartment_id
+                                                                    }
+                                                                </p>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                            <InputSelect
+                                                                value={tower}
+                                                                onChange={
+                                                                    handleTowerChange
+                                                                }
+                                                                options={
+                                                                    apartmentTower
+                                                                }
+                                                            />
+                                                            {errors.tower_id && (
+                                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                                    {
+                                                                        errors.tower_id
+                                                                    }
+                                                                </p>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-0">
+                                                            <CustomInput
+                                                                label="Nomor Apartemen"
+                                                                id="room_no"
+                                                                value={
+                                                                    data.room_no
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "room_no",
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                errors={
+                                                                    errors.room_no
+                                                                }
+                                                                className="tablet:mt-8"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-0">
+                                                            <CustomInput
+                                                                label="Nomor Identitas"
+                                                                id="identity_no"
+                                                                value={
+                                                                    data.identity_no
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "identity_no",
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                errors={
+                                                                    errors.identity_no
+                                                                }
+                                                                className="tablet:mt-8"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                            <CustomInput
+                                                                label="Nama Owner"
+                                                                id="owner_name"
+                                                                value={
+                                                                    data.owner_name
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "owner_name",
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                errors={
+                                                                    errors.owner_name
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-0">
+                                                            <CustomInput
+                                                                label="Email"
+                                                                id="email"
+                                                                value={
+                                                                    data.email
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "email",
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                errors={
+                                                                    errors.email
+                                                                }
+                                                                className="tablet:mt-8"
+                                                            />
+                                                        </div>
+                                                        <div className="flex flex-col w-full mr-4 tablet:mt-0">
+                                                            <CustomInput
+                                                                label="Nomor HP"
+                                                                id="phone"
+                                                                value={
+                                                                    data.phone
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setData(
+                                                                        "phone",
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                errors={
+                                                                    errors.phone
+                                                                }
+                                                                className="tablet:mt-8"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </DialogBody>
+                                            <DialogFooter>
+                                                <Button
+                                                    variant="filled"
+                                                    onClick={handleSubmit}
+                                                    loading={processing}
+                                                    className="ml-auto bg-green-500"
+                                                >
+                                                    Edit Data
+                                                </Button>
+                                            </DialogFooter>
+                                        </section>
+                                    </ModalCustom>
+                                )}
                             </CardBody>
                             <Pagination
                                 current_page={data.current_page}

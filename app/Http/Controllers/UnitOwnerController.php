@@ -16,6 +16,30 @@ class UnitOwnerController extends Controller
         $user = Auth::user();
         $role = $user->role;
 
+        $apartId = $user->apartment_id;
+        $apar = Apartment::find($apartId);
+
+        $apartmentTower = ApartmentTower::Query();
+        if($role !== 'SUPER ADMIN'){
+            $apartmentTower->where('apartment_id', $apartId);
+        }
+
+        $apartmentTower = $apartmentTower->get()->map(function ($apartmentTower) {
+            return [
+                'label' => $apartmentTower->tower_name,
+                'value' => $apartmentTower->id
+            ];
+        })->prepend(['label' => 'Pilih Tower', 'value' => ''])->values()->toArray();
+
+        // Check if apartment is found
+        if ($apar) {
+            $apartName = $apar->name; // Assuming the column name is 'name'
+        } else {
+            // Handle the case where the apartment is not found
+            $apartName = 'Apartment not found';
+        }
+
+
         $query = ApartmentOwner::with(['apartment', 'createdBy','tower'])   
             ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                 return $query->where('apartment_id', $user->apartment_id);
@@ -25,10 +49,18 @@ class UnitOwnerController extends Controller
             })
             ->orderByDesc('id')
             ->paginate(10);
+        
+            $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
+                return ['label' => $apartmentName, 'value' => $apartementId];
+            })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
 
         return Inertia::render('Unit Owner/UnitOwner', [
             'filters' => $request->only('search'),
-            'data' => $query,
+            'UnitOwnerData' => $query,
+            'apartmenetData' => $apartment,
+            'apartId'=> $apartId,
+            'apartName' => $apartName,
+            'apartmentTower' => $apartmentTower
         ]);
     }
 
@@ -133,16 +165,30 @@ class UnitOwnerController extends Controller
         }
 
         if ($role === 'SUPER ADMIN') {
-            return Inertia::render('Unit Owner/EditUnitOwner', [
+            return Inertia::render('Unit Owner/EditModal', [
                 "unitOwnerData" => $apartmentOwner->find($request->id),
                 'apartmenetData' => $apartment,
                 'apartId' => $apartId,
                 'apartName' => $apartName,
                 'apartmentTower' => $apartmentTower
             ]);
+            // return Inertia::render('Unit Owner/EditUnitOwner', [
+            //     "unitOwnerData" => $apartmentOwner->find($request->id),
+            //     'apartmenetData' => $apartment,
+            //     'apartId' => $apartId,
+            //     'apartName' => $apartName,
+            //     'apartmentTower' => $apartmentTower
+            // ]);
         } else {
             if ($userApartmentId == $unitOwnerApartmentData) {
-                return Inertia::render('Unit Owner/EditUnitOwner', [
+                return Inertia::render('Unit Owner/EditModal', [
+                    "unitOwnerData" => $apartmentOwner->find($request->id),
+                    'apartmenetData' => $apartment,
+                    'apartId' => $apartId,
+                    'apartName' => $apartName,
+                    'apartmentTower' => $apartmentTower
+                ]);
+                 return Inertia::render('Unit Owner/EditModal', [
                     "unitOwnerData" => $apartmentOwner->find($request->id),
                     'apartmenetData' => $apartment,
                     'apartId' => $apartId,

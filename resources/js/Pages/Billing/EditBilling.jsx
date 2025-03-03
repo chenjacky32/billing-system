@@ -116,9 +116,9 @@ export default function Edit({
         if (billingType === "Air" && WaterPriceData) {
             setData((prevValues) => ({
                 ...prevValues,
-                unit_price: WaterPriceData,
-                minimum_charge: WaterPriceMinimumCharge,
-                water_type: waterPriceId,
+                unit_price: WaterPriceData ?? 0,
+                minimum_charge: WaterPriceMinimumCharge ?? 0,
+                water_type: waterPriceId ?? 0,
             }));
         }
     }, []);
