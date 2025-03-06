@@ -11,7 +11,9 @@ use App\Http\Controllers\BillingFineRulesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UnitOwnerApartmentController;
 use App\Http\Controllers\UnitOwnerController;
+use App\Http\Controllers\UserApartmentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -95,6 +97,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/unit-owner/store', [UnitOwnerController::class, 'store'])->name('unitowner.store');
     Route::get('/unit-owner/{id}/edit', [UnitOwnerController::class, 'edit'])->name('unitowner.edit');
     Route::post('/unit-owner/{id}/update', [UnitOwnerController::class, 'update'])->name('unitowner.update');
+
+    //!Unit Owner List Apartment
+    Route::get('/unit-owner-apartment', [UnitOwnerApartmentController::class, 'index'])->name('unitOwnerApartment.index');
+    Route::post('/unit-owner-apartment/{id}/update', [UnitOwnerApartmentController::class, 'update'])->name('unitOwnerApartment.update');
 
 
     //!Billing Category

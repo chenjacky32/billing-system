@@ -28,6 +28,8 @@ export default function AddBiling({
     WaterPriceData,
     WaterPriceMinimumCharge,
     waterPriceId,
+    apartmentId,
+    billingDueDays,
 }) {
     //mapping roomNumber props and change label to string
     const mappedRoomNumber = roomNumber.map((number) => ({
@@ -46,27 +48,35 @@ export default function AddBiling({
     const [vehicleTypeSelected, setVehicleTypeSelected] = useState("");
     const [isLoading, setIsLoading] = useState(null);
     const { flash } = usePage().props;
+    console.log(flash);
+    console.log(billingDueDays);
+    console.log(waterPriceId);
 
     const { data, setData, post, processing, errors } = useForm({
         billing_fee: flash?.billing_fee || "",
+        total_amount: flash?.total_amount || "",
         meter_reading: flash?.meter_reading || "",
         billing_date: "",
+        due_days: 10,
         billing_type: billingType,
-        fine: "",
+        fine: flash?.fine || "",
         minimum_charge: "",
         due_date: "",
+        apartment_id: apartmentId,
         start_meter: "",
         end_meter: "",
         residence_id: "",
         unit_price: "",
         period: null,
         tower_id: "",
-        water_type: "",
+        water_type: waterPriceId || "",
         electric_type: electricTypeSelected,
         maintenance_type: maintenanceTypeSelected,
         vehicle_type_parking: vehicleTypeSelected,
     });
 
+    console.log("waterType", data.water_type);
+    // 2025-03-04
     const role = auth.user.role;
 
     function formattedDate(date) {
@@ -78,14 +88,21 @@ export default function AddBiling({
     }
 
     useEffect(() => {
-        if (flash?.billing_fee || flash?.meter_reading) {
+        if (flash?.billing_fee || flash?.meter_reading || flash?.fine) {
             setData((prevValues) => ({
                 ...prevValues,
                 billing_fee: flash.billing_fee,
                 meter_reading: flash.meter_reading,
+                fine: flash.fine,
+                total_amount: flash.total_amount,
             }));
         }
-    }, [flash?.billing_fee, flash?.meter_reading]);
+    }, [
+        flash?.billing_fee,
+        flash?.meter_reading,
+        flash?.fine,
+        flash?.total_amount,
+    ]);
 
     useEffect(() => {
         if (billingType === "Air" && WaterPriceData) {
@@ -95,7 +112,25 @@ export default function AddBiling({
                 minimum_charge: WaterPriceMinimumCharge ?? 0,
             }));
         }
-    }, []);
+    }, [billingType, WaterPriceData, WaterPriceMinimumCharge]);
+
+    const handleChangeBillingDate = (value) => {
+        setData((prevValues) => {
+            const billingDate = dayjs(value);
+            const dueDate = billingDate
+                .add(prevValues.due_days, "day")
+                .format("YYYY-MM-DD");
+
+            console.log("billingDate", billingDate);
+            console.log("dueDate", dueDate);
+
+            return {
+                ...prevValues,
+                billing_date: value,
+                due_date: dueDate,
+            };
+        });
+    };
 
     const handleChangePeriod = (value) => {
         const firstDate = value.date(1);
@@ -244,6 +279,7 @@ export default function AddBiling({
 
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
+
         if (value === "Air" && WaterPriceData) {
             setData((prevValues) => ({
                 ...prevValues,
@@ -294,6 +330,8 @@ export default function AddBiling({
                 unit_price: "",
                 minimum_charge: "",
                 billing_fee: "",
+                total_amount: "",
+                fine: "",
             }));
         } else if (billingType === "Maintenance" || billingType === "Parkir") {
             setData((prevValues) => ({
@@ -1107,7 +1145,33 @@ export default function AddBiling({
                                                         unformattedValue
                                                     );
                                                 }}
+                                                disabled={true}
                                                 errors={errors.fine}
+                                                className="tablet:mt-0"
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Total Tagihan
+                                            </Typography>
+                                            <CustomInput
+                                                label="Total Tagihan"
+                                                id="total"
+                                                disabled={true}
+                                                value={
+                                                    data.total_amount
+                                                        ? data.total_amount
+                                                              .toString()
+                                                              .replace(
+                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                  "."
+                                                              )
+                                                        : ""
+                                                }
+                                                errors={errors.total_amount}
                                                 className="tablet:mt-0"
                                             />
                                         </div>
@@ -1152,8 +1216,7 @@ export default function AddBiling({
                                                 id="billing_date"
                                                 value={data.billing_date}
                                                 onChange={(e) =>
-                                                    setData(
-                                                        "billing_date",
+                                                    handleChangeBillingDate(
                                                         e.target.value
                                                     )
                                                 }
@@ -1172,12 +1235,7 @@ export default function AddBiling({
                                                 label="Tanggal Batas Pembayaran"
                                                 id="due_date"
                                                 value={data.due_date}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "due_date",
-                                                        e.target.value
-                                                    )
-                                                }
+                                                disabled={true}
                                                 errors={errors.due_date}
                                                 type="date"
                                             />

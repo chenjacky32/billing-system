@@ -44,6 +44,9 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn () => $request->session()->get('success'),
                 'billing_fee' => fn () => $request->session()->get('billing_fee'),
                 'meter_reading'=> fn()=>$request->session()->get('meter_reading'),
+                'fine'=> fn()=>$request->session()->get('fine'),
+                'due_days'=> fn()=>$request->session()->get('due_days'),
+                'total_amount'=> fn()=>$request->session()->get('total_amount'),
             ],
         ]);
     }

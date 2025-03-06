@@ -1,80 +1,73 @@
+import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { router, usePage, Head, Link, useForm } from "@inertiajs/react";
 import {
     Card,
     Typography,
     CardBody,
     IconButton,
-    Button,
     Tooltip,
+    Breadcrumbs,
     DialogHeader,
     DialogBody,
     DialogFooter,
-    Breadcrumbs,
+    Button,
 } from "@material-tailwind/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { router, usePage, Head, Link, useForm } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import moment from "moment";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect } from "react";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
-import { ToastContainer, toast } from "react-toastify";
 import ModalCustom from "@/Components/ModalCustom";
 import InputSelect from "@/Components/InputSelect";
 import CustomInput from "@/Components/CustomInput";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const TABLE_HEAD = [
+    "No",
     "No Identitas",
     "Nama Owner",
     "Nomor HP",
+    "Email",
     "Apartemen",
     "Tower",
-    "No Apartemen",
-    "Dibuat Pada Tanggal",
-    "Dibuat Oleh",
+    "No Unit",
     "Edit",
 ];
 
-export default function UnitOwner({
+const UserApartment = ({
     auth,
-    UnitOwnerData,
+    userApartments,
     filters,
+    apartmentName,
+    apartmentTower,
     apartmenetData,
     apartId,
-    apartName,
-    apartmentTower,
-}) {
+}) => {
     const role = auth.user.role;
     const { flash } = usePage().props;
-    console.log(UnitOwnerData.data);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ownerId, setOwnerId] = useState(null);
     const [ownerData, setOwnerData] = useState(
-        UnitOwnerData.data.find((item) => item.id === ownerId) || null
+        userApartments.data.find((item) => item.id === ownerId) || null
     );
-
-    const { data, setData, post, processing, errors } = useForm({
-        owner_name: ownerData?.owner_name,
-        phone: ownerData?.phone,
-        email: ownerData?.email,
-        identity_no: ownerData?.identity_no,
-        room_no: ownerData?.room_no,
-        tower_id: ownerData?.tower_id,
-        apartment_id:
-            role === "SUPER ADMIN" ? ownerData?.apartment_id : apartId,
-    });
-
     const initialApartment = apartmenetData.find(
-        (apartment) => apartment.value === ownerData?.apartment_id
+        (apartment) => apartment.value === ownerData?.apartmentId
     );
     const [apartment, setApartment] = useState(initialApartment);
     const [tower, setTower] = useState(
         apartmentTower.find(
-            (tower) => tower.value === ownerData?.tower_id || null
+            (tower) => tower.value == ownerData?.apartmentTowerId || null
         )
     );
+
+    const { data, setData, post, processing, errors } = useForm({
+        roomNo: ownerData?.roomNo || "",
+        apartmentTowerId: ownerData?.apartmentTowerId || "",
+        apartmentId: role === "SUPER ADMIN" ? ownerData?.apartmentId : apartId,
+    });
 
     const handleModalClose = () => {
         setIsModalOpen(false);
@@ -84,23 +77,23 @@ export default function UnitOwner({
     };
 
     const handleEditClick = (id) => {
-        const ownerSelected = UnitOwnerData.data.find((item) => item.id === id);
+        const ownerSelected = userApartments.data.find(
+            (item) => item.id === id
+        );
         setOwnerId(id);
         setOwnerData(ownerSelected);
         setTower(
-            apartmentTower.find((item) => item.value === ownerSelected.tower_id)
+            apartmentTower.find(
+                (item) => item.value === ownerSelected.apartmentTowerId
+            )
         );
         if (ownerSelected) {
             setData({
-                owner_name: ownerSelected.owner_name,
-                phone: ownerSelected.phone,
-                email: ownerSelected.email,
-                identity_no: ownerSelected.identity_no,
-                room_no: ownerSelected.room_no,
-                tower_id: ownerSelected.tower_id,
-                apartment_id:
+                roomNo: ownerSelected.roomNo,
+                apartmentTowerId: ownerSelected.apartmentTowerId,
+                apartmentId:
                     role === "SUPER ADMIN"
-                        ? ownerSelected.apartment_id
+                        ? ownerSelected.apartmentId
                         : apartId,
             });
         }
@@ -111,7 +104,7 @@ export default function UnitOwner({
         setTower(value);
         setData((prevValue) => ({
             ...prevValue,
-            tower_id: value.value,
+            apartmentTowerId: value.value,
         }));
     };
 
@@ -119,7 +112,7 @@ export default function UnitOwner({
         setApartment(value);
         setData((prevValues) => ({
             ...prevValues,
-            apartment_id: value.value,
+            apartmentTowerId: value.value,
         }));
     };
 
@@ -127,7 +120,7 @@ export default function UnitOwner({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/unit-owner/${dataID}/update`, {
+        post(`/unit-owner-apartment/${dataID}/update`, {
             onSuccess: () => {
                 handleModalClose();
                 setTimeout(() => {
@@ -158,13 +151,13 @@ export default function UnitOwner({
         }
     }
 
-    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
-
     useEffect(() => {
         if (flash.message) {
             toast.success(flash.message);
         }
     }, [flash.message]);
+
+    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
     return (
         <AuthenticatedLayout
@@ -172,11 +165,11 @@ export default function UnitOwner({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unit Owner
+                    User/Owner Apartment List
                 </h2>
             }
         >
-            <Head title="Unit Owner" />
+            <Head title="Billing Fine Rules" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -188,25 +181,25 @@ export default function UnitOwner({
                             Dashboard
                         </Link>
                         <Link
-                            href={route("unitowner.index")}
+                            href={route("unitOwnerApartment.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Unit Owner
+                            Unit Owner List
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className="w-full h-full p-12 ">
+                        <Card className="w-full h-full p-12">
                             <PageHeader
                                 handleSearch={handleSearch}
-                                title={"Unit Owner List"}
+                                title={"Unit Owner Apartment List"}
                                 description={
-                                    "Informasi Data Unit Owner pada Apartemen"
+                                    "Informasi Data Unit Owner Pada Apartemen"
                                 }
                                 buttonLabel={"Tambah Unit Owner"}
                                 icon={buttonIcon}
-                                addRoute={"unitowner.add"}
                                 label="Cari Nama Unit Owner"
+                                showAddButton={false}
                             />
                             <CardBody className="px-0 overflow-scroll">
                                 <table
@@ -221,7 +214,7 @@ export default function UnitOwner({
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="py-4 pl-4 border-y bg-primary "
+                                                    className="py-4 pl-4 border-y bg-primary"
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -234,29 +227,24 @@ export default function UnitOwner({
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {UnitOwnerData.data.map(
+                                        {userApartments.data.map(
                                             (
                                                 {
-                                                    identity_no,
-                                                    owner_name,
-                                                    phone,
-                                                    apartment,
-                                                    room_no,
-                                                    created_at,
-                                                    tower,
                                                     id,
-                                                    created_by,
+                                                    userId,
+                                                    apartmentTower,
+                                                    roomNo,
+                                                    user,
                                                 },
                                                 index
                                             ) => {
                                                 const isLast =
                                                     index ===
-                                                    UnitOwnerData.data.length -
+                                                    userApartments.data.length -
                                                         1;
                                                 const classes = isLast
                                                     ? "pl-4"
-                                                    : "pl-4 border-b border-blue-gray-150";
-
+                                                    : "pl-4 border-b border-blue-gray-50";
                                                 return (
                                                     <tr
                                                         key={id}
@@ -268,9 +256,7 @@ export default function UnitOwner({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {
-                                                                        identity_no
-                                                                    }
+                                                                    {index + 1}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -280,17 +266,7 @@ export default function UnitOwner({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {owner_name}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {phone}
+                                                                    {userId}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -301,7 +277,7 @@ export default function UnitOwner({
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        apartment.name
+                                                                        user.fullname
                                                                     }
                                                                 </Typography>
                                                             </div>
@@ -312,9 +288,7 @@ export default function UnitOwner({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {tower?.tower_name
-                                                                        ? tower.tower_name
-                                                                        : "-"}
+                                                                    {user.phone}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -324,31 +298,45 @@ export default function UnitOwner({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {room_no}
+                                                                    {user.email}
                                                                 </Typography>
                                                             </div>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {moment(
-                                                                    created_at
-                                                                ).format("LL")}
-                                                            </Typography>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {apartmentTower
+                                                                        ?.apartment
+                                                                        ?.name ||
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal"
-                                                            >
-                                                                {
-                                                                    created_by.name
-                                                                }
-                                                            </Typography>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {apartmentTower?.tower_name ||
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
                                                         </td>
-
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {roomNo ??
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
                                                         <td className={classes}>
                                                             <Tooltip
                                                                 content="Edit Unit Owner"
@@ -440,7 +428,7 @@ export default function UnitOwner({
                                                                 <CustomInput
                                                                     label="Nama Apartemen"
                                                                     value={
-                                                                        apartName
+                                                                        apartmentName
                                                                     }
                                                                     className=""
                                                                     disabled={
@@ -451,7 +439,7 @@ export default function UnitOwner({
                                                             {errors.apartment_id && (
                                                                 <p className="mt-3 ml-0 text-sm text-red-500">
                                                                     {
-                                                                        errors.apartment_id
+                                                                        errors.apartmentId
                                                                     }
                                                                 </p>
                                                             )}
@@ -481,17 +469,19 @@ export default function UnitOwner({
                                                                 label="Nomor Apartemen"
                                                                 id="room_no"
                                                                 value={
-                                                                    data.room_no
+                                                                    data.roomNo ??
+                                                                    ""
                                                                 }
+                                                                type="number"
                                                                 onChange={(e) =>
                                                                     setData(
-                                                                        "room_no",
+                                                                        "roomNo",
                                                                         e.target
                                                                             .value
                                                                     )
                                                                 }
                                                                 errors={
-                                                                    errors.room_no
+                                                                    errors.roomNo
                                                                 }
                                                                 className="tablet:mt-8"
                                                             />
@@ -504,18 +494,10 @@ export default function UnitOwner({
                                                                 label="Nomor Identitas"
                                                                 id="identity_no"
                                                                 value={
-                                                                    data.identity_no
+                                                                    ownerData?.userId ??
+                                                                    ""
                                                                 }
-                                                                onChange={(e) =>
-                                                                    setData(
-                                                                        "identity_no",
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                                errors={
-                                                                    errors.identity_no
-                                                                }
+                                                                disabled
                                                                 className="tablet:mt-8"
                                                             />
                                                         </div>
@@ -524,18 +506,11 @@ export default function UnitOwner({
                                                                 label="Nama Owner"
                                                                 id="owner_name"
                                                                 value={
-                                                                    data.owner_name
+                                                                    ownerData
+                                                                        ?.user
+                                                                        ?.fullname
                                                                 }
-                                                                onChange={(e) =>
-                                                                    setData(
-                                                                        "owner_name",
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                                errors={
-                                                                    errors.owner_name
-                                                                }
+                                                                disabled
                                                             />
                                                         </div>
                                                     </div>
@@ -546,18 +521,11 @@ export default function UnitOwner({
                                                                 label="Email"
                                                                 id="email"
                                                                 value={
-                                                                    data.email
+                                                                    ownerData
+                                                                        ?.user
+                                                                        ?.email
                                                                 }
-                                                                onChange={(e) =>
-                                                                    setData(
-                                                                        "email",
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                                errors={
-                                                                    errors.email
-                                                                }
+                                                                disabled
                                                                 className="tablet:mt-8"
                                                             />
                                                         </div>
@@ -566,18 +534,11 @@ export default function UnitOwner({
                                                                 label="Nomor HP"
                                                                 id="phone"
                                                                 value={
-                                                                    data.phone
+                                                                    ownerData
+                                                                        ?.user
+                                                                        ?.phone
                                                                 }
-                                                                onChange={(e) =>
-                                                                    setData(
-                                                                        "phone",
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                                errors={
-                                                                    errors.phone
-                                                                }
+                                                                disabled
                                                                 className="tablet:mt-8"
                                                             />
                                                         </div>
@@ -599,10 +560,10 @@ export default function UnitOwner({
                                 )}
                             </CardBody>
                             <Pagination
-                                current_page={UnitOwnerData.current_page}
-                                last_page={UnitOwnerData.last_page}
-                                prev_page_url={UnitOwnerData.prev_page_url}
-                                next_page_url={UnitOwnerData.next_page_url}
+                                current_page={userApartments.current_page}
+                                last_page={userApartments.last_page}
+                                prev_page_url={userApartments.prev_page_url}
+                                next_page_url={userApartments.next_page_url}
                                 search={filters.search}
                                 getPaginationUrl={getPaginationUrl}
                             />
@@ -613,4 +574,6 @@ export default function UnitOwner({
             <ToastContainer />
         </AuthenticatedLayout>
     );
-}
+};
+
+export default UserApartment;

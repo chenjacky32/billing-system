@@ -219,6 +219,8 @@ class UnitOwnerController extends Controller
 
         $apartmentOwner->update($validatedData);
 
-        return redirect('/unit-owner')->with('success', 'Unit owner data has been updated!');
+        return redirect('/unit-owner')
+            ->with('success', 'Unit owner data has been updated!')
+            ;
     }
 }

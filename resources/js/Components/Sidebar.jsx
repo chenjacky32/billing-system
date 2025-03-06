@@ -130,7 +130,7 @@ export default function Sidebar({ user, classname, auth }) {
                                     Account Pending
                                 </ListItem>
                             </Link>
-                            <Link href={route("unitowner.index")}>
+                            {/* <Link href={route("unitowner.index")}>
                                 <ListItem className="hover:text-primary ">
                                     <ListItemPrefix>
                                         <ChevronRightIcon
@@ -139,6 +139,17 @@ export default function Sidebar({ user, classname, auth }) {
                                         />
                                     </ListItemPrefix>
                                     Unit Owner
+                                </ListItem>
+                            </Link> */}
+                            <Link href={route("unitOwnerApartment.index")}>
+                                <ListItem className="hover:text-primary ">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Unit Owner List
                                 </ListItem>
                             </Link>
                             <Link href={route("billingCategory.index")}>

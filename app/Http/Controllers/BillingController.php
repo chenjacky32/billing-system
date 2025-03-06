@@ -7,9 +7,11 @@ use App\Events\BillingPaid;
 use App\Models\ApartmentOwner;
 use App\Models\ApartmentTower;
 use App\Models\Billing;
+use App\Models\BillingFineRules;
 use App\Models\BillingsCategory;
 use App\Models\UserApartmentOkgo;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -70,7 +72,7 @@ class BillingController extends Controller
         $categoryBillingQuery = BillingsCategory::query();
         $towerQuery = ApartmentTower::query();
         $userApartmentsQuery = UserApartmentOkgo::with(['user']);
-
+        $billingFineRules = BillingFineRules::query();
         
         if ($role !== 'SUPER ADMIN') {
             $ownerQuery->where('apartment_id', $apartmentId);
@@ -82,6 +84,7 @@ class BillingController extends Controller
             ->toArray();
 
             $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
+            $billingFineRules->where('apartment_id', $apartmentId);
         }
 
         $owner_data = $ownerQuery->pluck('owner_name', 'id')
@@ -127,10 +130,24 @@ class BillingController extends Controller
             'label' => $tower->tower_name,
             'value' => $tower->id
         ];
-    })->prepend([
-        'label' => 'Pilih Tower',
-        'value' => '',
-    ])->values()->toArray();
+        })->prepend([
+            'label' => 'Pilih Tower',
+            'value' => '',
+        ])->values()->toArray();
+
+        $getBillingTypeDueDays = $billingFineRules->get()->groupBy('apartment_id')->map(function ($items, $apartmentId) {
+            return [
+                'apartmentId' => $apartmentId,
+                'billingTypeRules' => $items->map(function ($item) {
+                    return [
+                        'billingType' => $item->billing_type,
+                        'due_days' => $item->due_date, 
+                    ];
+                })->values()->toArray(),
+            ];
+        })
+        ->values()
+        ->toArray();
 
         $userOkgo = $userApartmentsQuery->get()->map(function ($userApartment) {
             return [
@@ -141,7 +158,7 @@ class BillingController extends Controller
             'label' => 'Pilih Residence',
             'value' => '',
         ])->values()->toArray();
-
+        
 
         if($role === "SUPER ADMIN") {
             return Inertia::render("Billing/AddBilling", [
@@ -150,6 +167,7 @@ class BillingController extends Controller
                 'roomNumber' => $room_number,
                 'towerData' => $tower_data,
                 'residenceData'=>$userOkgo,
+                'billingDueDays'=>$getBillingTypeDueDays,
             ]);
         } else {
             return Inertia::render("Billing/AddBilling", [
@@ -160,11 +178,11 @@ class BillingController extends Controller
                 'residenceData'=>$userOkgo,
                 'WaterPriceData'=>$WaterPriceData,
                 'WaterPriceMinimumCharge'=>$WaterPriceMinimumCharge,
-                'waterPriceId' => $waterPriceId
+                'waterPriceId' => $waterPriceId,
+                'apartmentId' => $apartmentId,
+                'billingDueDays'=>$getBillingTypeDueDays,
         ]);
             }
-
-       
     }
 
     public function store(Request $request)
@@ -517,6 +535,74 @@ class BillingController extends Controller
         return redirect('/billing')->with('success', 'Billing data has been deleted!');
     }
 
+    public function calculateFine(Request $request, $billingType, $ownerId) {
+        Log::info('Calculating fine', ['billingType' => $billingType, 'ownerId' => $ownerId]);
+
+        if (!in_array($billingType, ['Air', 'Listrik'])) {
+            Log::info('Billing type not eligible for fine calculation', ['billingType' => $billingType]);
+            return 0;
+        }
+
+        $previousPeriod = Carbon::parse($request->period)->subMonth()->format('Y-m-01');
+
+        $previousBilling = Billing::where('owner_id', $ownerId)
+        ->where('billing_type', $billingType)
+        ->where('apartment_id', $request->apartment_id)
+        ->where('period', $previousPeriod) // Ambil periode 1 bulan sebelumnya
+        ->where(function ($query) {
+            $query->where('status', 'Pending')
+                  ->orWhereColumn('paid_date', '>', 'due_date'); // OR kondisi paid_date > due_date
+        })
+        ->where(function ($query) {
+            $query->whereNull('is_paid')
+                  ->orWhere('is_paid', 0); // OR is_paid = 0 atau NULL
+        })
+        ->orderBy('id', 'desc')  // Jika ada lebih dari satu, ambil yang terbaru
+        ->first(); // Mengambil 1 data terakhir
+        
+        Log::info('previous Billing',[
+            'Previous Billing' => $previousBilling
+        ]);
+
+        if (!$previousBilling) {
+            Log::info('No previous billing found', ['ownerId' => $ownerId, 'billingType' => $billingType]);
+            return 0;
+        }
+
+        $today = now();
+        $dueDate = Carbon::parse($previousBilling->due_date);
+
+        if ($today->lessThanOrEqualTo($dueDate)) {
+            Log::info('Due date has not passed', ['dueDate' => $dueDate]);
+            return 0;
+        }
+
+        $dayLate = $today->diffInDays($dueDate);
+        Log::info('Days late', ['dayLate' => $dayLate]);
+
+        $fineRules = BillingFineRules::where('billing_type', $request->billing_type)
+            ->where('apartment_id', $request->apartment_id)
+            ->first();
+        
+        Log::info('fineRulesQuery',['data'=>$fineRules]);
+
+        if (!$fineRules) {
+            Log::info('No fine rules found', ['billingType' => $request->billing_type, 'apartmentId' => $request->apartment_id]);
+            return 0;   
+        }
+
+        $fineRatePerDays = $fineRules->fine_rate_per_day;
+        $maximumFine = $fineRules->max_fine;
+        $dueDate = $fineRules->due_date;
+        Log::info('Fine rules retrieved', ['fineRatePerDays' => $fineRatePerDays, 'maximumFine' => $maximumFine]);
+
+        $fine = $fineRatePerDays * $dayLate;
+        Log::info('Calculated fine', ['fine' => $fine, 'maximumFine' => $maximumFine]);
+
+        return min($fine, $maximumFine);
+        
+    }
+
     //count electric and water bill
     public function calculateBill(Request $request){
         $request->validate ([
@@ -524,6 +610,7 @@ class BillingController extends Controller
                 'end_meter' => 'required|integer|min:1|max:999999999999999',
                 'unit_price' => 'required|integer|min:1|max:999999999999999',
                 'minimum_charge'=>'required|numeric|min:0|max:999999999999999',
+                'owner_id' => 'required|integer',
         ]);
 
         $startMeter = $request->input('start_meter');
@@ -532,50 +619,125 @@ class BillingController extends Controller
         $minimumCharge = $request->input('minimum_charge');
 
         if($startMeter > $endMeter){
-            return back()->with('error', 'Meter reading end must be greater than start meter.');
+            return redirect()->back()->with('error', 'Meter reading end must be greater than start meter.');
         }
 
         $meterDifference = $endMeter - $startMeter;
 
+        if ($meterDifference < 0) {
+            return redirect()->back()->with('error', 'Meter reading difference must be positive.');
+        }
+
         $totalCharge = $meterDifference * $unitPrice;
         $billingFee =  $totalCharge < $minimumCharge ? $minimumCharge : $totalCharge;
-        return back()->with([
+
+        $fine = $this->calculateFine($request, $request->input('billing_type'), $request->input('owner_id'));
+        Log::info('finalFine', ['finalFine' => $fine]);
+
+        // return redirect()->back()->with([
+        return redirect()->back()->with([
             'billing_fee' => $billingFee,
-            'meter_reading' => $meterDifference
+            'meter_reading' => $meterDifference,
+            'fine' => $fine,
+            'total_amount' => $billingFee + $fine,  
         ]);
     }
 
     public function fetchBillingFee($id){
         $billingCategory = BillingsCategory::find($id);
-
+        
         return back()->with([
             'billing_fee' => $billingCategory ? $billingCategory->unit_price : 0
         ]);
+
+        // return [
+        //     'billing_fee' => $billingCategory ? $billingCategory->unit_price : 0,
+        // ];
     }
 
     public function countBilling(Request $request){
         $billingType = $request->input('billing_type');
         $maintenanceId = $request->input('maintenance_type');
         $vehicleId = $request->input('vehicle_type_parking');
+        $apartmentId = $request->input('apartment_id');
 
-        // basic rules validation
-        $request->validate([
-            'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
-        ]);
+        Log::info('Request All', $request->all());
 
-        switch($billingType){
-            case 'Air':
-                return $this->calculateBill($request);
-            case 'Listrik':
-                return $this->calculateBill($request);
-            case 'Maintenance':
-                $request->validate(['maintenance_type' => 'required|integer']);
-                return $this->fetchBillingFee($maintenanceId);
-            case 'Parkir':
-                $request->validate(['vehicle_type_parking' => 'required|integer']);
-                return $this->fetchBillingFee($vehicleId);
-            default:
-                return back();
+        try {
+            $request->validate([
+                'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
+            ]);
+
+            switch($billingType) {
+                case 'Air':
+                case 'Listrik':
+                    return $this->calculateBill($request);
+
+                case 'Maintenance':
+                    $request->validate(['maintenance_type' => 'required|integer']);
+                    return $this->fetchBillingFee($maintenanceId);
+
+                case 'Parkir':
+                    $request->validate(['vehicle_type_parking' => 'required|integer']);
+                    return $this->fetchBillingFee($vehicleId);
+
+                default:
+                    return back()->with('error', 'Invalid billing type.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error in countBilling: ' . $e->getMessage());
+            return back()->with('error', 'An error occurred while processing the request.');
         }
     }
+
+    // public function calculateFine($billing){
+    // $fineRules = BillingFineRules::where('billing_type', $billing->billing_type)
+    //     ->where('apartment_id', $billing->apartment_id)
+    //     ->first();
+
+    // if (!$fineRules) {
+    //     return 0;
+    // }
+
+    // // Cari tagihan periode sebelumnya yang belum dibayar atau terlambat dibayar
+    // $previousPeriod = Carbon::parse($billing->period)->subMonth()->format('Y-m-d');
+    // $previousBill = Billing::where('owner_id', $billing->owner_id)
+    //     ->where('billing_type', $billing->billing_type)
+    //     ->where('period', $previousPeriod)
+    //     ->where(function ($query) {
+    //         $query->where('status', 'Pending')
+    //               ->orWhere('paid_date', '>', 'due_date')
+    //               ->orWhereNull('paid_date');
+    //     })
+    //     ->get();
+
+    // if (!$previousBill) {
+    //     return 0;
+    // }
+    
+
+    // $dueDate = Carbon::parse($previousBill->due_date);
+    // $currentDate = Carbon::now();
+    // $daysLate = $currentDate->diffInDays($dueDate);
+
+    // Log::info('dueDate', ['dueDate' => $dueDate]);
+    // Log::info('currentDate', ['currentDate' => $currentDate]);
+    // Log::info('daysLate', ['daysLate' => $daysLate]);
+    // Log::info('previousBill', ['previousBill' => $previousBill]);
+
+    // // Hitung denda
+    // $calculatedFine = $daysLate * $fineRules->fine_rate_per_day;
+    // $appliedFine = min($calculatedFine, $fineRules->max_fine);
+
+    // Log::info('Fine Calculation', [
+    //     'daysLate' => $daysLate,
+    //     'fineRatePerDay' => $fineRules->fine_rate_per_day,
+    //     'calculatedFine' => $calculatedFine,
+    //     'maxFine' => $fineRules->max_fine,
+    //     'appliedFine' => $appliedFine,
+    // ]);
+
+    // return $appliedFine;
+
+    // }
 }
