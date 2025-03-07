@@ -8,15 +8,15 @@ export default function CustomTable({ data, title, route }) {
     return (
         <>
             <div className="w-full h-full">
-                <h1 className="text-center p-2 font-bold text-primary">
+                <h1 className="p-2 font-bold text-center text-primary">
                     {title}
                 </h1>
-                <h1 className="text-center font-bold text-primary">
+                <h1 className="font-bold text-center text-primary">
                     Periode {currentMonthYear}
                 </h1>
-                <CardBody className="overflow-scroll px-0 h-60 w-full">
+                <CardBody className="w-full px-0 overflow-scroll h-60">
                     <table
-                        className="mt-0 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                        className="w-full mt-0 text-left border table-auto mobile:mt-0 min-w-max "
                         style={{
                             borderRadius: "10px",
                             overflow: "hidden",
@@ -27,7 +27,7 @@ export default function CustomTable({ data, title, route }) {
                                 {TABLE_HEAD.map((head) => (
                                     <th
                                         key={head}
-                                        className="border-y  bg-primary py-4 pl-4"
+                                        className="py-4 pl-4 border-y bg-primary"
                                     >
                                         <Typography
                                             variant="small"
@@ -60,7 +60,7 @@ export default function CustomTable({ data, title, route }) {
                                         return (
                                             <tr
                                                 key={id}
-                                                className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                             >
                                                 <td className={classes}>
                                                     <div className="flex flex-col">
@@ -68,7 +68,7 @@ export default function CustomTable({ data, title, route }) {
                                                             variant="small"
                                                             className="font-normal capitalize"
                                                         >
-                                                            {owner.owner_name}
+                                                            {owner?.owner_name}
                                                         </Typography>
                                                     </div>
                                                 </td>
@@ -111,7 +111,7 @@ export default function CustomTable({ data, title, route }) {
                                 <tr>
                                     <td
                                         colSpan="3"
-                                        className="pl-4 py-2 text-center"
+                                        className="py-2 pl-4 text-center"
                                     >
                                         No data available
                                     </td>
@@ -122,7 +122,7 @@ export default function CustomTable({ data, title, route }) {
                 </CardBody>
                 <Link
                     href={route}
-                    className="opacity-100 text-primary font-bold"
+                    className="font-bold opacity-100 text-primary"
                 >
                     View More
                 </Link>

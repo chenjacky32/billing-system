@@ -24,23 +24,22 @@ export default function AddBiling({
     billingCategory,
     roomNumber,
     towerData,
-    residenceData,
+    // residenceData,
     WaterPriceData,
     WaterPriceMinimumCharge,
     waterPriceId,
     apartmentId,
     billingDueDays,
 }) {
-    //mapping roomNumber props and change label to string
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
-        label: `No - ${number.label}`,
+        label: `Nomor - ${number.label}`,
     }));
 
     // const [owner, setOwner] = useState(ownerData[0]);
     const [room, setRoom] = useState(mappedRoomNumber[0]);
     const [tower, setTower] = useState(towerData[0]);
-    const [residence, setResidence] = useState(residenceData[0]);
+    const [residence, setResidence] = useState("");
     const [billingType, setBillingType] = useState("Air");
     const [waterTypeSelected, setWaterTypeSelected] = useState("");
     const [electricTypeSelected, setElectricTypeSelected] = useState("");
@@ -48,9 +47,6 @@ export default function AddBiling({
     const [vehicleTypeSelected, setVehicleTypeSelected] = useState("");
     const [isLoading, setIsLoading] = useState(null);
     const { flash } = usePage().props;
-    console.log(flash);
-    console.log(billingDueDays);
-    console.log(waterPriceId);
 
     const { data, setData, post, processing, errors } = useForm({
         billing_fee: flash?.billing_fee || "",
@@ -65,7 +61,7 @@ export default function AddBiling({
         apartment_id: apartmentId,
         start_meter: "",
         end_meter: "",
-        residence_id: "",
+        // residence_id: "",
         unit_price: "",
         period: null,
         tower_id: "",
@@ -75,8 +71,21 @@ export default function AddBiling({
         vehicle_type_parking: vehicleTypeSelected,
     });
 
-    console.log("waterType", data.water_type);
-    // 2025-03-04
+    // console.log(data.fine);
+    // console.log(flash);
+    // console.log("useState", {
+    //     room: room,
+    //     tower: tower,
+    //     residence: residence,
+    //     billingType: billingType,
+    //     waterTypeSelected: waterTypeSelected,
+    //     electricTypeSelected: electricTypeSelected,
+    //     maintenanceTypeSelected: maintenanceTypeSelected,
+    //     maintenanceTypeSelected: maintenanceTypeSelected,
+    //     isLoading: isLoading,
+    // });
+    // console.log("useForm State", data);
+
     const role = auth.user.role;
 
     function formattedDate(date) {
@@ -120,9 +129,6 @@ export default function AddBiling({
             const dueDate = billingDate
                 .add(prevValues.due_days, "day")
                 .format("YYYY-MM-DD");
-
-            console.log("billingDate", billingDate);
-            console.log("dueDate", dueDate);
 
             return {
                 ...prevValues,
@@ -169,48 +175,6 @@ export default function AddBiling({
         }));
     };
 
-    // const OptionsCategory =
-    //     billingType === "Listrik" ? electricOptions : waterOptions;
-
-    // const categoryError =
-    //     billingType === "Listrik" ? errors.electric_type : errors.water_type;
-
-    // const handleChangeWaterOrElectricType = (value) => {
-    //     if (billingType === "Air") {
-    //         setWaterTypeSelected(value);
-    //         const findBilling = billingCategory.find(
-    //             (type) => type.billing_type === "Air"
-    //         );
-    //         const findCategory = findBilling?.categories.find(
-    //             (items) => items.value == value
-    //         );
-
-    //         setData((prevValues) => ({
-    //             ...prevValues,
-    //             water_type: value,
-    //             unit_price: findCategory?.price,
-    //             minimum_charge: findCategory?.minimum_charge,
-    //         }));
-    //     } else if (billingType === "Listrik") {
-    //         setElectricTypeSelected(value);
-    //         const findBilling = billingCategory.find(
-    //             (type) => type.billing_type === "Listrik"
-    //         );
-    //         const findCategory = findBilling?.categories.find(
-    //             (items) => items.value == value
-    //         );
-
-    //         setData((prevValues) => ({
-    //             ...prevValues,
-    //             electric_type: value,
-    //             unit_price: findCategory?.price,
-    //             minimum_charge: findCategory?.minimum_charge,
-    //         }));
-    //     } else {
-    //         return;
-    //     }
-    // };
-
     const handleElectricChange = (value) => {
         setElectricTypeSelected(value);
         const findBilling = billingCategory.find(
@@ -244,19 +208,25 @@ export default function AddBiling({
         }));
     };
 
-    const handleOwnerChangeChange = (value) => {
-        setOwner(value);
-        setData((prevValues) => ({
-            ...prevValues,
-            owner_id: value.value,
-        }));
-    };
+    // const handleOwnerChangeChange = (value) => {
+    //     setOwner(value);
+    //     setData((prevValues) => ({
+    //         ...prevValues,
+    //         owner_id: value.value,
+    //     }));
+    // };
 
     const handleRoomChange = (value) => {
         setRoom(value);
+        const findOwnerTower = towerData.find(
+            (item) => item.value == value.apartmentTowerId
+        );
+        setTower(findOwnerTower);
+        setResidence(value.ownerName);
         setData((prevValue) => ({
             ...prevValue,
             room_no: value.value,
+            tower_id: value.apartmentTowerId,
             owner_id: value.value,
         }));
     };
@@ -266,14 +236,6 @@ export default function AddBiling({
         setData((prevValue) => ({
             ...prevValue,
             tower_id: value.value,
-        }));
-    };
-
-    const handleResidenceChange = (value) => {
-        setResidence(value);
-        setData((prevValues) => ({
-            ...prevValues,
-            residence_id: value.value,
         }));
     };
 
@@ -425,6 +387,11 @@ export default function AddBiling({
                                                 }
                                                 onChange={handleChangePeriod}
                                             />
+                                            {errors.period && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.period}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col">
@@ -440,6 +407,7 @@ export default function AddBiling({
                                                 value={tower}
                                                 onChange={handleTowerChange}
                                                 options={towerData}
+                                                disabled={true}
                                             />
                                             {errors.tower_id && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
@@ -455,7 +423,11 @@ export default function AddBiling({
                                                 Nama Owner
                                             </Typography>
 
-                                            <InputSelect
+                                            <CustomInput
+                                                value={residence}
+                                                disabled={true}
+                                            />
+                                            {/* <InputSelect
                                                 value={residence}
                                                 onChange={handleResidenceChange}
                                                 options={residenceData}
@@ -464,7 +436,7 @@ export default function AddBiling({
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.residence_id}
                                                 </p>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
@@ -473,7 +445,7 @@ export default function AddBiling({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Nomor Room
+                                                Nomor Unit
                                             </Typography>
 
                                             <InputSelect
@@ -1132,7 +1104,7 @@ export default function AddBiling({
                                                                   /\B(?=(\d{3})+(?!\d))/g,
                                                                   "."
                                                               )
-                                                        : ""
+                                                        : 0
                                                 }
                                                 onChange={(e) => {
                                                     const unformattedValue =
@@ -1145,7 +1117,9 @@ export default function AddBiling({
                                                         unformattedValue
                                                     );
                                                 }}
-                                                disabled={true}
+                                                disabled={
+                                                    billingType !== "Parkir"
+                                                }
                                                 errors={errors.fine}
                                                 className="tablet:mt-0"
                                             />

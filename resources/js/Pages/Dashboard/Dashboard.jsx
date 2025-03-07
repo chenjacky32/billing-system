@@ -19,6 +19,12 @@ export default function Dashboard({
     penaltyData,
     billingChartData,
 }) {
+    console.log("data", data);
+    console.log("paid", paidData);
+    console.log("unpaid", unpaidData);
+    console.log(penaltyData);
+    console.log(billingChartData);
+
     const pieData = {
         labels: data.labels,
         datasets: [
@@ -81,7 +87,7 @@ export default function Dashboard({
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Dashboard
                 </h2>
             }
@@ -89,11 +95,11 @@ export default function Dashboard({
             <Head title="Dashboard" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-full">
+                <div className="w-full h-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
-                            className="opacity-100 text-primaryHover font-extrabold "
+                            className="font-extrabold opacity-100 text-primaryHover "
                         >
                             Dashboard
                         </Link>
@@ -101,10 +107,10 @@ export default function Dashboard({
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <div className="py-6 text-primary font-extrabold text-2xl text-center tablet:text-xl">
+                        <div className="py-6 text-2xl font-extrabold text-center text-primary tablet:text-xl">
                             Welcome to Dashboard, {auth.user.name}
                         </div>
-                        <div className="p-5 flex flex-col flex-wrap  ">
+                        <div className="flex flex-col flex-wrap p-5 ">
                             {role === "SUPER ADMIN" ? (
                                 <div className="w-full  flex overflow-scroll shadow-[0_1px_100px_#c3b0f7] rounded-3xl">
                                     {data.map((apartmentData, index) => (
@@ -139,13 +145,13 @@ export default function Dashboard({
                                     ) : (
                                         <h1
                                             colSpan="3"
-                                            className="pl-4 py-2 text-center"
+                                            className="py-2 pl-4 text-center"
                                         >
                                             No data available
                                         </h1>
                                     )}
                                 </BillingPieContainer>
-                                <div className="h-full  laptop:h-full flex flex-row tablet:flex-col gap-8 laptop:gap-0 mt-8">
+                                <div className="flex flex-row h-full gap-8 mt-8 laptop:h-full tablet:flex-col laptop:gap-0">
                                     <CustomTable
                                         data={paidData}
                                         title="Tagihan IPL yang Sudah Bayar"

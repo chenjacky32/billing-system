@@ -2,9 +2,9 @@ import CustomInput from "@/Components/CustomInput";
 import InputSelect from "@/Components/InputSelect";
 import PageHeader from "@/Components/PageHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { TypeBilling } from "@/utils/constant";
-import { TrashIcon } from "@heroicons/react/24/solid";
 import {
     Breadcrumbs,
     Button,
@@ -25,10 +25,12 @@ export default function Edit({
     billingCategory,
     roomNumber,
     towerData,
-    residenceData,
+    // residenceData,
     WaterPriceData,
     WaterPriceMinimumCharge,
     waterPriceId,
+    apartmentId,
+    billingDueDays,
 }) {
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
@@ -36,21 +38,22 @@ export default function Edit({
     }));
 
     const findRoomNumber = mappedRoomNumber.find(
-        (item) => item.value == billingData.owner_id
+        (item) => item.value == billingData?.residence_id
     );
 
     const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
+    const [residence, setResidence] = useState(
+        mappedRoomNumber.find(
+            (items) => items.value === billingData.residence_id
+        )?.ownerName
+    );
     const [tower, setTower] = useState(
         towerData.find((items) => items.value === billingData.tower_id)
     );
 
-    const [residence, setResidence] = useState(
-        residenceData.find((item) => item.value === billingData.residence_id)
-    );
-
-    const [owner, setOwner] = useState(
-        ownerData.find((item) => item.value === billingData.owner_id)
-    );
+    // const [owner, setOwner] = useState(
+    //     ownerData.find((item) => item.value === billingData.owner_id)
+    // );
     const [billingType, setBillingType] = useState(billingData.billing_type);
     const [status, setStatus] = useState(billingData.status);
     const [waterTypeSelected, setWaterTypeSelected] = useState(
@@ -78,19 +81,37 @@ export default function Edit({
         vehicle_type_parking: vehicleTypeSelected,
         meter_reading: billingData.meter_reading || flash?.meter_reading,
         billing_date: billingData.billing_date,
+        due_days: 10,
         billing_type: billingData.billing_type,
         water_type: waterTypeSelected,
         electric_type: electricTypeSelected,
         room_no: room.value,
         status: billingData.status,
         period: billingData.period,
-        residence_id: billingData.residence_id,
+        // residence_id: billingData.residence_id,
+        apartment_id: apartmentId,
         tower_id: billingData.tower_id,
         paid_date: billingData.paid_date,
-        owner_id: billingData.owner_id,
-        fine: billingData.fine,
+        owner_id: billingData.residence_id,
+        fine: billingData.fine ?? 0,
+        total_amount: flash?.total_amount,
         due_date: billingData.due_date,
     });
+
+    // console.log(flash);
+    // console.log("useState", {
+    //     room: room,
+    //     tower: tower,
+    //     residence: residence,
+    //     billingType: billingType,
+    //     waterTypeSelected: waterTypeSelected,
+    //     electricTypeSelected: electricTypeSelected,
+    //     maintenanceTypeSelected: maintenanceTypeSelected,
+    //     maintenanceTypeSelected: maintenanceTypeSelected,
+    //     isLoading: isLoading,
+    // });
+    // console.log("useForm State", data);
+    // console.log(billingData.residence_id);
 
     const role = auth.user.role;
 
@@ -103,14 +124,21 @@ export default function Edit({
     }
 
     useEffect(() => {
-        if (flash?.billing_fee || flash?.meter_reading) {
+        if (flash?.billing_fee || flash?.meter_reading || flash?.fine) {
             setData((prevValues) => ({
                 ...prevValues,
                 billing_fee: flash.billing_fee,
                 meter_reading: flash.meter_reading,
+                fine: flash.fine,
+                total_amount: flash.total_amount,
             }));
         }
-    }, [flash?.billing_fee, flash?.meter_reading]);
+    }, [
+        flash?.billing_fee,
+        flash?.meter_reading,
+        flash?.fine,
+        flash?.total_amount,
+    ]);
 
     useEffect(() => {
         if (billingType === "Air" && WaterPriceData) {
@@ -121,7 +149,22 @@ export default function Edit({
                 water_type: waterPriceId ?? 0,
             }));
         }
-    }, []);
+    }, [billingType, WaterPriceData, WaterPriceMinimumCharge]);
+
+    const handleChangeBillingDate = (value) => {
+        setData((prevValues) => {
+            const billingDate = dayjs(value);
+            const dueDate = billingDate
+                .add(prevValues.due_days, "day")
+                .format("YYYY-MM-DD");
+
+            return {
+                ...prevValues,
+                billing_date: value,
+                due_date: dueDate,
+            };
+        });
+    };
 
     const handleChangePeriod = (value) => {
         const firstDate = value.date(1);
@@ -141,6 +184,7 @@ export default function Edit({
     const maintenanceOptions = getOptionsForType("Maintenance");
     const vehicleOptions = getOptionsForType("Parkir");
     const electricOptions = getOptionsForType("Listrik");
+    const waterOptions = getOptionsForType("Air");
 
     const handleChangeWater = (value) => {
         setWaterTypeSelected(value);
@@ -157,48 +201,6 @@ export default function Edit({
             minimum_charge: findCategory?.minimum_charge,
         }));
     };
-    const waterOptions = getOptionsForType("Air");
-    // const OptionsCategory =
-    //     billingType === "Listrik" ? electricOptions : waterOptions;
-
-    // const categoryError =
-    //     billingType === "Listrik" ? errors.electric_type : errors.water_type;
-
-    // const handleChangeWaterOrElectricType = (value) => {
-    //     if (billingType === "Air") {
-    //         setWaterTypeSelected(value);
-    //         const findBilling = billingCategory.find(
-    //             (type) => type.billing_type === "Air"
-    //         );
-    //         const findCategory = findBilling?.categories.find(
-    //             (items) => items.value == value
-    //         );
-
-    //         setData((prevValues) => ({
-    //             ...prevValues,
-    //             water_type: value,
-    //             unit_price: findCategory?.price,
-    //             minimum_charge: findCategory?.minimum_charge,
-    //         }));
-    //     } else if (billingType === "Listrik") {
-    //         setElectricTypeSelected(value);
-    //         const findBilling = billingCategory.find(
-    //             (type) => type.billing_type === "Listrik"
-    //         );
-    //         const findCategory = findBilling?.categories.find(
-    //             (items) => items.value == value
-    //         );
-
-    //         setData((prevValues) => ({
-    //             ...prevValues,
-    //             electric_type: value,
-    //             unit_price: findCategory?.price,
-    //             minimum_charge: findCategory?.minimum_charge,
-    //         }));
-    //     } else {
-    //         return;
-    //     }
-    // };
 
     const handleElectricChange = (value) => {
         setElectricTypeSelected(value);
@@ -245,19 +247,25 @@ export default function Edit({
             status: value,
         }));
     };
-    const handleOwnerChangeChange = (value) => {
-        setOwner(value);
-        setData((prevValues) => ({
-            ...prevValues,
-            owner_id: value.value,
-        }));
-    };
+    // const handleOwnerChangeChange = (value) => {
+    //     setOwner(value);
+    //     setData((prevValues) => ({
+    //         ...prevValues,
+    //         owner_id: value.value,
+    //     }));
+    // };
 
     const handleRoomChange = (value) => {
         setRoom(value);
+        const findOwnerTower = towerData.find(
+            (item) => item.value == value.apartmentTowerId
+        );
+        setTower(findOwnerTower);
+        setResidence(value.ownerName);
         setData((prevValue) => ({
             ...prevValue,
             room_no: value.value,
+            tower_id: value.apartmentTowerId,
             owner_id: value.value,
         }));
     };
@@ -267,14 +275,6 @@ export default function Edit({
         setData((prevValue) => ({
             ...prevValue,
             tower_id: value.value,
-        }));
-    };
-
-    const handleResidenceChange = (value) => {
-        setResidence(value);
-        setData((prevValues) => ({
-            ...prevValues,
-            residence_id: value.value,
         }));
     };
 
@@ -436,6 +436,11 @@ export default function Edit({
                                                 }
                                                 onChange={handleChangePeriod}
                                             />
+                                            {errors.period && (
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
+                                                    {errors.period}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col">
@@ -451,6 +456,7 @@ export default function Edit({
                                                 value={tower}
                                                 onChange={handleTowerChange}
                                                 options={towerData}
+                                                disabled={true}
                                             />
                                             {errors.tower_id && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
@@ -466,7 +472,11 @@ export default function Edit({
                                                 Nama Owner
                                             </Typography>
 
-                                            <InputSelect
+                                            <CustomInput
+                                                value={residence}
+                                                disabled={true}
+                                            />
+                                            {/* <InputSelect
                                                 value={residence}
                                                 onChange={handleResidenceChange}
                                                 options={residenceData}
@@ -475,7 +485,7 @@ export default function Edit({
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.residence_id}
                                                 </p>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
@@ -484,7 +494,7 @@ export default function Edit({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Nomor Room
+                                                Nomor Unit
                                             </Typography>
 
                                             <InputSelect
@@ -1150,7 +1160,7 @@ export default function Edit({
                                                                   /\B(?=(\d{3})+(?!\d))/g,
                                                                   "."
                                                               )
-                                                        : ""
+                                                        : 0
                                                 }
                                                 onChange={(e) => {
                                                     const unformattedValue =
@@ -1163,7 +1173,9 @@ export default function Edit({
                                                         unformattedValue
                                                     );
                                                 }}
-                                                type="text"
+                                                disabled={
+                                                    billingType !== "Parkir"
+                                                }
                                                 errors={errors.fine}
                                                 className="tablet:mt-0"
                                             />
@@ -1209,8 +1221,7 @@ export default function Edit({
                                                 id="billing_date"
                                                 value={data.billing_date}
                                                 onChange={(e) =>
-                                                    setData(
-                                                        "billing_date",
+                                                    handleChangeBillingDate(
                                                         e.target.value
                                                     )
                                                 }
@@ -1229,12 +1240,7 @@ export default function Edit({
                                                 label="Tanggal Batas Pembayaran"
                                                 id="due_date"
                                                 value={data.due_date}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "due_date",
-                                                        e.target.value
-                                                    )
-                                                }
+                                                disabled={true}
                                                 errors={errors.due_date}
                                                 type="date"
                                             />
@@ -1272,7 +1278,7 @@ export default function Edit({
                                             )}
                                         </div>
                                         {status === "Success" && (
-                                            <div className="flex flex-col w-full mr-4">
+                                            <div className="flex flex-col w-full mr-4 tablet:mt-8">
                                                 <Typography
                                                     variant="paragraph"
                                                     className="mb-2 text-base font-semibold "
@@ -1290,7 +1296,7 @@ export default function Edit({
                                                         )
                                                     }
                                                     errors={errors.paid_date}
-                                                    className="tablet:mt-8"
+                                                    className="tablet:mt-0"
                                                     type="date"
                                                 />
                                             </div>

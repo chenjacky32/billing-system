@@ -53,6 +53,8 @@ export default function Billing({ auth, errors, data, filters }) {
         setStatus(value);
     };
 
+    console.log(data.data);
+
     function getStatusColor(status) {
         switch (status) {
             case "Pending":
@@ -339,7 +341,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner.room_no
+                                                                        residence?.roomNo
                                                                     }
                                                                 </Typography>
                                                             </div>

@@ -14,9 +14,21 @@ import {
     Select,
 } from "@material-tailwind/react";
 
-const EditPendingAccount = ({ auth, userApartment, apartmentTower }) => {
+const EditPendingAccount = ({
+    auth,
+    userApartment,
+    apartmentTower,
+    apartmenetData,
+    apartTowerData,
+    apartId,
+}) => {
+    const role = auth.user.role;
+
     const { data, setData, post, processing, errors } = useForm({
         active: userApartment.active || 0,
+        apartmentId:
+            role === "SUPER ADMIN" ? userApartment.apartmentId : apartId,
+        apartmentTowerId: userApartment.apartmentTowerId || "",
     });
 
     const dataID = userApartment.id;
@@ -30,6 +42,14 @@ const EditPendingAccount = ({ auth, userApartment, apartmentTower }) => {
         apartmentTower: apartmentTower?.tower_name,
     });
 
+    const [apartment, setApartment] = React.useState(
+        apartmenetData.find((item) => item.value === userApartment.apartmentId)
+    );
+    const [tower, setTower] = React.useState(
+        apartTowerData.find(
+            (item) => item.value === userApartment.apartmentTowerId
+        )
+    );
     const [status, setStatus] = React.useState(userApartment.active);
 
     const handleStatusChange = (value) => {
@@ -37,6 +57,22 @@ const EditPendingAccount = ({ auth, userApartment, apartmentTower }) => {
         setData((prevValues) => ({
             ...prevValues,
             active: value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            apartmentTowerId: value.value,
+        }));
+    };
+
+    const handleApartmentChange = (value) => {
+        setApartment(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            apartmentId: value.value,
         }));
     };
 
@@ -149,14 +185,25 @@ const EditPendingAccount = ({ auth, userApartment, apartmentTower }) => {
                                             >
                                                 Apartement
                                             </Typography>
-                                            <CustomInput
-                                                label="Apartment"
-                                                id="apartment"
-                                                value={
-                                                    userApartmentData?.apartment
-                                                }
-                                                disabled={true}
-                                            />
+                                            {role === "SUPER ADMIN" ? (
+                                                <InputSelect
+                                                    label="Apartment"
+                                                    value={apartment}
+                                                    onChange={
+                                                        handleApartmentChange
+                                                    }
+                                                    options={apartmenetData}
+                                                />
+                                            ) : (
+                                                <CustomInput
+                                                    label="Apartment"
+                                                    id="apartment"
+                                                    value={
+                                                        userApartmentData?.apartment
+                                                    }
+                                                    disabled={true}
+                                                />
+                                            )}
                                         </div>
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
@@ -165,13 +212,12 @@ const EditPendingAccount = ({ auth, userApartment, apartmentTower }) => {
                                             >
                                                 Nama Tower
                                             </Typography>
-                                            <CustomInput
+
+                                            <InputSelect
                                                 label="Tower"
-                                                id="tower"
-                                                value={
-                                                    userApartmentData?.apartmentTower
-                                                }
-                                                disabled={true}
+                                                value={tower}
+                                                onChange={handleTowerChange}
+                                                options={apartTowerData}
                                             />
                                         </div>
                                     </div>

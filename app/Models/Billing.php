@@ -40,9 +40,8 @@ class Billing extends Model
     }
 
     public function residence()
-{
+    {
     return $this->belongsTo(UserApartmentOkgo::class, 'residence_id', 'id')
         ->withDefault(); 
-}
-
+    }
 }

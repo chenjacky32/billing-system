@@ -251,7 +251,7 @@ export default function PenaltiesReport({
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner.owner_name
+                                                                        owner?.owner_name
                                                                     }
                                                                 </Typography>
                                                             </div>
@@ -264,7 +264,7 @@ export default function PenaltiesReport({
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner.room_no
+                                                                        owner?.room_no
                                                                     }
                                                                 </Typography>
                                                             </div>
