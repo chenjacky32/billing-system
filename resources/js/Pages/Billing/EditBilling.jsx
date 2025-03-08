@@ -456,7 +456,7 @@ export default function Edit({
                                                 value={tower}
                                                 onChange={handleTowerChange}
                                                 options={towerData}
-                                                disabled={true}
+                                                // disabled={true}
                                             />
                                             {errors.tower_id && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">

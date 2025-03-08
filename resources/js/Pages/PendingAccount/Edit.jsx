@@ -4,6 +4,7 @@ import PageHeader from "@/Components/PageHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import InputSelect from "@/Components/InputSelect";
+import ImageContainer from "@/Components/ImageContainer";
 import {
     Breadcrumbs,
     Button,
@@ -68,6 +69,8 @@ const EditPendingAccount = ({
         }));
     };
 
+    console.log(userApartment);
+
     const handleApartmentChange = (value) => {
         setApartment(value);
         setData((prevValues) => ({
@@ -93,7 +96,7 @@ const EditPendingAccount = ({
         >
             <Head title="Activate Account" />
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-[35rem] tablet:h-[55rem]">
+                <div className="w-full h-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -221,6 +224,36 @@ const EditPendingAccount = ({
                                             />
                                         </div>
                                     </div>
+
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
+                                        <div className="w-full mr-4 tablet:mt-0">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold"
+                                            >
+                                                Foto KTP
+                                            </Typography>
+                                            <ImageContainer
+                                                imageUrl={`https://apis.okgo.co.id/apartment-id/${userApartment.identityImage}`}
+                                                altText="ktp"
+                                                errorMesssageImg="Foto KTP Tidak Tersedia"
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8 h-fit">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold"
+                                            >
+                                                Foto Wajah
+                                            </Typography>
+                                            <ImageContainer
+                                                imageUrl={`https://apis.okgo.co.id/apartment-user/${userApartment.userImage}`}
+                                                altText="userSignature"
+                                                errorMesssageImg="Foto Wajah Tidak Tersedia"
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
