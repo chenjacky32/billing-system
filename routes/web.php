@@ -14,6 +14,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UnitOwnerApartmentController;
 use App\Http\Controllers\UnitOwnerController;
 use App\Http\Controllers\UserApartmentController;
+use App\Http\Controllers\VerifyAccessPasswordController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -102,6 +103,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/unit-owner-apartment', [UnitOwnerApartmentController::class, 'index'])->name('unitOwnerApartment.index');
     Route::post('/unit-owner-apartment/{id}/update', [UnitOwnerApartmentController::class, 'update'])->name('unitOwnerApartment.update');
 
+    //!Verify ResourceAccessPassword
+    Route::post('/verify-resource-access',[VerifyAccessPasswordController::class,'verifyAccessPassword'])->name('resourceAccess.verify');
 
     //!Billing Category
     Route::get('/billing-category',[BillingCategoryController::class,'index'])->name('billingCategory.index');

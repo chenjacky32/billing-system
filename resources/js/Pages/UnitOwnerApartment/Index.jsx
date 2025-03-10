@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import axios from "axios";
 import { router, usePage, Head, Link, useForm } from "@inertiajs/react";
 import {
     Card,
@@ -47,7 +48,7 @@ const UserApartment = ({
 }) => {
     const role = auth.user.role;
     const { flash } = usePage().props;
-
+    const [isPasswordVerified, setIsPasswordVerified] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ownerId, setOwnerId] = useState(null);
     const [ownerData, setOwnerData] = useState(
@@ -62,10 +63,15 @@ const UserApartment = ({
             (tower) => tower.value == ownerData?.apartmentTowerId || null
         )
     );
+    const [isLoading, setIsLoading] = useState(null);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
+    const [pendingEditId, setPendingEditId] = useState("");
 
     const { data, setData, post, processing, errors } = useForm({
         roomNo: ownerData?.roomNo || "",
         apartmentTowerId: ownerData?.apartmentTowerId || "",
+        password: "",
         apartmentId: role === "SUPER ADMIN" ? ownerData?.apartmentId : apartId,
     });
 
@@ -74,30 +80,79 @@ const UserApartment = ({
         setOwnerId(null);
         setOwnerData(null);
         setTower(null);
+        setIsPasswordVerified(null);
+        setData((prevValue) => ({
+            ...prevValue,
+            password: "",
+        }));
+    };
+
+    const handleClosePasswordModal = () => {
+        setIsPasswordModalOpen(false);
+        setPendingEditId(null);
+        setPasswordError("");
+        setIsPasswordVerified(null);
+        setData((prevValue) => ({
+            ...prevValue,
+            password: "",
+        }));
     };
 
     const handleEditClick = (id) => {
-        const ownerSelected = userApartments.data.find(
-            (item) => item.id === id
-        );
-        setOwnerId(id);
-        setOwnerData(ownerSelected);
-        setTower(
-            apartmentTower.find(
-                (item) => item.value === ownerSelected.apartmentTowerId
-            )
-        );
-        if (ownerSelected) {
-            setData({
-                roomNo: ownerSelected.roomNo,
-                apartmentTowerId: ownerSelected.apartmentTowerId,
-                apartmentId:
-                    role === "SUPER ADMIN"
-                        ? ownerSelected.apartmentId
-                        : apartId,
+        setPendingEditId(id);
+        setIsPasswordModalOpen(true);
+        setPasswordError("");
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading("verify-password");
+        setPasswordError("");
+        try {
+            const response = await axios.post(route("resourceAccess.verify"), {
+                password: data.password,
+                apartmentId: data.apartmentId,
             });
+
+            if (response.data.success) {
+                const id = pendingEditId;
+                const ownerSelected = userApartments.data.find(
+                    (item) => item.id === id
+                );
+                setOwnerId(id);
+                setOwnerData(ownerSelected);
+                setTower(
+                    apartmentTower.find(
+                        (item) => item.value === ownerSelected.apartmentTowerId
+                    )
+                );
+                if (ownerSelected) {
+                    setData({
+                        roomNo: ownerSelected.roomNo,
+                        apartmentTowerId: ownerSelected.apartmentTowerId,
+                        apartmentId:
+                            role === "SUPER ADMIN"
+                                ? ownerSelected.apartmentId
+                                : apartId,
+                    });
+                }
+                setIsPasswordModalOpen(false);
+                setIsModalOpen(true);
+            } else {
+                setPasswordError(
+                    response.data.errors?.password ||
+                        "Incorrect password, please try again."
+                );
+            }
+        } catch (error) {
+            if (error.response?.data?.errors?.password) {
+                setPasswordError(error.response.data.errors.password);
+            } else {
+                setPasswordError("Something went wrong, please try again.");
+            }
+        } finally {
+            setIsLoading(null);
         }
-        setIsModalOpen(true);
     };
 
     const handleTowerChange = (value) => {
@@ -120,6 +175,7 @@ const UserApartment = ({
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setIsLoading("edit-owner");
         post(`/unit-owner-apartment/${dataID}/update`, {
             onSuccess: () => {
                 handleModalClose();
@@ -127,6 +183,7 @@ const UserApartment = ({
                     toast.success("Unit owner data has been updated!");
                 }, 100);
             },
+            onFinish: () => setIsLoading(null),
         });
     };
 
@@ -154,6 +211,7 @@ const UserApartment = ({
     useEffect(() => {
         if (flash.message) {
             toast.success(flash.message);
+            console.log("useEffect 1");
         }
     }, [flash.message]);
 
@@ -372,6 +430,74 @@ const UserApartment = ({
                                         )}
                                     </tbody>
                                 </table>
+                                {isPasswordModalOpen && (
+                                    <ModalCustom
+                                        isOpen={isPasswordModalOpen}
+                                        onClose={() => {
+                                            setIsPasswordModalOpen(false);
+                                            setPendingEditId(null);
+                                        }}
+                                    >
+                                        <DialogHeader className="relative block m-0">
+                                            <PageHeader
+                                                title={"Otorisasi Diperlukan !"}
+                                                description={
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Unit Owner."
+                                                }
+                                                showSearch={false}
+                                            />
+                                            <IconButton
+                                                size="sm"
+                                                variant="text"
+                                                className="!absolute right-3.5 top-3.5"
+                                                onClick={() => {
+                                                    handleClosePasswordModal();
+                                                }}
+                                            >
+                                                <XMarkIcon className="w-4 h-4 stroke-2" />
+                                            </IconButton>
+                                        </DialogHeader>
+                                        <DialogBody className="pb-6 space-y-4">
+                                            <form
+                                                onSubmit={handlePasswordSubmit}
+                                            >
+                                                <div className="flex flex-col w-full">
+                                                    <CustomInput
+                                                        label="Password"
+                                                        id="password"
+                                                        type="password"
+                                                        value={data.password}
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "password",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className=""
+                                                    />
+                                                    {passwordError && (
+                                                        <p className="mt-2 text-sm text-red-500">
+                                                            {passwordError}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </form>
+                                        </DialogBody>
+                                        <DialogFooter>
+                                            <Button
+                                                variant="filled"
+                                                onClick={handlePasswordSubmit}
+                                                className="ml-auto bg-primary"
+                                                loading={
+                                                    isLoading ===
+                                                    "verify-password"
+                                                }
+                                            >
+                                                Verify
+                                            </Button>
+                                        </DialogFooter>
+                                    </ModalCustom>
+                                )}
                                 {isModalOpen && ownerData && (
                                     <ModalCustom
                                         isOpen={isModalOpen}
@@ -549,7 +675,10 @@ const UserApartment = ({
                                                 <Button
                                                     variant="filled"
                                                     onClick={handleSubmit}
-                                                    loading={processing}
+                                                    loading={
+                                                        isLoading ===
+                                                        "edit-owner"
+                                                    }
                                                     className="ml-auto bg-green-500"
                                                 >
                                                     Edit Data
