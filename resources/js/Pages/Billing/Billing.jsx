@@ -1,20 +1,27 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import axios from "axios";
 import { Head, Link } from "@inertiajs/react";
 import {
     Card,
     Typography,
     CardBody,
-    IconButton,
     Tooltip,
+    Button,
     Breadcrumbs,
     Select,
     Option,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+    IconButton,
 } from "@material-tailwind/react";
+import ModalCustom from "@/Components/ModalCustom";
 import {
     FolderPlusIcon,
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/solid";
+import CustomInput from "@/Components/CustomInput";
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import moment from "moment";
@@ -23,6 +30,7 @@ import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InputLabel from "@/Components/InputLabel";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import BillingRow from "@/Components/BillingRow";
 
 const TABLE_HEAD = [
@@ -44,16 +52,24 @@ const TABLE_HEAD = [
     "Delete",
 ];
 
-export default function Billing({ auth, errors, data, filters }) {
+export default function Billing({ auth, errors, data, filters, apartmentId }) {
+    const role = auth.user.role;
+
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
+    const [pendingEditId, setPendingEditId] = useState("");
+    const [isLoading, setIsLoading] = useState(null);
+    const [password, setPassword] = useState("");
+    const [apartId, setApartId] = useState(
+        role === "SUPER ADMIN" ? "" : apartmentId
+    );
 
     const handleStatusChange = (value) => {
         setStatus(value);
     };
-
-    console.log(data.data);
 
     function getStatusColor(status) {
         switch (status) {
@@ -166,6 +182,56 @@ export default function Billing({ auth, errors, data, filters }) {
         route("billing.delete"), { id };
         toast.dismiss();
     };
+
+    const handleClickEdit = ({ id, apartId }) => {
+        console.log(id);
+        setPendingEditId(id);
+        setApartId(apartId);
+        setIsPasswordModalOpen(true);
+        setPasswordError("");
+    };
+
+    const handleClosePasswordModal = () => {
+        setIsPasswordModalOpen(false);
+        setPendingEditId(null);
+        setPassword("");
+        setPasswordError("");
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading("verify-password");
+        setPasswordError("");
+        try {
+            const response = await axios.post(route("resourceAccess.verify"), {
+                password: password,
+                apartmentId: apartId,
+            });
+
+            if (response.data.success) {
+                const id = pendingEditId;
+
+                router.visit(route("billing.edit", { id }), {
+                    method: "get",
+                    data: {
+                        id: undefined,
+                    },
+                });
+            } else {
+                setPasswordError(response.data.errors?.password);
+            }
+        } catch (error) {
+            if (error.response?.data?.errors?.password) {
+                setPasswordError(error.response.data.errors.password);
+            } else {
+                setPasswordError("Something went wrong, please try again.");
+            }
+        } finally {
+            setIsLoading(null);
+        }
+    };
+    console.log(apartmentId);
+    console.log(data.data);
 
     return (
         <AuthenticatedLayout
@@ -308,6 +374,7 @@ export default function Billing({ auth, errors, data, filters }) {
                                                 {
                                                     id,
                                                     owner,
+                                                    apartment_id,
                                                     billing_type,
                                                     billing_fee,
                                                     period,
@@ -560,23 +627,47 @@ export default function Billing({ auth, errors, data, filters }) {
                                                                 }}
                                                                 className="bg-green-600"
                                                             >
-                                                                <Link
-                                                                    href={route(
-                                                                        "billing.edit",
-                                                                        {
-                                                                            id: id,
-                                                                        }
-                                                                    )}
-                                                                    method="get"
-                                                                    data={{
-                                                                        id: undefined,
-                                                                    }}
-                                                                    as="button"
-                                                                >
-                                                                    <IconButton color="green">
-                                                                        <PencilIcon className="w-4 h-4" />
-                                                                    </IconButton>
-                                                                </Link>
+                                                                {role ===
+                                                                "SUPER ADMIN" ? (
+                                                                    <>
+                                                                        <Link
+                                                                            href={route(
+                                                                                "billing.edit",
+                                                                                {
+                                                                                    id: id,
+                                                                                }
+                                                                            )}
+                                                                            method="get"
+                                                                            data={{
+                                                                                id: undefined,
+                                                                            }}
+                                                                            as="button"
+                                                                        >
+                                                                            <IconButton color="green">
+                                                                                <PencilIcon className="w-4 h-4" />
+                                                                            </IconButton>
+                                                                        </Link>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Button
+                                                                            size="md"
+                                                                            variant="gradient"
+                                                                            color="green"
+                                                                            onClick={() =>
+                                                                                handleClickEdit(
+                                                                                    {
+                                                                                        id: id,
+                                                                                        apartId:
+                                                                                            apartment_id,
+                                                                                    }
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilIcon className="w-4 h-4" />
+                                                                        </Button>
+                                                                    </>
+                                                                )}
                                                             </Tooltip>
                                                         </td>
                                                         <td className={classes}>
@@ -619,6 +710,73 @@ export default function Billing({ auth, errors, data, filters }) {
                                         )}
                                     </tbody>
                                 </table>
+                                {isPasswordModalOpen && (
+                                    <ModalCustom
+                                        isOpen={isPasswordModalOpen}
+                                        onClose={() => {
+                                            setIsPasswordModalOpen(false);
+                                            setPendingEditId(null);
+                                        }}
+                                    >
+                                        <DialogHeader className="relative block m-0">
+                                            <PageHeader
+                                                title={"Otorisasi Diperlukan !"}
+                                                description={
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Unit Owner."
+                                                }
+                                                showSearch={false}
+                                            />
+                                            <IconButton
+                                                size="sm"
+                                                variant="text"
+                                                className="!absolute right-3.5 top-3.5"
+                                                onClick={() => {
+                                                    handleClosePasswordModal();
+                                                }}
+                                            >
+                                                <XMarkIcon className="w-4 h-4 stroke-2" />
+                                            </IconButton>
+                                        </DialogHeader>
+                                        <DialogBody className="pb-6 space-y-4">
+                                            <form
+                                                onSubmit={handlePasswordSubmit}
+                                            >
+                                                <div className="flex flex-col w-full">
+                                                    <CustomInput
+                                                        label="Password"
+                                                        id="password"
+                                                        type="password"
+                                                        value={password}
+                                                        onChange={(e) =>
+                                                            setPassword(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className=""
+                                                    />
+                                                    {passwordError && (
+                                                        <p className="mt-2 text-sm text-red-500">
+                                                            {passwordError}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </form>
+                                        </DialogBody>
+                                        <DialogFooter>
+                                            <Button
+                                                variant="filled"
+                                                onClick={handlePasswordSubmit}
+                                                className="ml-auto bg-primary"
+                                                loading={
+                                                    isLoading ===
+                                                    "verify-password"
+                                                }
+                                            >
+                                                Verify
+                                            </Button>
+                                        </DialogFooter>
+                                    </ModalCustom>
+                                )}
                             </CardBody>
                             <Pagination
                                 current_page={data.current_page}

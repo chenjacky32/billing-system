@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BillingCreated;
 use App\Events\BillingPaid;
+use App\Models\Apartment;
 use App\Models\ApartmentOwner;
 use App\Models\ApartmentTower;
 use App\Models\Billing;
@@ -24,7 +25,11 @@ class BillingController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+        $userApartId = $user->apartment_id;
+        $ApartmentId = Apartment::find($userApartId);
+
         return Inertia::render('Billing/Billing', [
+            'apartmentId'=> $ApartmentId,
             'filters' => $request->only('search', 'status'),  // Include 'status' in the filters
             'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user'])
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {

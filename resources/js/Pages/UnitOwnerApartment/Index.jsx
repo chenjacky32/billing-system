@@ -99,9 +99,33 @@ const UserApartment = ({
     };
 
     const handleEditClick = (id) => {
-        setPendingEditId(id);
-        setIsPasswordModalOpen(true);
-        setPasswordError("");
+        if (role === "SUPER ADMIN") {
+            const ownerSelected = userApartments.data.find(
+                (item) => item.id === id
+            );
+            setOwnerId(id);
+            setOwnerData(ownerSelected);
+            setTower(
+                apartmentTower.find(
+                    (item) => item.value === ownerSelected.apartmentTowerId
+                )
+            );
+            if (ownerSelected) {
+                setData({
+                    roomNo: ownerSelected.roomNo,
+                    apartmentTowerId: ownerSelected.apartmentTowerId,
+                    apartmentId:
+                        role === "SUPER ADMIN"
+                            ? ownerSelected.apartmentId
+                            : apartId,
+                });
+            }
+            setIsModalOpen(true);
+        } else {
+            setPendingEditId(id);
+            setIsPasswordModalOpen(true);
+            setPasswordError("");
+        }
     };
 
     const handlePasswordSubmit = async (e) => {
