@@ -476,16 +476,6 @@ export default function Edit({
                                                 value={residence}
                                                 disabled={true}
                                             />
-                                            {/* <InputSelect
-                                                value={residence}
-                                                onChange={handleResidenceChange}
-                                                options={residenceData}
-                                            />
-                                            {errors.residence_id && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.residence_id}
-                                                </p>
-                                            )} */}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
@@ -516,7 +506,6 @@ export default function Edit({
                                                 Tipe Billing
                                             </Typography>
                                             <Select
-                                                label="Tipe Billing"
                                                 id="billing_type"
                                                 color="blue"
                                                 value={billingType}
@@ -578,221 +567,6 @@ export default function Edit({
                                                 </div>
                                             </div>
                                         )}
-                                    {/* {billingType === "Listrik" ||
-                                    billingType === "Air" ? (
-                                        <>
-                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                                <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
-                                                    <div className="w-full mr-4">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Kategori / Jenis
-                                                            Tagihan
-                                                        </Typography>
-                                                        <Select
-                                                            label="Kategori / Jenis Tagihan"
-                                                            id={
-                                                                billingType ===
-                                                                "Listrik"
-                                                                    ? "electric_type"
-                                                                    : "water_type"
-                                                            }
-                                                            value={
-                                                                billingType ===
-                                                                "Listrik"
-                                                                    ? electricTypeSelected
-                                                                    : waterTypeSelected
-                                                            }
-                                                            onChange={
-                                                                handleChangeWaterOrElectricType
-                                                            }
-                                                        >
-                                                            {OptionsCategory.map(
-                                                                (
-                                                                    items,
-                                                                    index
-                                                                ) => {
-                                                                    return (
-                                                                        <Option
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            value={items.value.toString()}
-                                                                        >
-                                                                            {
-                                                                                items.label
-                                                                            }
-                                                                        </Option>
-                                                                    );
-                                                                }
-                                                            )}
-                                                        </Select>
-                                                        {categoryError && (
-                                                            <p className="mt-3 ml-0 text-sm text-red-500">
-                                                                {categoryError}
-                                                            </p>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Meteran Awal
-                                                        </Typography>
-
-                                                        <CustomInput
-                                                            label="Meteran Awal"
-                                                            id="start_meter"
-                                                            value={
-                                                                data.start_meter
-                                                                    ? data.start_meter
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const unformattedValue =
-                                                                    e.target.value.replace(
-                                                                        /\./g,
-                                                                        ""
-                                                                    );
-                                                                setData(
-                                                                    "start_meter",
-                                                                    unformattedValue
-                                                                );
-                                                            }}
-                                                            errors={
-                                                                errors.start_meter
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Meteran Akhir
-                                                        </Typography>
-                                                        <CustomInput
-                                                            label="Meteran Akhir"
-                                                            id="end_meter"
-                                                            value={
-                                                                data.end_meter
-                                                                    ? data.end_meter
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const unformattedValue =
-                                                                    e.target.value.replace(
-                                                                        /\./g,
-                                                                        ""
-                                                                    );
-                                                                setData(
-                                                                    "end_meter",
-                                                                    unformattedValue
-                                                                );
-                                                            }}
-                                                            errors={
-                                                                errors.end_meter
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Total Meteran
-                                                        </Typography>
-                                                        <CustomInput
-                                                            disabled={true}
-                                                            label="Total Meteran"
-                                                            id="meter_reading"
-                                                            value={
-                                                                data.meter_reading
-                                                                    ? data.meter_reading
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            errors={
-                                                                errors.meter_reading
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold "
-                                                    >
-                                                        {isAirOrListrik}
-                                                    </Typography>
-                                                    <CustomInput
-                                                        label={isAirOrListrik}
-                                                        id="unit_price"
-                                                        value={
-                                                            data.unit_price
-                                                                ? data.unit_price
-                                                                      .toString()
-                                                                      .replace(
-                                                                          /\B(?=(\d{3})+(?!\d))/g,
-                                                                          "."
-                                                                      )
-                                                                : ""
-                                                        }
-                                                        disabled={true}
-                                                        errors={
-                                                            errors.unit_price
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold "
-                                                    >
-                                                        Minimum Charge
-                                                    </Typography>
-                                                    <CustomInput
-                                                        label="Minimum Charge"
-                                                        id="minimum_charge"
-                                                        value={
-                                                            data.minimum_charge
-                                                                ? data.minimum_charge
-                                                                      .toString()
-                                                                      .replace(
-                                                                          /\B(?=(\d{3})+(?!\d))/g,
-                                                                          "."
-                                                                      )
-                                                                : 0
-                                                        }
-                                                        disabled={true}
-                                                        errors={
-                                                            errors.minimum_charge
-                                                        }
-                                                    ></CustomInput>
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : null} */}
                                     <>
                                         <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                             <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
@@ -1121,10 +895,10 @@ export default function Edit({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Biaya Tagihan
+                                                Nominal Tagihan
                                             </Typography>
                                             <CustomInput
-                                                label="Biaya Tagihan"
+                                                label="Nominal Tagihan"
                                                 id="billing_fee"
                                                 value={
                                                     data.billing_fee
@@ -1181,6 +955,43 @@ export default function Edit({
                                             />
                                         </div>
                                     </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tanggal Tagihan
+                                            </Typography>
+                                            <CustomInput
+                                                id="billing_date"
+                                                value={data.billing_date}
+                                                onChange={(e) =>
+                                                    handleChangeBillingDate(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                errors={errors.billing_date}
+                                                type="date"
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tanggal Batas Pembayaran
+                                            </Typography>
+                                            <CustomInput
+                                                label="Tanggal Batas Pembayaran"
+                                                id="due_date"
+                                                value={data.due_date}
+                                                disabled={true}
+                                                errors={errors.due_date}
+                                                type="date"
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
                                         <div className="mr-4 w-fit tablet:mt-8">
                                             <Button
@@ -1214,48 +1025,9 @@ export default function Edit({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Tanggal Tagihan
-                                            </Typography>
-                                            <CustomInput
-                                                label="Tanggal Tagihan Dibuat"
-                                                id="billing_date"
-                                                value={data.billing_date}
-                                                onChange={(e) =>
-                                                    handleChangeBillingDate(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                errors={errors.billing_date}
-                                                type="date"
-                                            />
-                                        </div>
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Tanggal Batas Pembayaran
-                                            </Typography>
-                                            <CustomInput
-                                                label="Tanggal Batas Pembayaran"
-                                                id="due_date"
-                                                value={data.due_date}
-                                                disabled={true}
-                                                errors={errors.due_date}
-                                                type="date"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
                                                 Status Pembayaran
                                             </Typography>
                                             <Select
-                                                label="Status Pembayaran"
                                                 id="status"
                                                 color="blue"
                                                 value={status}
@@ -1286,7 +1058,6 @@ export default function Edit({
                                                     Tanggal Pembayaran
                                                 </Typography>
                                                 <CustomInput
-                                                    label="Tanggal Pembayaran"
                                                     id="paid_date"
                                                     value={data.paid_date}
                                                     onChange={(e) =>

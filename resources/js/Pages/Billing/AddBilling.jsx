@@ -427,16 +427,6 @@ export default function AddBiling({
                                                 value={residence}
                                                 disabled={true}
                                             />
-                                            {/* <InputSelect
-                                                value={residence}
-                                                onChange={handleResidenceChange}
-                                                options={residenceData}
-                                            />
-                                            {errors.residence_id && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.residence_id}
-                                                </p>
-                                            )} */}
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
@@ -467,7 +457,6 @@ export default function AddBiling({
                                                 Tipe Billing
                                             </Typography>
                                             <Select
-                                                label="Tipe Billing"
                                                 id="billing_type"
                                                 color="blue"
                                                 value={billingType}
@@ -526,215 +515,6 @@ export default function AddBiling({
                                                 </div>
                                             </div>
                                         )}
-                                    {/* {billingType === "Listrik" ||
-                                    billingType === "Air" ? (
-                                        <>
-                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                                <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
-                                                    <div className="w-full mr-4">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Kategori / Jenis
-                                                            Tagihan
-                                                        </Typography>
-                                                        <Select
-                                                            label="Kategori / Jenis Tagihan"
-                                                            id={
-                                                                billingType ===
-                                                                "Listrik"
-                                                                    ? "electric_type"
-                                                                    : "water_type"
-                                                            }
-                                                            onChange={
-                                                                handleChangeWaterOrElectricType
-                                                            }
-                                                        >
-                                                            {OptionsCategory.map(
-                                                                (
-                                                                    items,
-                                                                    index
-                                                                ) => {
-                                                                    return (
-                                                                        <Option
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            value={items.value.toString()}
-                                                                        >
-                                                                            {
-                                                                                items.label
-                                                                            }
-                                                                        </Option>
-                                                                    );
-                                                                }
-                                                            )}
-                                                        </Select>
-                                                        {categoryError && (
-                                                            <p className="mt-3 ml-0 text-sm text-red-500">
-                                                                {categoryError}
-                                                            </p>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Meteran Awal
-                                                        </Typography>
-
-                                                        <CustomInput
-                                                            label="Meteran Awal"
-                                                            id="start_meter"
-                                                            value={
-                                                                data.start_meter
-                                                                    ? data.start_meter
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const unformattedValue =
-                                                                    e.target.value.replace(
-                                                                        /\./g,
-                                                                        ""
-                                                                    );
-                                                                setData(
-                                                                    "start_meter",
-                                                                    unformattedValue
-                                                                );
-                                                            }}
-                                                            errors={
-                                                                errors.start_meter
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Meteran Akhir
-                                                        </Typography>
-                                                        <CustomInput
-                                                            label="Meteran Akhir"
-                                                            id="end_meter"
-                                                            value={
-                                                                data.end_meter
-                                                                    ? data.end_meter
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const unformattedValue =
-                                                                    e.target.value.replace(
-                                                                        /\./g,
-                                                                        ""
-                                                                    );
-                                                                setData(
-                                                                    "end_meter",
-                                                                    unformattedValue
-                                                                );
-                                                            }}
-                                                            errors={
-                                                                errors.end_meter
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Total Meteran
-                                                        </Typography>
-                                                        <CustomInput
-                                                            disabled={true}
-                                                            label="Total Meteran"
-                                                            id="meter_reading"
-                                                            value={
-                                                                data.meter_reading
-                                                                    ? data.meter_reading
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            errors={
-                                                                errors.meter_reading
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold "
-                                                    >
-                                                        {isAirOrListrik}
-                                                    </Typography>
-                                                    <CustomInput
-                                                        label={isAirOrListrik}
-                                                        id="unit_price"
-                                                        value={
-                                                            data.unit_price
-                                                                ? data.unit_price
-                                                                      .toString()
-                                                                      .replace(
-                                                                          /\B(?=(\d{3})+(?!\d))/g,
-                                                                          "."
-                                                                      )
-                                                                : ""
-                                                        }
-                                                        disabled={true}
-                                                        errors={
-                                                            errors.unit_price
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold "
-                                                    >
-                                                        Minimum Charge
-                                                    </Typography>
-                                                    <CustomInput
-                                                        label="Minimum Charge"
-                                                        id="minimum_charge"
-                                                        value={
-                                                            data.minimum_charge
-                                                                ? data.minimum_charge
-                                                                      .toString()
-                                                                      .replace(
-                                                                          /\B(?=(\d{3})+(?!\d))/g,
-                                                                          "."
-                                                                      )
-                                                                : 0
-                                                        }
-                                                        disabled={true}
-                                                        errors={
-                                                            errors.minimum_charge
-                                                        }
-                                                    ></CustomInput>
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : null} */}
                                     <>
                                         <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                             <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
@@ -1064,10 +844,10 @@ export default function AddBiling({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
-                                                Biaya Tagihan
+                                                Nominal Tagihan
                                             </Typography>
                                             <CustomInput
-                                                label="Biaya Tagihan"
+                                                label="Nominal Tagihan"
                                                 id="billing_fee"
                                                 value={
                                                     data.billing_fee
@@ -1151,33 +931,6 @@ export default function AddBiling({
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="mr-4 w-fit tablet:mt-8">
-                                            <Button
-                                                variant="filled"
-                                                onClick={handleCountBilling}
-                                                className="bg-orange-500"
-                                                loading={
-                                                    isLoading ===
-                                                    "count-billing"
-                                                }
-                                            >
-                                                Hitung Tagihan
-                                            </Button>
-                                        </div>
-                                        <div className="mr-4 w-fit tablet:mt-8">
-                                            <Button
-                                                variant="filled"
-                                                onClick={
-                                                    handleClearCountBilling
-                                                }
-                                                className="flex items-center justify-center gap-2 bg-red-600 "
-                                            >
-                                                <TrashIcon className="w-4 h-4" />{" "}
-                                                <span>Clear</span>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
                                                 variant="paragraph"
@@ -1186,7 +939,6 @@ export default function AddBiling({
                                                 Tanggal Tagihan
                                             </Typography>
                                             <CustomInput
-                                                label="Tanggal Tagihan Dibuat"
                                                 id="billing_date"
                                                 value={data.billing_date}
                                                 onChange={(e) =>
@@ -1215,6 +967,34 @@ export default function AddBiling({
                                             />
                                         </div>
                                     </div>
+                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={handleCountBilling}
+                                                className="bg-orange-500"
+                                                loading={
+                                                    isLoading ===
+                                                    "count-billing"
+                                                }
+                                            >
+                                                Hitung Tagihan
+                                            </Button>
+                                        </div>
+                                        <div className="mr-4 w-fit tablet:mt-8">
+                                            <Button
+                                                variant="filled"
+                                                onClick={
+                                                    handleClearCountBilling
+                                                }
+                                                className="flex items-center justify-center gap-2 bg-red-600 "
+                                            >
+                                                <TrashIcon className="w-4 h-4" />{" "}
+                                                <span>Clear</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max">
                                             <Button

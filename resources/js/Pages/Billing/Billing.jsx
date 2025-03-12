@@ -246,7 +246,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
             <Head title="Billing List" />
 
             <div className="py-12">
-                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8 ">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
