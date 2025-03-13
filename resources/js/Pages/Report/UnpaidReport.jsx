@@ -17,6 +17,9 @@ import "react-toastify/dist/ReactToastify.css";
 const TABLE_HEAD = [
     "Nama Owner",
     "Nomor Room",
+    "Apartemen",
+    "Tower",
+    "Tipe Unit",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Tanggal Tagihan Dibuat",
@@ -207,10 +210,12 @@ export default function UnpaidReport({
                                             (
                                                 {
                                                     id,
-                                                    owner,
+
                                                     billing_type,
                                                     billing_fee,
-                                                    created_by,
+                                                    residence,
+                                                    apartment,
+                                                    tower,
                                                     status,
                                                     billing_date,
                                                     due_date,
@@ -236,9 +241,22 @@ export default function UnpaidReport({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {
-                                                                        owner?.owner_name
-                                                                    }
+                                                                    {residence
+                                                                        ?.user
+                                                                        ?.fullname ??
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {residence?.roomNo ??
+                                                                        "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -250,8 +268,31 @@ export default function UnpaidReport({
                                                                     className="font-normal capitalize"
                                                                 >
                                                                     {
-                                                                        owner?.room_no
+                                                                        apartment.name
                                                                     }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {tower?.tower_name ??
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {"-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

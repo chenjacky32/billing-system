@@ -265,6 +265,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
+                                searchValue={search}
                                 handleSearch={(event) =>
                                     handleInputChange(
                                         event.target.value,
@@ -286,7 +287,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                 <div className="flex flex-wrap ">
                                     <div className="w-[21rem] mr-4 tablet:w-full">
                                         <InputLabel>
-                                            Status Pembyaran
+                                            Status Pembayaran
                                         </InputLabel>
                                         <Select
                                             id="status"

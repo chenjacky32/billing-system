@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage, router } from "@inertiajs/react";
 import {
     Card,
     Typography,
@@ -14,8 +14,6 @@ import {
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/solid";
-import { usePage, router } from "@inertiajs/react";
-import { useEffect } from "react";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
@@ -35,12 +33,16 @@ const TABLE_HEAD = [
 ];
 
 const BillingFineRules = ({ auth, errors, data, filters }) => {
+    const [search, setSearch] = useState("");
     const { flash } = usePage().props;
 
-    function handleSearch(event) {
+    function handleSearch(value, type) {
+        if (type === "search") {
+            setSearch(value);
+        }
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            { search: type === "search" ? value : search },
             {
                 preserveState: true,
                 replace: true,
@@ -51,7 +53,9 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
             // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
+            return `${baseUrl}${
+                baseUrl.includes("?") ? "&" : "?"
+            }search=${encodeURIComponent(searchQuery)}`;
         } else {
             // Don't include the search query
             return baseUrl;
@@ -98,7 +102,10 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12">
                             <PageHeader
-                                handleSearch={handleSearch}
+                                searchValue={search}
+                                handleSearch={(event) =>
+                                    handleSearch(event.target.value, "search")
+                                }
                                 title={"Billing Fine Rules List"}
                                 description={"Informasi Data Ketentuan Denda"}
                                 buttonLabel={"Tambah Data Ketentuan"}

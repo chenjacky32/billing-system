@@ -71,6 +71,7 @@ export default function AddBiling({
         vehicle_type_parking: vehicleTypeSelected,
     });
 
+    console.log(data.period);
     // console.log(data.fine);
     // console.log(flash);
     // console.log("useState", {

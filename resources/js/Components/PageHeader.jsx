@@ -12,6 +12,7 @@ import {
 
 export default function PageHeader({
     handleSearch,
+    searchValue = "",
     title,
     description,
     buttonLabel,
@@ -87,6 +88,7 @@ export default function PageHeader({
                     >
                         <Input
                             label={label}
+                            value={searchValue}
                             icon={<MagnifyingGlassIcon className="w-5 h-5 " />}
                             onChange={handleSearch}
                         />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import axios from "axios";
 import { router, usePage, Head, Link, useForm } from "@inertiajs/react";
@@ -16,7 +16,6 @@ import {
 } from "@material-tailwind/react";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect } from "react";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import ModalCustom from "@/Components/ModalCustom";
@@ -48,6 +47,7 @@ const UserApartment = ({
 }) => {
     const role = auth.user.role;
     const { flash } = usePage().props;
+    const [search, setSearch] = useState("");
     const [isPasswordVerified, setIsPasswordVerified] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ownerId, setOwnerId] = useState(null);
@@ -211,10 +211,13 @@ const UserApartment = ({
         });
     };
 
-    function handleSearch(event) {
+    function handleSearch(value, type) {
+        if (type === "search") {
+            setSearch(value);
+        }
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            { search: type === "search" ? value : search },
             {
                 preserveState: true,
                 replace: true,
@@ -225,7 +228,9 @@ const UserApartment = ({
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
             // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
+            return `${baseUrl}${
+                baseUrl.includes("?") ? "&" : "?"
+            }search=${encodeURIComponent(searchQuery)}`;
         } else {
             // Don't include the search query
             return baseUrl;
@@ -273,7 +278,10 @@ const UserApartment = ({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12">
                             <PageHeader
-                                handleSearch={handleSearch}
+                                searchValue={search}
+                                handleSearch={(event) =>
+                                    handleSearch(event.target.value, "search")
+                                }
                                 title={"Unit Owner Apartment List"}
                                 description={
                                     "Informasi Data Unit Owner Pada Apartemen"

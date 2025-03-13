@@ -131,6 +131,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
+                                searchValue={search}
                                 handleSearch={(e) =>
                                     handleInputChange(e.target.value, "search")
                                 }

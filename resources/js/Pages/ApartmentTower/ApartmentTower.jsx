@@ -32,11 +32,16 @@ const TABLE_HEAD = [
 
 const ApartmentTower = ({ auth, errors, data, filters }) => {
     const { flash } = usePage().props;
+    const [search, setSearch] = React.useState("");
 
-    function handleSearch(event) {
+    function handleSearch(value, type) {
+        if (type === "search") {
+            setSearch(value);
+        }
+
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            { search: type === "search" ? value : search },
             {
                 preserveState: true,
                 replace: true,
@@ -47,7 +52,9 @@ const ApartmentTower = ({ auth, errors, data, filters }) => {
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
             // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
+            return `${baseUrl}${
+                baseUrl.includes("?") ? "&" : "?"
+            }search=${encodeURIComponent(searchQuery)}`;
         } else {
             // Don't include the search query
             return baseUrl;
@@ -94,7 +101,10 @@ const ApartmentTower = ({ auth, errors, data, filters }) => {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12">
                             <PageHeader
-                                handleSearch={handleSearch}
+                                searchValue={search}
+                                handleSearch={(event) =>
+                                    handleSearch(event.target.value, "search")
+                                }
                                 title={"Apartment Tower List"}
                                 description={"Informasi Data Tower Apartemen"}
                                 buttonLabel={"Tambah Data Tower"}

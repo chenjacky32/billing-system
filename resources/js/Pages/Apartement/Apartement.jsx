@@ -10,7 +10,7 @@ import {
 } from "@material-tailwind/react";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { router, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
@@ -27,13 +27,17 @@ const TABLE_HEAD = [
 ];
 
 export default function Apartement({ auth, errors, data, filters }) {
+    const [search, setSearch] = useState("");
     const { flash } = usePage().props;
 
-    function handleSearch(event) {
-        console.log(event.target.value);
+    function handleSearch(value, type) {
+        if (type === "search") {
+            setSearch(value);
+        }
+
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            { search: type === "search" ? value : search },
             {
                 preserveState: true,
                 replace: true,
@@ -44,14 +48,16 @@ export default function Apartement({ auth, errors, data, filters }) {
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
             // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
+            return `${baseUrl}${
+                baseUrl.includes("?") ? "&" : "?"
+            }search=${encodeURIComponent(searchQuery)}`;
         } else {
             // Don't include the search query
             return baseUrl;
         }
     }
 
-    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="h-4 w-4" />;
+    const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
     useEffect(() => {
         if (flash.message) {
@@ -64,7 +70,7 @@ export default function Apartement({ auth, errors, data, filters }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Apartment
                 </h2>
             }
@@ -72,7 +78,7 @@ export default function Apartement({ auth, errors, data, filters }) {
             <Head title="Apartement" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -82,16 +88,19 @@ export default function Apartement({ auth, errors, data, filters }) {
                         </Link>
                         <Link
                             href={route("apartement.index")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Apartment
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                handleSearch={handleSearch}
+                                searchValue={search}
+                                handleSearch={(event) =>
+                                    handleSearch(event.target.value, "search")
+                                }
                                 title={"Apartment List"}
                                 description={"Informasi Data Apartememen"}
                                 buttonLabel={"Tambah Apartemen"}
@@ -99,9 +108,9 @@ export default function Apartement({ auth, errors, data, filters }) {
                                 addRoute={"apartement.add"}
                                 label="Cari Nama Apartemen"
                             />
-                            <CardBody className="overflow-scroll px-0">
+                            <CardBody className="px-0 overflow-scroll">
                                 <table
-                                    className="mt-4 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -112,7 +121,7 @@ export default function Apartement({ auth, errors, data, filters }) {
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="border-y  bg-primary pl-4 py-4 "
+                                                    className="py-4 pl-4 border-y bg-primary "
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -147,7 +156,7 @@ export default function Apartement({ auth, errors, data, filters }) {
                                                 return (
                                                     <tr
                                                         key={name}
-                                                        className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                        className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
@@ -235,7 +244,7 @@ export default function Apartement({ auth, errors, data, filters }) {
                                                                         variant="fill"
                                                                         color="green"
                                                                     >
-                                                                        <PencilIcon className="h-4 w-4" />
+                                                                        <PencilIcon className="w-4 h-4" />
                                                                     </IconButton>
                                                                 </Tooltip>
                                                             </Link>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApartmentOwner;
+use App\Models\UserApartmentOkgo;
 use Illuminate\Http\Request;
 use App\Models\Billing;
 use Inertia\Inertia;
@@ -26,17 +27,27 @@ class ReportController extends Controller
         $totalBillingFee = $queryBySuccess->sum('billing_fee');
     
         return Inertia::render('Report/PaidReport', [
-            'filters' => $request->only('search'),
-            'data' => Billing::with(['owner', 'createdBy'])
+            'filters' => $request->only('search','period'),
+            'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user','apartment'])
                 ->where('status', 'success')  // Only include records where status is "success"
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                     return $query->where('apartment_id', $user->apartment_id);
                 })
                 ->when($request->has('search'), function ($query) use ($request) {
                     $searchTerm = $request->input('search');
-                    $query->whereHas('owner', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('owner_name', 'like', "%$searchTerm%");
-                    });
+
+                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('fullname', 'like', "%$searchTerm%");
+                    })
+                    ->orWhere('roomNo', 'like', "%$searchTerm%")
+                    ->pluck('id') // Ambil hanya kolom `id`
+                    ->toArray();
+            
+                $query->whereIn('residence_id', $matchingResidenceIds);
+                })
+                ->when($request->filled('period'), function($query) use ($request){
+                    $period = $request->input('period');
+                    $query->where('period','like',"%$period%");
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
@@ -60,7 +71,7 @@ class ReportController extends Controller
 
         return Inertia::render('Report/UnpaidReport', [
             'filters' => $request->only('search'),  // Remove 'status' from the filters
-            'data' => Billing::with(['owner', 'createdBy'])
+            'data' => Billing::with(['owner', 'createdBy', 'tower', 'residence.user','apartment'])
                 ->where('status', 'pending')  // Only include records where status is "pending"
                 ->where('due_date', '>=', today()) // Only include records where due_date is today or in the future
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
@@ -68,9 +79,15 @@ class ReportController extends Controller
                 })
                 ->when($request->has('search'), function ($query) use ($request) {
                     $searchTerm = $request->input('search');
-                    $query->whereHas('owner', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('owner_name', 'like', "%$searchTerm%");
-                    });
+                    
+                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('fullname', 'like', "%$searchTerm%");
+                    })
+                    ->orWhere('roomNo', 'like', "%$searchTerm%")
+                    ->pluck('id') // Ambil hanya kolom `id`
+                    ->toArray();
+            
+                $query->whereIn('residence_id', $matchingResidenceIds);
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
@@ -96,7 +113,7 @@ class ReportController extends Controller
     
         return Inertia::render('Report/PenaltiesReport', [
             'filters' => $request->only('search'),  // Remove 'status' from the filters
-            'data' => Billing::with(['owner', 'createdBy'])
+            'data' => Billing::with(['owner', 'createdBy','tower','residence.user','apartment'])
                 ->where('status', 'pending')  // Only include records where status is "pending"
                 ->where('due_date', '<', today()) // Only include records where due_date is today or in the future
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
@@ -104,9 +121,15 @@ class ReportController extends Controller
                 })
                 ->when($request->has('search'), function ($query) use ($request) {
                     $searchTerm = $request->input('search');
-                    $query->whereHas('owner', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('owner_name', 'like', "%$searchTerm%");
-                    });
+                    
+                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('fullname', 'like', "%$searchTerm%");
+                    })
+                    ->orWhere('roomNo', 'like', "%$searchTerm%")
+                    ->pluck('id') // Ambil hanya kolom `id`
+                    ->toArray();
+            
+                $query->whereIn('residence_id', $matchingResidenceIds);
                 })
                 ->orderByDesc('id')
                 ->paginate(10),

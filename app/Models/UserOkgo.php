@@ -13,6 +13,13 @@ class UserOkgo extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
+    protected $hidden = [
+        'refferalCode', 'supervisor', 'merchantId', 'balance', 'xtBalance', 
+        'limitBalance', 'point', 'password', 'regid', 'posRegid', 'deleted', 
+        'login','loginTime','token','isSpender','createdBy','createdAt',
+        'updatedAt','browserId'
+    ];
+
     public function userApartments()
     {
         return $this->hasMany(UserApartmentOkgo::class, 'userId', 'id');
