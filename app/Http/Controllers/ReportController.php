@@ -70,7 +70,7 @@ class ReportController extends Controller
         $totalBillingFee = $queryByPending->sum('billing_fee');
 
         return Inertia::render('Report/UnpaidReport', [
-            'filters' => $request->only('search'),  // Remove 'status' from the filters
+            'filters' => $request->only('search','period'),  // Remove 'status' from the filters
             'data' => Billing::with(['owner', 'createdBy', 'tower', 'residence.user','apartment'])
                 ->where('status', 'pending')  // Only include records where status is "pending"
                 ->where('due_date', '>=', today()) // Only include records where due_date is today or in the future
@@ -88,6 +88,10 @@ class ReportController extends Controller
                     ->toArray();
             
                 $query->whereIn('residence_id', $matchingResidenceIds);
+                })
+                ->when($request->filled('period'), function($query) use ($request){
+                    $period = $request->input('period');
+                    $query->where('period','like',"%$period%");
                 })
                 ->orderByDesc('id')
                 ->paginate(10),
@@ -112,7 +116,7 @@ class ReportController extends Controller
         $totalFine = $queryByPenalties->sum('fine');
     
         return Inertia::render('Report/PenaltiesReport', [
-            'filters' => $request->only('search'),  // Remove 'status' from the filters
+            'filters' => $request->only('search','period'),  // Remove 'status' from the filters
             'data' => Billing::with(['owner', 'createdBy','tower','residence.user','apartment'])
                 ->where('status', 'pending')  // Only include records where status is "pending"
                 ->where('due_date', '<', today()) // Only include records where due_date is today or in the future
@@ -130,6 +134,10 @@ class ReportController extends Controller
                     ->toArray();
             
                 $query->whereIn('residence_id', $matchingResidenceIds);
+                })
+                ->when($request->filled('period'), function($query) use ($request){
+                    $period = $request->input('period');
+                    $query->where('period','like',"%$period%");
                 })
                 ->orderByDesc('id')
                 ->paginate(10),

@@ -412,11 +412,15 @@ export default function PaidReport({
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
-                                                                    className={`font-bold capitalize  ${getStatusColor(
-                                                                        status
-                                                                    )} text-white rounded-2xl w-20 flex justify-center`}
+                                                                    className="font-normal capitalize"
                                                                 >
-                                                                    {status}
+                                                                    {period
+                                                                        ? moment(
+                                                                              period
+                                                                          ).format(
+                                                                              "MMMM, YYYY"
+                                                                          )
+                                                                        : "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

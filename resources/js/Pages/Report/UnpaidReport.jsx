@@ -4,6 +4,7 @@ import {
     Card,
     Typography,
     CardBody,
+    Button,
     Breadcrumbs,
 } from "@material-tailwind/react";
 import { router, usePage } from "@inertiajs/react";
@@ -12,7 +13,9 @@ import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
+import CustomDatePicker from "@/Components/CustomDatePicker";
 import "react-toastify/dist/ReactToastify.css";
+import dayjs from "dayjs";
 
 const TABLE_HEAD = [
     "Nama Owner",
@@ -21,7 +24,9 @@ const TABLE_HEAD = [
     "Tower",
     "Tipe Unit",
     "Jenis Tagihan",
+    "Periode",
     "Biaya Tagihan",
+    "Denda",
     "Tanggal Tagihan Dibuat",
     "Tanggal Jatuh Tempo",
     "Status Pembayaran",
@@ -37,6 +42,7 @@ export default function UnpaidReport({
     totalCountPending,
 }) {
     const [search, setSearch] = useState("");
+    const [period, setPeriod] = useState(null);
 
     function getStatusColor(status) {
         switch (status) {
@@ -50,6 +56,27 @@ export default function UnpaidReport({
                 return ""; // Default background color
         }
     }
+
+    const applyFilters = () => {
+        router.get(
+            route(route().current()),
+            {
+                search: search,
+                period: period,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    };
+
+    const applyClearFilters = () => {
+        setSearch("");
+        setPeriod(null);
+        applyFilters();
+    };
+
     const handleInputChange = (value, type) => {
         if (type === "search") {
             setSearch(value);
@@ -61,6 +88,7 @@ export default function UnpaidReport({
             route(route().current()),
             {
                 search: type === "search" ? value : search,
+                period: period,
             },
             {
                 preserveState: true,
@@ -76,6 +104,9 @@ export default function UnpaidReport({
         if (searchQuery) {
             params.push(`search=${encodeURIComponent(searchQuery)}`);
         }
+        if (periodQuery) {
+            params.push(`period=${encodeURIComponent(periodQuery)}`);
+        }
 
         // Check if baseUrl already has a query parameter
         if (baseUrl.includes("?")) {
@@ -86,6 +117,19 @@ export default function UnpaidReport({
 
         return url;
     }
+
+    function formattedDate(date) {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    const handleChangePeriod = (value) => {
+        const firstDate = value.date(1);
+        setPeriod(formattedDate(firstDate.$d));
+    };
 
     const dataIsUnPaid = data.data.map((items) => items.billing_fee);
     const sumDataIsUnPaid = dataIsUnPaid.reduce((acc, currentValue) => {
@@ -124,6 +168,7 @@ export default function UnpaidReport({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
+                                searchValue={search}
                                 handleSearch={(event) =>
                                     handleInputChange(
                                         event.target.value,
@@ -150,34 +195,34 @@ export default function UnpaidReport({
                             />
                             <div className="mt-5">
                                 <div className="flex flex-wrap ">
-                                    {/* <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Dari Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="from_date"
-                                            onChange={(value) =>
-                                                handleInputChange(
-                                                    value,
-                                                    "from_date"
-                                                )
+                                    <div className="mr-4 w-[21rem]  tablet:w-full tablet:mt-5">
+                                        {/* <InputLabel>Sub Periode</InputLabel> */}
+                                        <CustomDatePicker
+                                            value={
+                                                period ? dayjs(period) : null
                                             }
-                                            className=""
-                                            type="date"
+                                            onChange={handleChangePeriod}
+                                            placeholderText={
+                                                "Pilih Periode Bulan"
+                                            }
                                         />
+                                        <div className="w-[21rem] flex flex-row gap-4 mt-4 tablet:w-full">
+                                            <Button
+                                                className="w-full bg-white tablet:w-full border-primary text-primary"
+                                                variant="outlined"
+                                                onClick={applyFilters}
+                                            >
+                                                Filter
+                                            </Button>
+                                            <Button
+                                                className="w-full text-red-400 bg-white border-red-400 tablet:w-full"
+                                                variant="outlined"
+                                                onClick={applyClearFilters}
+                                            >
+                                                Clear
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Sampai Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="until_date"
-                                            onChange={(value) =>
-                                                handleInputChange(
-                                                    value,
-                                                    "status"
-                                                )
-                                            }
-                                            className=""
-                                            type="date"
-                                        />
-                                    </div> */}
                                 </div>
                             </div>
                             <CardBody className="px-0 overflow-scroll">
@@ -210,16 +255,16 @@ export default function UnpaidReport({
                                             (
                                                 {
                                                     id,
-
                                                     billing_type,
                                                     billing_fee,
                                                     residence,
                                                     apartment,
+                                                    fine,
                                                     tower,
+                                                    period,
                                                     status,
                                                     billing_date,
                                                     due_date,
-                                                    paid_date,
                                                 },
                                                 index
                                             ) => {
@@ -316,6 +361,23 @@ export default function UnpaidReport({
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
+                                                                    {period
+                                                                        ? moment(
+                                                                              period
+                                                                          ).format(
+                                                                              "MMMM, YYYY"
+                                                                          )
+                                                                        : "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
                                                                     {new Intl.NumberFormat(
                                                                         "id-ID",
                                                                         {
@@ -341,6 +403,25 @@ export default function UnpaidReport({
                                                             </Typography>
                                                         </td> */}
 
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        fine
+                                                                    )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
