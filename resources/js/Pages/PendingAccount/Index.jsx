@@ -27,6 +27,7 @@ const TABLE_HEAD = [
     "Email",
     "Apartemen",
     "Tower",
+    "No Unit",
     "status",
     "Foto KTP",
     "Foto Wajah",
@@ -201,6 +202,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                     user,
                                                     apartmentTower,
                                                     identityImage,
+                                                    roomNo,
                                                     userImage,
                                                     active,
                                                 },
@@ -299,6 +301,18 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                     {apartmentTower
                                                                         ? apartmentTower.tower_name
                                                                         : "No Tower"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {roomNo ??
+                                                                        "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

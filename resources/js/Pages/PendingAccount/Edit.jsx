@@ -40,6 +40,7 @@ const EditPendingAccount = ({
         email: userApartment?.user?.email,
         phone: userApartment?.user?.phone,
         apartment: apartmentTower?.apartment?.name,
+        roomNo: userApartment.roomNo,
         apartmentTower: apartmentTower?.tower_name,
     });
 
@@ -207,6 +208,23 @@ const EditPendingAccount = ({
                                                     disabled={true}
                                                 />
                                             )}
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Nomor Unit
+                                            </Typography>
+
+                                            <CustomInput
+                                                label="Unit Number"
+                                                id="unitNumber"
+                                                value={
+                                                    userApartmentData?.roomNo
+                                                }
+                                                disabled={true}
+                                            />
                                         </div>
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
