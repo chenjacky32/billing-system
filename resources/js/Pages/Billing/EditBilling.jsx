@@ -1,6 +1,7 @@
 import CustomInput from "@/Components/CustomInput";
 import InputSelect from "@/Components/InputSelect";
 import PageHeader from "@/Components/PageHeader";
+import InputUpload from "@/Components/InputUpload";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
@@ -25,7 +26,6 @@ export default function Edit({
     billingCategory,
     roomNumber,
     towerData,
-    // residenceData,
     WaterPriceData,
     WaterPriceMinimumCharge,
     waterPriceId,
@@ -88,7 +88,7 @@ export default function Edit({
         room_no: room.value,
         status: billingData.status,
         period: billingData.period,
-        // residence_id: billingData.residence_id,
+        end_meter_image_path: billingData.end_meter_image_path || null,
         apartment_id: apartmentId,
         tower_id: billingData.tower_id,
         paid_date: billingData.paid_date,
@@ -98,22 +98,8 @@ export default function Edit({
         due_date: billingData.due_date,
     });
 
-    // console.log(flash);
-    // console.log("useState", {
-    //     room: room,
-    //     tower: tower,
-    //     residence: residence,
-    //     billingType: billingType,
-    //     waterTypeSelected: waterTypeSelected,
-    //     electricTypeSelected: electricTypeSelected,
-    //     maintenanceTypeSelected: maintenanceTypeSelected,
-    //     maintenanceTypeSelected: maintenanceTypeSelected,
-    //     isLoading: isLoading,
-    // });
-    // console.log("useForm State", data);
-    // console.log(billingData.residence_id);
-
     const role = auth.user.role;
+    console.log(data.end_meter_image_path);
 
     function formattedDate(date) {
         if (!date) return null;
@@ -356,7 +342,6 @@ export default function Edit({
         }
     }
 
-    // const isAirOrListrik = billingType === "Air" ? "Harga / m3" : "Harga / kWh";
     const isAirOrListrik = () => {
         if (billingType === "Air") {
             return "Harga / m3";
@@ -622,7 +607,14 @@ export default function Edit({
                                                 {billingType === "Listrik" ||
                                                 billingType === "Air" ? (
                                                     <>
-                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                        <div
+                                                            className={`w-full mr-4 ${
+                                                                billingType ===
+                                                                "Air"
+                                                                    ? "tablet:mt-0"
+                                                                    : "tablet:mt-8"
+                                                            }`}
+                                                        >
                                                             <Typography
                                                                 variant="paragraph"
                                                                 className="mb-2 text-base font-semibold "
@@ -729,64 +721,85 @@ export default function Edit({
                                                 ) : null}
                                             </div>
                                         </div>
-                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                            {billingType === "Air" ||
-                                            billingType === "Listrik" ? (
-                                                <div className="w-full mr-4 tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold "
-                                                    >
-                                                        {isAirOrListrik()}
-                                                    </Typography>
-                                                    <CustomInput
-                                                        label={isAirOrListrik()}
-                                                        id="unit_price"
-                                                        value={
-                                                            data.unit_price
-                                                                ? data.unit_price
-                                                                      .toString()
-                                                                      .replace(
-                                                                          /\B(?=(\d{3})+(?!\d))/g,
-                                                                          "."
-                                                                      )
-                                                                : ""
-                                                        }
-                                                        disabled={true}
-                                                        errors={
-                                                            errors.unit_price
-                                                        }
-                                                    />
+                                        {billingType === "Air" ||
+                                        billingType === "Listrik" ? (
+                                            <div>
+                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            {isAirOrListrik()}
+                                                        </Typography>
+                                                        <CustomInput
+                                                            label={isAirOrListrik()}
+                                                            id="unit_price"
+                                                            value={
+                                                                data.unit_price
+                                                                    ? data.unit_price
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : ""
+                                                            }
+                                                            disabled={true}
+                                                            errors={
+                                                                errors.unit_price
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="w-full mr-4 tablet:mt-8">
+                                                        <Typography
+                                                            variant="paragraph"
+                                                            className="mb-2 text-base font-semibold "
+                                                        >
+                                                            Minimum Charge
+                                                        </Typography>
+                                                        <CustomInput
+                                                            label="Minimum Charge"
+                                                            id="minimum_charge"
+                                                            value={
+                                                                data.minimum_charge
+                                                                    ? data.minimum_charge
+                                                                          .toString()
+                                                                          .replace(
+                                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                                              "."
+                                                                          )
+                                                                    : 0
+                                                            }
+                                                            disabled={true}
+                                                            errors={
+                                                                errors.minimum_charge
+                                                            }
+                                                        ></CustomInput>
+                                                    </div>
                                                 </div>
-                                            ) : null}
-
-                                            <div className="w-full mr-4 tablet:mt-8">
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Minimum Charge
-                                                </Typography>
-                                                <CustomInput
-                                                    label="Minimum Charge"
-                                                    id="minimum_charge"
-                                                    value={
-                                                        data.minimum_charge
-                                                            ? data.minimum_charge
-                                                                  .toString()
-                                                                  .replace(
-                                                                      /\B(?=(\d{3})+(?!\d))/g,
-                                                                      "."
-                                                                  )
-                                                            : 0
-                                                    }
-                                                    disabled={true}
-                                                    errors={
-                                                        errors.minimum_charge
-                                                    }
-                                                ></CustomInput>
+                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                    <div className="w-full mr-4 tablet:mt-0">
+                                                        <InputUpload
+                                                            label="Upload Foto Meteran Akhir"
+                                                            className="tablet:mt-8"
+                                                            onChange={(file) =>
+                                                                setData(
+                                                                    "end_meter_image_path",
+                                                                    file
+                                                                )
+                                                            }
+                                                            error={
+                                                                errors.end_meter_image_path
+                                                            }
+                                                            currentImage={
+                                                                data.end_meter_image_path
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        ) : null}
                                     </>
 
                                     <div

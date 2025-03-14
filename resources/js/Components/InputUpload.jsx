@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { XCircleIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
 import { toast } from "react-toastify";
 
-const InputUpload = ({ className, onChange, error, currentImage }) => {
+const InputUpload = ({
+    label = "",
+    className,
+    onChange,
+    error,
+    currentImage,
+}) => {
     const imageUrl = new URL(`/storage/${currentImage}`, window.location.origin)
         .href;
 
@@ -72,7 +78,7 @@ const InputUpload = ({ className, onChange, error, currentImage }) => {
                 htmlFor="file_input"
                 className="block mb-2 text-sm font-medium text-gray-700"
             >
-                Upload Your Logo
+                {label}
             </label>
 
             {preview ? (

@@ -17,7 +17,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Storage;
 
 class BillingController extends Controller
 {
@@ -231,6 +231,7 @@ class BillingController extends Controller
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
+            $rules['end_meter_image_path'] = 'required|image|mimes:jpeg,png,jpg,webp|max:2048';
         }
 
         if(in_array($request->input('billing_type'), ['Listrik'])) {
@@ -281,6 +282,17 @@ class BillingController extends Controller
             ])->first();
         } else {
             $billingCategory = null;
+        }
+
+        if(in_array($request->input('billing_type'),['Air', 'Listrik'])) {
+            if($request->hasFile('end_meter_image_path')){
+                // generate file img name
+                $fileName = 'end-meter-image/' . time() . '.' . $request->file('end_meter_image_path')->extension();
+                
+                // save new end meter image
+                $request->file('end_meter_image_path')->storeAs('public', $fileName);
+                $validatedData['end_meter_image_path'] = $fileName;
+            }
         }
 
          // Check if billing category exists
@@ -480,6 +492,10 @@ class BillingController extends Controller
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
+            
+            if ($request->hasFile('end_meter_image_path')) {
+                $rules['end_meter_image_path'] = 'image|mimes:jpeg,png,jpg,webp|max:2048';
+            }
         }
 
         if(in_array($request->input('billing_type'), ['Listrik'])) {
@@ -508,6 +524,10 @@ class BillingController extends Controller
 
         // Set meter_reading to null if billing_type is Parkir or Maintenance
         if (in_array($request->input('billing_type'), ['Parkir', 'Maintenance'])) {
+            if ($billing->end_meter_image_path) {
+                Storage::delete('public/' . $billing->end_meter_image_path);
+                $validatedData['end_meter_image_path'] = null;
+            }
             $validatedData['meter_reading'] = null;
             $validatedData['start_meter'] = null;
             $validatedData['end_meter'] = null;
@@ -552,6 +572,23 @@ class BillingController extends Controller
          // Check if billing category exists
         if (in_array($request->input('billing_type'), ['Maintenance', 'Parkir']) && !$billingCategory) {
             return back()->with('error', 'Billing Category not found.');
+        }
+
+        if(in_array($request->input('billing_type'),['Air', 'Listrik'])) {
+            if($request->hasFile('end_meter_image_path')){
+                if($billing->end_meter_image_path){
+                    Storage::delete('public/'.$billing->end_meter_image_path);
+                }
+
+                // generate file img name
+                $fileName = 'end-meter-image/' . time() . '.' . $request->file('end_meter_image_path')->extension();
+                
+                // save new end meter image
+                $request->file('end_meter_image_path')->storeAs('public', $fileName);
+                $validatedData['end_meter_image_path'] = $fileName;
+            } else {
+                $validatedData['end_meter_image_path'] = $billing->end_meter_image_path;
+            }
         }
 
         $validatedData['billing_category_id'] = $billingCategory ? $billingCategory->id : null;

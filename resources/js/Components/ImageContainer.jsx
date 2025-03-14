@@ -18,6 +18,7 @@ const ImageContainer = ({ imageUrl, altText, errorMesssageImg }) => {
                     alt={altText}
                     className="object-contain w-full h-full"
                     onError={handleImageError}
+                    loading="lazy"
                 />
             ) : (
                 <div className="flex justify-center">

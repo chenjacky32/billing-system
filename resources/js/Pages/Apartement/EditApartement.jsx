@@ -21,7 +21,7 @@ export default function EditApartement({ auth, apartementData }) {
         total_room: apartementData.total_room,
         logo_company: apartementData.logo_company,
     });
-
+    console.log(data.logo_company);
     const { flash } = usePage().props;
 
     const dataID = apartementData.id;
@@ -130,6 +130,7 @@ export default function EditApartement({ auth, apartementData }) {
                                     </div>
                                     <div className="mt-8 mr-4 tablet:mr-0">
                                         <InputUpload
+                                            label="Upload Your Logo"
                                             className="tablet:mt-8"
                                             onChange={(file) =>
                                                 setData("logo_company", file)

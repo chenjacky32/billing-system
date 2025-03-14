@@ -1,6 +1,7 @@
 import CustomInput from "@/Components/CustomInput";
 import InputSelect from "@/Components/InputSelect";
 import PageHeader from "@/Components/PageHeader";
+import InputUpload from "@/Components/InputUpload";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
@@ -61,7 +62,7 @@ export default function AddBiling({
         apartment_id: apartmentId,
         start_meter: "",
         end_meter: "",
-        // residence_id: "",
+        end_meter_image_path: null,
         unit_price: "",
         period: null,
         tower_id: "",
@@ -72,6 +73,7 @@ export default function AddBiling({
     });
 
     console.log(data.period);
+    console.log(data.end_meter_image_path);
     // console.log(data.fine);
     // console.log(flash);
     // console.log("useState", {
@@ -571,7 +573,14 @@ export default function AddBiling({
                                                 {billingType === "Listrik" ||
                                                 billingType === "Air" ? (
                                                     <>
-                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                        <div
+                                                            className={`w-full mr-4 ${
+                                                                billingType ===
+                                                                "Air"
+                                                                    ? "tablet:mt-0"
+                                                                    : "tablet:mt-8"
+                                                            }`}
+                                                        >
                                                             <Typography
                                                                 variant="paragraph"
                                                                 className="mb-2 text-base font-semibold "
@@ -678,10 +687,10 @@ export default function AddBiling({
                                                 ) : null}
                                             </div>
                                         </div>
-                                        <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                            {billingType === "Air" ||
-                                            billingType === "Listrik" ? (
-                                                <>
+                                        {billingType === "Air" ||
+                                        billingType === "Listrik" ? (
+                                            <div>
+                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
                                                     <div className="w-full mr-4 tablet:mt-8">
                                                         <Typography
                                                             variant="paragraph"
@@ -734,9 +743,29 @@ export default function AddBiling({
                                                             }
                                                         ></CustomInput>
                                                     </div>
-                                                </>
-                                            ) : null}
-                                        </div>
+                                                </div>
+                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
+                                                    <div className="w-full mr-4 tablet:mt-0">
+                                                        <InputUpload
+                                                            label="Upload Foto Meteran Akhir"
+                                                            className="tablet:mt-8"
+                                                            onChange={(file) =>
+                                                                setData(
+                                                                    "end_meter_image_path",
+                                                                    file
+                                                                )
+                                                            }
+                                                            error={
+                                                                errors.end_meter_image_path
+                                                            }
+                                                            currentImage={
+                                                                data.end_meter_image_path
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : null}
                                     </>
 
                                     <div
