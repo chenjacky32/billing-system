@@ -47,7 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'fine'=> fn()=>$request->session()->get('fine'),
                 'due_days'=> fn()=>$request->session()->get('due_days'),
                 'total_amount'=> fn()=>$request->session()->get('total_amount'),
-                'isPasswordCorrect'=>fn()=>$request->session()->get('isPasswordCorrect'),
+                'new_start_meter'=> fn()=>$request->session()->get('new_start_meter'),
             ],
         ]);
     }

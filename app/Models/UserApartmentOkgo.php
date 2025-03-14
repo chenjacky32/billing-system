@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class UserApartmentOkgo extends Model
 {
@@ -18,10 +19,20 @@ class UserApartmentOkgo extends Model
         'apartmentId',
         'roomNo',
         'active',
+        'apartmentType'
     ];
+
+    protected $appends = ['apartmentTypeData'];
 
     public function user()
     {
         return $this->belongsTo(UserOkgo::class, 'userId', 'id');
+    }
+
+    public function getApartmentTypeDataAttribute()
+    {
+        return DB::table('apartment_types')
+            ->where('id', $this->apartmentType)
+            ->first();
     }
 }

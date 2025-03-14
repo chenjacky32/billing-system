@@ -28,9 +28,8 @@ const TABLE_HEAD = [
     "Apartemen",
     "Tower",
     "No Unit",
+    "Tipe Unit",
     "status",
-    "Foto KTP",
-    "Foto Wajah",
     "Active",
 ];
 
@@ -38,8 +37,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
-
-    console.log(data.data);
 
     const handleInputChange = (value, type) => {
         if (type === "search") {
@@ -203,6 +200,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                     apartmentTower,
                                                     identityImage,
                                                     roomNo,
+                                                    apartType,
                                                     userImage,
                                                     active,
                                                 },
@@ -321,6 +319,18 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {apartType?.name ??
+                                                                        "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
                                                                     className={`font-bold capitalize  ${getStatusColor(
                                                                         active
                                                                     )} text-white rounded-2xl w-20 flex justify-center`}
@@ -332,27 +342,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <img
-                                                                    src={`https://apis.okgo.co.id/apartment-id/${identityImage}`}
-                                                                    alt="Foto KTP"
-                                                                    className="object-cover h-[50px] rounded-md"
-                                                                />
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <img
-                                                                    src={`https://apis.okgo.co.id/apartment-user/${userImage}`}
-                                                                    alt="Foto Wajah"
-                                                                    className="object-cover h-[50px] rounded-md"
-                                                                />
-                                                            </div>
-                                                        </td>
-
                                                         <td className={classes}>
                                                             <Link
                                                                 href={route(

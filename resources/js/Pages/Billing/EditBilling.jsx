@@ -30,7 +30,6 @@ export default function Edit({
     WaterPriceMinimumCharge,
     waterPriceId,
     apartmentId,
-    billingDueDays,
 }) {
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
@@ -42,11 +41,6 @@ export default function Edit({
     );
 
     const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
-    const [residence, setResidence] = useState(
-        mappedRoomNumber.find(
-            (items) => items.value === billingData.residence_id
-        )?.ownerName
-    );
     const [tower, setTower] = useState(
         towerData.find((items) => items.value === billingData.tower_id)
     );
@@ -68,11 +62,21 @@ export default function Edit({
     const [vehicleTypeSelected, setVehicleTypeSelected] = useState(
         billingData.billing_category_id?.toString() || ""
     );
+    const [residence, setResidence] = useState(() => {
+        const foundItem = roomNumber.find(
+            (items) => items.value === billingData.residence_id
+        );
+        return {
+            name: foundItem.ownerName ?? "",
+            apartTypeName: foundItem.apartType?.name ?? "",
+            apartTypeId: foundItem.apartType?.id ?? foundItem.apartmentTypeId,
+        };
+    });
 
     const { flash } = usePage().props;
     const [isLoading, setIsLoading] = useState(null);
     const { data, setData, post, processing, errors } = useForm({
-        start_meter: billingData.start_meter,
+        start_meter: billingData.start_meter || flash?.start_meter,
         end_meter: billingData.end_meter,
         unit_price: billingData.unit_price,
         minimum_charge: billingData.minimum_charge,
@@ -99,7 +103,19 @@ export default function Edit({
     });
 
     const role = auth.user.role;
-    console.log(data.end_meter_image_path);
+    console.log(data.start_meter, "data start meter");
+
+    const getOptionsForType = (type) => {
+        const filteredCategory = billingCategory.find(
+            (category) => category.billing_type === type
+        );
+        return filteredCategory ? filteredCategory.categories : [];
+    };
+
+    const maintenanceOptions = getOptionsForType("Maintenance");
+    const vehicleOptions = getOptionsForType("Parkir");
+    const electricOptions = getOptionsForType("Listrik");
+    const waterOptions = getOptionsForType("Air");
 
     function formattedDate(date) {
         if (!date) return null;
@@ -110,13 +126,19 @@ export default function Edit({
     }
 
     useEffect(() => {
-        if (flash?.billing_fee || flash?.meter_reading || flash?.fine) {
+        if (
+            flash?.billing_fee ||
+            flash?.meter_reading ||
+            flash?.fine ||
+            flash?.new_start_meter
+        ) {
             setData((prevValues) => ({
                 ...prevValues,
                 billing_fee: flash.billing_fee,
                 meter_reading: flash.meter_reading,
                 fine: flash.fine,
                 total_amount: flash.total_amount,
+                start_meter: flash.new_start_meter || prevValues.start_meter,
             }));
         }
     }, [
@@ -124,6 +146,7 @@ export default function Edit({
         flash?.meter_reading,
         flash?.fine,
         flash?.total_amount,
+        flash?.new_start_meter,
     ]);
 
     useEffect(() => {
@@ -159,18 +182,6 @@ export default function Edit({
             period: formattedDate(firstDate.$d),
         }));
     };
-
-    const getOptionsForType = (type) => {
-        const filteredCategory = billingCategory.find(
-            (category) => category.billing_type === type
-        );
-        return filteredCategory ? filteredCategory.categories : [];
-    };
-
-    const maintenanceOptions = getOptionsForType("Maintenance");
-    const vehicleOptions = getOptionsForType("Parkir");
-    const electricOptions = getOptionsForType("Listrik");
-    const waterOptions = getOptionsForType("Air");
 
     const handleChangeWater = (value) => {
         setWaterTypeSelected(value);
@@ -247,13 +258,39 @@ export default function Edit({
             (item) => item.value == value.apartmentTowerId
         );
         setTower(findOwnerTower);
-        setResidence(value.ownerName);
+        setResidence((prevState) => ({
+            ...prevState,
+            name: value.ownerName,
+            apartTypeName: value.apartType?.name ?? "",
+        }));
         setData((prevValue) => ({
             ...prevValue,
             room_no: value.value,
             tower_id: value.apartmentTowerId,
             owner_id: value.value,
         }));
+        if (billingType === "Maintenance") {
+            const matchedMaintenanceOption = maintenanceOptions.find(
+                (item) => item.label === value.apartType?.name
+            );
+
+            if (matchedMaintenanceOption) {
+                setMaintenanceTypeSelected(
+                    matchedMaintenanceOption.value.toString()
+                );
+
+                setData((prevValue) => ({
+                    ...prevValue,
+                    maintenance_type: matchedMaintenanceOption.value.toString(),
+                }));
+            }
+        } else {
+            setMaintenanceTypeSelected("");
+            setData((prevValue) => ({
+                ...prevValue,
+                maintenance_type: "",
+            }));
+        }
     };
 
     const handleTowerChange = (value) => {
@@ -307,13 +344,34 @@ export default function Edit({
         });
     }
 
+    // ! Handle get Previous Meter
+    function handleGetPreviousMeter(e) {
+        e.preventDefault();
+        setData((prevValues) => ({
+            ...prevValues,
+            start_meter: "",
+        }));
+        setIsLoading("get-previous-meter");
+        post(route("billing.previousMeter"), {
+            preserveScroll: true,
+            onFinish: () => setIsLoading(null),
+        });
+    }
+
     // ! Handle Count Billing
     function handleCountBilling(e) {
         e.preventDefault();
+        const currentStartMeter = data.start_meter;
         setIsLoading("count-billing");
         post(route("billing.count"), {
             preserveScroll: true,
             onFinish: () => setIsLoading(null),
+            onSuccess: () => {
+                setData((prevValues) => ({
+                    ...prevValues,
+                    start_meter: currentStartMeter,
+                }));
+            },
         });
     }
 
@@ -328,6 +386,8 @@ export default function Edit({
                 unit_price: "",
                 minimum_charge: "",
                 billing_fee: "",
+                total_amount: "",
+                fine: "",
             }));
         } else if (billingType === "Maintenance" || billingType === "Parkir") {
             setData((prevValues) => ({
@@ -454,11 +514,24 @@ export default function Edit({
                                                 variant="paragraph"
                                                 className="mb-2 text-base font-semibold "
                                             >
+                                                Tipe Unit Apartment
+                                            </Typography>
+
+                                            <CustomInput
+                                                value={residence.apartTypeName}
+                                                disabled={true}
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
                                                 Nama Owner
                                             </Typography>
 
                                             <CustomInput
-                                                value={residence}
+                                                value={residence?.name ?? ""}
                                                 disabled={true}
                                             />
                                         </div>
@@ -652,6 +725,25 @@ export default function Edit({
                                                                     errors.start_meter
                                                                 }
                                                             />
+                                                        </div>
+                                                        <div className="w-full mr-4 tablet:mt-8">
+                                                            <div className="mt-8 tablet:mt-0">
+                                                                <Button
+                                                                    variant="filled"
+                                                                    size="md"
+                                                                    onClick={
+                                                                        handleGetPreviousMeter
+                                                                    }
+                                                                    className="bg-blue-500 w-fit tablet:w-full"
+                                                                    loading={
+                                                                        isLoading ===
+                                                                        "get-previous-meter"
+                                                                    }
+                                                                >
+                                                                    Ambil
+                                                                    Meteran Awal
+                                                                </Button>
+                                                            </div>
                                                         </div>
                                                         <div className="w-full mr-4 tablet:mt-8">
                                                             <Typography
@@ -1006,11 +1098,11 @@ export default function Edit({
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="mr-4 w-fit tablet:mt-8">
+                                        <div className="mr-4 w-fit tablet:mt-8 tablet:w-full">
                                             <Button
                                                 variant="filled"
                                                 onClick={handleCountBilling}
-                                                className="bg-orange-500"
+                                                className="bg-orange-500 tablet:w-full"
                                                 loading={
                                                     isLoading ===
                                                     "count-billing"
@@ -1019,13 +1111,13 @@ export default function Edit({
                                                 Hitung Tagihan
                                             </Button>
                                         </div>
-                                        <div className="mr-4 w-fit tablet:mt-8">
+                                        <div className="mr-4 w-fit tablet:mt-8 tablet:w-full">
                                             <Button
                                                 variant="filled"
                                                 onClick={
                                                     handleClearCountBilling
                                                 }
-                                                className="flex items-center justify-center gap-2 bg-red-600 "
+                                                className="flex items-center justify-center gap-2 bg-red-600 tablet:w-full"
                                             >
                                                 <TrashIcon className="w-4 h-4" />{" "}
                                                 <span>Clear</span>
@@ -1087,11 +1179,11 @@ export default function Edit({
                                         )}
                                     </div>
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex gap-4 ml-0 w-max">
+                                        <div className="flex gap-4 ml-0 w-max tablet:w-full tablet:mt-0">
                                             <Button
                                                 variant="filled"
                                                 onClick={handleSubmit}
-                                                className="bg-green-500"
+                                                className="bg-green-500 tablet:w-full"
                                                 loading={
                                                     isLoading === "edit-billing"
                                                 }

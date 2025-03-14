@@ -136,7 +136,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing/{id}/update', [BillingController::class, 'update'])->name('billing.update');
     Route::post('/billing/delete', [BillingController::class, 'destroy'])->name('billing.delete');
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
-
+    Route::post('/billing/previous-meter',[BillingController::class,'getStartMeter'])->name('billing.previousMeter');
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');

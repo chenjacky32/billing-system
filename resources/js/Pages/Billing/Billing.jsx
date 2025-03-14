@@ -55,6 +55,7 @@ const TABLE_HEAD = [
 export default function Billing({ auth, errors, data, filters, apartmentId }) {
     const role = auth.user.role;
 
+    console.log(data.data);
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
@@ -231,7 +232,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
         }
     };
     console.log(apartmentId);
-    console.log(data.data);
+    console.log("data", data.data);
 
     return (
         <AuthenticatedLayout
@@ -448,7 +449,10 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    -
+                                                                    {residence
+                                                                        ?.apartmentTypeData
+                                                                        ?.name ??
+                                                                        "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

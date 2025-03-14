@@ -41,9 +41,11 @@ const EditPendingAccount = ({
         phone: userApartment?.user?.phone,
         apartment: apartmentTower?.apartment?.name,
         roomNo: userApartment.roomNo,
+        apartType: userApartment?.apartType,
         apartmentTower: apartmentTower?.tower_name,
     });
 
+    console.log(userApartment);
     const [apartment, setApartment] = React.useState(
         apartmenetData.find((item) => item.value === userApartment.apartmentId)
     );
@@ -69,8 +71,6 @@ const EditPendingAccount = ({
             apartmentTowerId: value.value,
         }));
     };
-
-    console.log(userApartment);
 
     const handleApartmentChange = (value) => {
         setApartment(value);
@@ -222,6 +222,24 @@ const EditPendingAccount = ({
                                                 id="unitNumber"
                                                 value={
                                                     userApartmentData?.roomNo
+                                                }
+                                                disabled={true}
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Tipe Unit
+                                            </Typography>
+
+                                            <CustomInput
+                                                label="Unit Number"
+                                                id="unitNumber"
+                                                value={
+                                                    userApartmentData?.apartType
+                                                        .name
                                                 }
                                                 disabled={true}
                                             />

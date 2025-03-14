@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Apartment;
 use App\Models\ApartmentTower;
+use App\Models\ApartmentType;
 use App\Models\UserApartmentOkgo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,8 +45,20 @@ class AccountActivationController extends Controller
             ->orderByDesc('id')
             ->paginate(10);
 
-        $apartmentTowers = ApartmentTower::with('apartment')->get()->keyBy('id');
 
+        $apartmentTypes = ApartmentType::pluck('name', 'id')->toArray();
+
+        $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTypes) {
+            $userApartment->apartType = [
+                'id' =>$userApartment->apartmentType,
+                'name' => $apartmentTypes[$userApartment->apartmentType] ?? 'Unknown',
+            ];
+            return $userApartment;
+        });
+
+
+        $apartmentTowers = ApartmentTower::with('apartment')->get()->keyBy('id');
+    
         $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTowers) {
             if (isset($apartmentTowers[$userApartment->apartmentTowerId])) {
                 $userApartment->apartmentTower = $apartmentTowers[$userApartment->apartmentTowerId];
@@ -66,14 +79,22 @@ class AccountActivationController extends Controller
         $user = Auth::user();
         $role = $user->role;
         $apartId = $user->apartment_id;
+
         $userApartment = UserApartmentOkgo::with(['user'])->find($request->id);
         $apartTower = ApartmentTower::query();
 
         if (!$userApartment) {
             return Redirect::route('pending-account.index')->with('error', 'User apartment not found.');
         }
+
         $apartmentTower = ApartmentTower::with('apartment')->find($userApartment->apartmentTowerId);
         
+        $apartmentType = ApartmentType::find($userApartment->apartmentType);
+        $userApartment->apartType = $apartmentType ? [
+            'id' => $apartmentType->id,
+            'name' => $apartmentType->name,
+        ] : null;
+
         $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
             return ['label' => $apartmentName, 'value' => $apartementId];
         })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();

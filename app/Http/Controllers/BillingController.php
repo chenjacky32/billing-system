@@ -13,6 +13,8 @@ use App\Models\BillingsCategory;
 use App\Models\UserApartmentOkgo;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\ValidatedData;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -120,7 +122,12 @@ class BillingController extends Controller
                 'ownerName' => $userApartment->user->fullname,
                 'apartmentTowerId'=> $userApartment->apartmentTowerId,
                 'label' => $userApartment->roomNo,
-                'value' => $userApartment->id
+                'value' => $userApartment->id,
+                'apartmentTypeId'=>$userApartment->apartmentType ?? null,
+                'apartType'=> [
+                    'id'=>$userApartment->apartmentTypeData->id ?? null,
+                    'name'=>$userApartment->apartmentTypeData->name ?? null
+                ],
             ];
         })->prepend([
             'label' => 'Pilih Nomor Unit',
@@ -332,7 +339,7 @@ class BillingController extends Controller
         $billingData = $billing->find($request->id);
         $billingApartmentId = $billingData->apartment_id;
 
-                // query to get the water price
+        // query to get the water price
         $WaterPrice = BillingsCategory::where('apartment_id', $apartment_id)
         ->where('billing_type','Air')
         ->where('category_name','PDAM')
@@ -389,7 +396,12 @@ class BillingController extends Controller
                 'ownerName' => $userApartment->user->fullname,
                 'apartmentTowerId'=> $userApartment->apartmentTowerId,
                 'label' => $userApartment->roomNo,
-                'value' => $userApartment->id
+                'value' => $userApartment->id,
+                'apartmentTypeId'=>$userApartment->apartmentType ?? null,
+                'apartType'=> [
+                    'id'=>$userApartment->apartmentTypeData->id ?? null,
+                    'name'=>$userApartment->apartmentTypeData->name ?? null
+                ],
             ];
         })->prepend([
             'label' => 'Pilih Nomor Unit',
@@ -805,54 +817,54 @@ class BillingController extends Controller
         }
     }
 
-    // public function calculateFine($billing){
-    // $fineRules = BillingFineRules::where('billing_type', $billing->billing_type)
-    //     ->where('apartment_id', $billing->apartment_id)
-    //     ->first();
+    public function getStartMeter(Request $request)
+    {
+        $validatedData = $request->validate([
+            'billing_type' => 'required|string|in:Air,Listrik',
+            'period'=>'required|date',
+            'owner_id' => 'required|integer',
+            'room_no' => 'required|integer|min:1|max:999999999999999',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
+        ]);
 
-    // if (!$fineRules) {
-    //     return 0;
-    // }
+        Log::info('getStartMeter', ['request' => $request->all(), 'validatedData' => $validatedData]);
 
-    // // Cari tagihan periode sebelumnya yang belum dibayar atau terlambat dibayar
-    // $previousPeriod = Carbon::parse($billing->period)->subMonth()->format('Y-m-d');
-    // $previousBill = Billing::where('owner_id', $billing->owner_id)
-    //     ->where('billing_type', $billing->billing_type)
-    //     ->where('period', $previousPeriod)
-    //     ->where(function ($query) {
-    //         $query->where('status', 'Pending')
-    //               ->orWhere('paid_date', '>', 'due_date')
-    //               ->orWhereNull('paid_date');
-    //     })
-    //     ->get();
+        if(in_array($request->input('billing_type'), ['Air'])) {
+            $validatedData['water_type']= 'required|integer|min:1|max:999999999999999';
+            $billingCategoryId = $request->water_type;
+        } else if(in_array($request->input('billing_type'), ['Listrik'])) {
+            $validatedData['electric_type']= 'required|integer|min:1|max:999999999999999';
+            $billingCategoryId = $request->electric_type;
+        }
 
-    // if (!$previousBill) {
-    //     return 0;
-    // }
-    
+        $currentPeriod = Carbon::parse($validatedData['period']);
+        $previousPeriod = $currentPeriod->copy()->subMonth()->format('Y-m-01');
 
-    // $dueDate = Carbon::parse($previousBill->due_date);
-    // $currentDate = Carbon::now();
-    // $daysLate = $currentDate->diffInDays($dueDate);
+        Log::info('getStartMeter', [
+            'previousPeriod' => $previousPeriod,
+            'billing_category_id' => $billingCategoryId
+        ]);
 
-    // Log::info('dueDate', ['dueDate' => $dueDate]);
-    // Log::info('currentDate', ['currentDate' => $currentDate]);
-    // Log::info('daysLate', ['daysLate' => $daysLate]);
-    // Log::info('previousBill', ['previousBill' => $previousBill]);
+        $previousBilling = Billing::where('billing_type', $validatedData['billing_type'])
+            ->where('residence_id', $validatedData['owner_id'])
+            ->where('tower_id', $validatedData['tower_id'])
+            ->where('period', $previousPeriod)
+            ->where('billing_category_id',$billingCategoryId)
+            ->orderBy('id', 'desc')
+            ->first();
+ 
+        Log::info('getStartMeter', ['previousBilling' => $previousBilling]);
 
-    // // Hitung denda
-    // $calculatedFine = $daysLate * $fineRules->fine_rate_per_day;
-    // $appliedFine = min($calculatedFine, $fineRules->max_fine);
-
-    // Log::info('Fine Calculation', [
-    //     'daysLate' => $daysLate,
-    //     'fineRatePerDay' => $fineRules->fine_rate_per_day,
-    //     'calculatedFine' => $calculatedFine,
-    //     'maxFine' => $fineRules->max_fine,
-    //     'appliedFine' => $appliedFine,
-    // ]);
-
-    // return $appliedFine;
-
-    // }
+        if($previousBilling) {
+            return redirect()->back()->with([
+                'new_start_meter' => $previousBilling->end_meter,
+            ]);
+        } else {
+            return redirect()->back()->with(key:[
+                'new_start_meter' => 0
+            ])->withErrors([
+                'start_meter' => 'Meteran periode sebelumnya tidak ditemukan. Silahkan Input Meteran Awal.'
+            ]);
+        }
+    }
 }
