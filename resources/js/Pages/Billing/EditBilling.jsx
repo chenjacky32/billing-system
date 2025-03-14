@@ -103,7 +103,6 @@ export default function Edit({
     });
 
     const role = auth.user.role;
-    console.log(data.start_meter, "data start meter");
 
     const getOptionsForType = (type) => {
         const filteredCategory = billingCategory.find(

@@ -73,13 +73,6 @@ export default function AddBiling({
         maintenance_type: maintenanceTypeSelected,
         vehicle_type_parking: vehicleTypeSelected,
     });
-    // console.log(data.start_meter);
-    // console.log(data.period);
-    // console.log(data.end_meter_image_path);
-    // console.log("useForm State", data);
-    console.log("roomNo", roomNumber);
-    console.log("state", maintenanceTypeSelected);
-    console.log(room);
 
     const role = auth.user.role;
 
@@ -92,7 +85,6 @@ export default function AddBiling({
     };
 
     const maintenanceOptions = getOptionsForType("Maintenance");
-    console.log(maintenanceOptions);
     const vehicleOptions = getOptionsForType("Parkir");
     const electricOptions = getOptionsForType("Listrik");
     const waterOptions = getOptionsForType("Air");

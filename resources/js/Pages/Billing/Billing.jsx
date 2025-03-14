@@ -55,7 +55,6 @@ const TABLE_HEAD = [
 export default function Billing({ auth, errors, data, filters, apartmentId }) {
     const role = auth.user.role;
 
-    console.log(data.data);
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
@@ -185,7 +184,6 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
     };
 
     const handleClickEdit = ({ id, apartId }) => {
-        console.log(id);
         setPendingEditId(id);
         setApartId(apartId);
         setIsPasswordModalOpen(true);
@@ -231,8 +229,6 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
             setIsLoading(null);
         }
     };
-    console.log(apartmentId);
-    console.log("data", data.data);
 
     return (
         <AuthenticatedLayout

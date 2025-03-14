@@ -19,12 +19,6 @@ export default function Dashboard({
     penaltyData,
     billingChartData,
 }) {
-    console.log("data", data);
-    console.log("paid", paidData);
-    console.log("unpaid", unpaidData);
-    console.log(penaltyData);
-    console.log(billingChartData);
-
     const pieData = {
         labels: data.labels,
         datasets: [
