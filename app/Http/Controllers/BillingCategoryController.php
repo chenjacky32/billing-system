@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apartment;
+use App\Models\ApartmentType;
 use App\Models\BillingsCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BillingCategoryController extends Controller
 {
@@ -40,6 +42,9 @@ class BillingCategoryController extends Controller
         $apartId = $user->apartment_id;
         $findApartment = Apartment::find($apartId);
 
+        $apartmentType = ApartmentType::pluck('name', 'id')->map(function ($apartmentTypeName, $apartmentTypeId) {
+            return ['label' => $apartmentTypeName, 'value' => $apartmentTypeId];
+        })->values()->toArray();
 
         if ($findApartment){
             $apartmentName = $findApartment->name;
@@ -55,6 +60,7 @@ class BillingCategoryController extends Controller
             'apartmentData' => $apartment,
             'apartmentName' => $apartmentName,
             'apartmentId' => $apartId,
+            'apartmentType' => $apartmentType
         ]);
 
     }
@@ -74,7 +80,11 @@ class BillingCategoryController extends Controller
 
         $apartId = $user->apartment_id;
         $findApartment = Apartment::find($apartId);
-     
+
+        $apartmentType = ApartmentType::pluck('name', 'id')->map(function ($apartmentTypeName, $apartmentTypeId) {
+            return ['label' => $apartmentTypeName, 'value' => $apartmentTypeId];
+        })->values()->toArray();
+
         if ($findApartment){
             $apartName = $findApartment->name;
         } else {
@@ -88,6 +98,7 @@ class BillingCategoryController extends Controller
                 'apartmentData' => $apartment,
                 'apartmentId' => $userApartmentId,
                 'apartmentName' => $apartName,
+                'apartmentType' => $apartmentType
             ]);
         } else if ($userApartmentId == $billingCategoryApartmentData ) {
             return Inertia::render('BillingCategory/EditBillingCategory', [
@@ -95,6 +106,7 @@ class BillingCategoryController extends Controller
                 'apartmentData' => $apartment,
                 'apartmentId' => $userApartmentId,
                 'apartmentName' => $apartName,
+                'apartmentType' => $apartmentType
             ]);
         }else {
             return redirect('/unauthorized');
@@ -113,6 +125,18 @@ class BillingCategoryController extends Controller
             'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
 
+        if($validateData['billing_type'] === "Maintenance"){
+            $existingData = BillingsCategory::where('apartment_id', $validateData['apartment_id'])
+                ->where('billing_type', 'Maintenance')
+                ->where('category_name', $validateData['category_name'])
+                ->exists();
+            Log::info('existingData', ['existingData' => $existingData]);
+
+            if ($existingData) {
+                return back()->withErrors(['category_name' => 'Kategori tagihan untuk tipe apartemen ini sudah tersedia. Jika perlu melakukan perubahan, silakan edit kategori yang sudah ada atau gunakan Tipe Apartemen lain'])->withInput();
+            }
+        }   
+
         $validateData['created_by'] = Auth::id();
 
         BillingsCategory::create($validateData);
@@ -130,6 +154,20 @@ class BillingCategoryController extends Controller
             'apartment_id' => 'required|integer|exists:apartments,id',
             'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
+
+        if($validatedData['billing_type'] === "Maintenance"){
+            $existingData = BillingsCategory::where('billing_type', 'Maintenance')
+                ->where('apartment_id', $validatedData['apartment_id'])
+                ->where('category_name', $validatedData['category_name'])
+                ->where('id', '!=', $id)
+                ->exists();
+            if($existingData) {
+                return back()->withErrors([
+                    'category_name'=>"Kategori '{$validatedData['category_name']}' untuk tipe apartemen ini sudah ada di sistem. Silakan gunakan Tipe Apartemen lain."
+                ])->withInput();
+            }
+        }
+
         $validatedData['created_by'] = Auth::id();
 
         $billingCategory->update($validatedData);
@@ -139,8 +177,15 @@ class BillingCategoryController extends Controller
 
     public function destroy(Request $request)
     {
-     $billingCategory = BillingsCategory::find($request->id);
-     $billingCategory->delete();
-     return redirect('/billing-category')->with('success', 'Billing Category data has been deleted!');
+    try{
+        $billingCategory = BillingsCategory::find($request->id);
+        $billingCategory->delete();
+        return redirect('/billing-category')->with('success', 'Billing Category data has been deleted!');
+    } catch (\Exception $e) {
+        if($e->getCode() == 23000){
+            return redirect('/billing-category')->with('error', 'Kategori ini tidak bisa dihapus karena masih digunakan dalam data tagihan.');
+        }
+            return redirect('/billing-category')->with('error', 'Terjadi kesalahan saat menghapus kategori billing.');
+        }
     }
 }

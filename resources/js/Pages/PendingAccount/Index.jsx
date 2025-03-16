@@ -30,6 +30,7 @@ const TABLE_HEAD = [
     "No Unit",
     "Tipe Unit",
     "status",
+    "Foto KTP",
     "Active",
 ];
 
@@ -342,6 +343,18 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <img
+                                                                    src={`https://apis.okgo.co.id/apartment-user/${userImage}`}
+                                                                    alt="Foto Wajah"
+                                                                    loading="lazy"
+                                                                    className="object-cover h-[50px] rounded-md"
+                                                                />
+                                                            </div>
+                                                        </td>
+
                                                         <td className={classes}>
                                                             <Link
                                                                 href={route(

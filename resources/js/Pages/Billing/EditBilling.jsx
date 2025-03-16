@@ -508,19 +508,23 @@ export default function Edit({
                                                 </p>
                                             )}
                                         </div>
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Tipe Unit Apartment
-                                            </Typography>
+                                        {billingType !== "Maintenance" ? (
+                                            <div className="w-full mr-4 tablet:mt-8">
+                                                <Typography
+                                                    variant="paragraph"
+                                                    className="mb-2 text-base font-semibold "
+                                                >
+                                                    Tipe Unit Apartment
+                                                </Typography>
 
-                                            <CustomInput
-                                                value={residence.apartTypeName}
-                                                disabled={true}
-                                            />
-                                        </div>
+                                                <CustomInput
+                                                    value={
+                                                        residence.apartTypeName
+                                                    }
+                                                    disabled={true}
+                                                />
+                                            </div>
+                                        ) : null}
                                         <div className="w-full mr-4 tablet:mt-8">
                                             <Typography
                                                 variant="paragraph"
@@ -920,6 +924,7 @@ export default function Edit({
                                                     onChange={
                                                         handleChangeMaintenanceType
                                                     }
+                                                    disabled
                                                     errors={
                                                         errors.maintenance_type
                                                     }

@@ -66,7 +66,10 @@ export default function BillingCategory({ auth, errors, data, filters }) {
         if (flash.message) {
             toast.success(flash.message);
         }
-    }, [flash.message]);
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash.message, flash.error]);
 
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 

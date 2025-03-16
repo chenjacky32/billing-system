@@ -86,17 +86,17 @@ export default function PenaltiesReport({
             setStatus(value);
         }
 
-        router.get(
-            route(route().current()),
-            {
-                search: type === "search" ? value : search,
-                period: period,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            }
-        );
+        // router.get(
+        //     route(route().current()),
+        //     {
+        //         search: type === "search" ? value : search,
+        //         period: period,
+        //     },
+        //     {
+        //         preserveState: true,
+        //         replace: true,
+        //     }
+        // );
     };
 
     function getPaginationUrl(baseUrl, searchQuery) {

@@ -20,6 +20,7 @@ export default function EditBillingCategory({
     billingCategoryData,
     apartmentId,
     apartmentName,
+    apartmentType,
 }) {
     const role = auth.user.role;
 
@@ -39,12 +40,21 @@ export default function EditBillingCategory({
     );
     const dataID = billingCategoryData.id;
     const [apartment, setApartment] = useState(initialApartment);
+    const [apartType, setApartType] = useState(data.category_name);
 
     const handleApartmentChange = (value) => {
         setApartment(value);
         setData((prevValues) => ({
             ...prevValues,
             apartment_id: value.value,
+        }));
+    };
+
+    const handleApartTypeChange = (value) => {
+        setApartType(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            category_name: value,
         }));
     };
 
@@ -153,19 +163,52 @@ export default function EditBillingCategory({
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        <CustomInput
-                                            label="Nama Kategori Tagihan"
-                                            id="category_name"
-                                            value={data.category_name}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "category_name",
-                                                    e.target.value
-                                                )
-                                            }
-                                            errors={errors.category_name}
-                                            className="tablet:mt-8"
-                                        />
+                                        {data.billing_type === "Maintenance" ? (
+                                            <div className="w-full mr-4 tablet:mt-8">
+                                                <Select
+                                                    label="Pilih Nama Tipe Apartemen"
+                                                    id="billing_type"
+                                                    color="blue"
+                                                    value={apartType}
+                                                    onChange={
+                                                        handleApartTypeChange
+                                                    }
+                                                >
+                                                    {apartmentType.map(
+                                                        (item) => (
+                                                            <Option
+                                                                key={item.value}
+                                                                value={
+                                                                    item.label
+                                                                }
+                                                            >
+                                                                {item.label}
+                                                            </Option>
+                                                        )
+                                                    )}
+                                                </Select>
+                                                {errors.category_name && (
+                                                    <p className="mt-3 ml-0 text-sm text-red-500">
+                                                        {errors.category_name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <CustomInput
+                                                label="Nama Kategori Tagihan"
+                                                id="category_name"
+                                                value={data.category_name}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "category_name",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                errors={errors.category_name}
+                                                className="tablet:mt-8"
+                                            />
+                                        )}
+
                                         <CustomInput
                                             type="number"
                                             label="Tarif / Harga"

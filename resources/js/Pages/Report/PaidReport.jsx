@@ -41,11 +41,11 @@ export default function PaidReport({
 }) {
     const [search, setSearch] = useState("");
     const [period, setPeriod] = useState(null);
-    console.log(search);
-    console.log(period);
-    console.log(data.data);
-    console.log("period", period);
-    console.log("search", search);
+    // console.log(search);
+    // console.log(period);
+    // console.log(data.data);
+    // console.log("period", period);
+    // console.log("search", search);
 
     function getStatusColor(status) {
         switch (status) {
@@ -86,18 +86,17 @@ export default function PaidReport({
         } else if (type === "status") {
             setStatus(value);
         }
-
-        router.get(
-            route(route().current()),
-            {
-                search: type === "search" ? value : search,
-                period: period,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            }
-        );
+        // router.get(
+        //     route(route().current()),
+        //     {
+        //         search: type === "search" ? value : search,
+        //         period: period,
+        //     },
+        //     {
+        //         preserveState: true,
+        //         replace: true,
+        //     }
+        // );
     };
 
     function getPaginationUrl(baseUrl, searchQuery, periodQuery) {
