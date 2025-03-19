@@ -35,6 +35,7 @@ const TABLE_HEAD = [
 export default function BillingCategory({ auth, errors, data, filters }) {
     const [search, setSearch] = useState("");
     const { flash } = usePage().props;
+    const role = auth.user.role;
 
     function handleSearch(value, type) {
         if (type === "search") {
@@ -302,42 +303,52 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                             </Tooltip>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "billingCategory.delete",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="post"
-                                                                data={{
-                                                                    id: undefined,
-                                                                }}
-                                                                as="button"
-                                                            >
-                                                                <Tooltip
-                                                                    content="Delete Billing Category"
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
-                                                                    }}
-                                                                    className="bg-red-600"
+                                                            {role ===
+                                                            "SUPER ADMIN" ? (
+                                                                <Link
+                                                                    href={route(
+                                                                        "billingCategory.delete",
+                                                                        {
+                                                                            id: id,
+                                                                        }
+                                                                    )}
+                                                                    method="post"
+                                                                    as="button"
                                                                 >
+                                                                    <Tooltip
+                                                                        content="Delete Billing Category"
+                                                                        animate={{
+                                                                            mount: {
+                                                                                scale: 1,
+                                                                                y: 0,
+                                                                            },
+                                                                            unmount:
+                                                                                {
+                                                                                    scale: 0,
+                                                                                    y: 25,
+                                                                                },
+                                                                        }}
+                                                                        className="bg-red-600"
+                                                                    >
+                                                                        <IconButton
+                                                                            color="red"
+                                                                            variant="filled"
+                                                                        >
+                                                                            <TrashIcon className="w-4 h-4" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Link>
+                                                            ) : (
+                                                                <Tooltip content="You don't have permission">
                                                                     <IconButton
-                                                                        color="red"
+                                                                        color="gray"
                                                                         variant="filled"
+                                                                        disabled
                                                                     >
                                                                         <TrashIcon className="w-4 h-4" />
                                                                     </IconButton>
                                                                 </Tooltip>
-                                                            </Link>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 );

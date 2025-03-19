@@ -59,9 +59,11 @@ export default function EditBillingCategory({
     };
 
     const handleBillingTypeChange = (value) => {
+        setApartType("");
         setData((prevValues) => ({
             ...prevValues,
             billing_type: value,
+            category_name: "",
         }));
     };
 
@@ -163,7 +165,8 @@ export default function EditBillingCategory({
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        {data.billing_type === "Maintenance" ? (
+                                        {data.billing_type === "Maintenance" ||
+                                        data.billing_type === "Listrik" ? (
                                             <div className="w-full mr-4 tablet:mt-8">
                                                 <Select
                                                     label="Pilih Nama Tipe Apartemen"
@@ -210,30 +213,56 @@ export default function EditBillingCategory({
                                         )}
 
                                         <CustomInput
-                                            type="number"
                                             label="Tarif / Harga"
                                             id="unit_price"
-                                            value={data.unit_price}
-                                            onChange={(e) =>
+                                            value={
+                                                data.unit_price
+                                                    ? data.unit_price
+                                                          .toString()
+                                                          .replace(
+                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                              "."
+                                                          )
+                                                    : ""
+                                            }
+                                            onChange={(e) => {
+                                                const unformattedValue =
+                                                    e.target.value.replace(
+                                                        /\./g,
+                                                        ""
+                                                    );
                                                 setData(
                                                     "unit_price",
-                                                    e.target.value
-                                                )
-                                            }
+                                                    unformattedValue
+                                                );
+                                            }}
                                             errors={errors.unit_price}
                                             className="tablet:mt-8"
                                         />
                                         <CustomInput
-                                            type="number"
                                             label="Minimum Charge"
                                             id="minimum_charge"
-                                            value={data.minimum_charge}
-                                            onChange={(e) =>
+                                            value={
+                                                data.minimum_charge
+                                                    ? data.minimum_charge
+                                                          .toString()
+                                                          .replace(
+                                                              /\B(?=(\d{3})+(?!\d))/g,
+                                                              "."
+                                                          )
+                                                    : ""
+                                            }
+                                            onChange={(e) => {
+                                                const unformattedValue =
+                                                    e.target.value.replace(
+                                                        /\./g,
+                                                        ""
+                                                    );
                                                 setData(
                                                     "minimum_charge",
-                                                    e.target.value
-                                                )
-                                            }
+                                                    unformattedValue
+                                                );
+                                            }}
                                             errors={errors.minimum_charge}
                                             className="tablet:mt-8"
                                         />

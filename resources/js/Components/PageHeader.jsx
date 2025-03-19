@@ -13,6 +13,7 @@ import {
 export default function PageHeader({
     handleSearch,
     searchValue = "",
+    showInput = true,
     title,
     description,
     buttonLabel,
@@ -86,12 +87,16 @@ export default function PageHeader({
                                 : "w-full md:w-72 border"
                         }
                     >
-                        <Input
-                            label={label}
-                            value={searchValue}
-                            icon={<MagnifyingGlassIcon className="w-5 h-5 " />}
-                            onChange={handleSearch}
-                        />
+                        {showInput ? (
+                            <Input
+                                label={label}
+                                value={searchValue}
+                                icon={
+                                    <MagnifyingGlassIcon className="w-5 h-5 " />
+                                }
+                                onChange={handleSearch}
+                            />
+                        ) : null}
                     </div>
                     {showAddButton ? (
                         <Link href={route(addRoute)} className=" mobile:w-full">

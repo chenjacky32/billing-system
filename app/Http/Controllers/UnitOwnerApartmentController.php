@@ -79,7 +79,6 @@ class UnitOwnerApartmentController extends Controller
             'apartmenetData' => $apartment,
             'apartId'=> $apartId
         ]);
-
     }
 
     public function update(Request $request, $id)

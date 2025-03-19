@@ -35,8 +35,8 @@ export default function AddBiling({
         label: `Nomor - ${number.label}`,
     }));
 
-    // const [owner, setOwner] = useState(ownerData[0]);
-    const [room, setRoom] = useState(mappedRoomNumber[0]);
+    const [room, setRoom] = useState(null);
+    const [roomOptions, setRoomOptions] = useState([]);
     const [tower, setTower] = useState(towerData[0]);
     const [billingType, setBillingType] = useState("Air");
     const [waterTypeSelected, setWaterTypeSelected] = useState("");
@@ -213,10 +213,10 @@ export default function AddBiling({
 
     const handleRoomChange = (value) => {
         setRoom(value);
-        const findOwnerTower = towerData.find(
-            (item) => item.value == value.apartmentTowerId
-        );
-        setTower(findOwnerTower);
+        // const findOwnerTower = towerData.find(
+        //     (item) => item.value == value.apartmentTowerId
+        // );
+        // setTower(findOwnerTower);
         setResidence((prevState) => ({
             ...prevState,
             name: value.ownerName,
@@ -225,8 +225,8 @@ export default function AddBiling({
         setData((prevValue) => ({
             ...prevValue,
             room_no: value.value,
-            tower_id: value.apartmentTowerId,
             owner_id: value.value,
+            // tower_id: value.apartmentTowerId,
         }));
 
         if (billingType === "Maintenance") {
@@ -244,6 +244,21 @@ export default function AddBiling({
                     maintenance_type: matchedMaintenanceOption.value.toString(),
                 }));
             }
+        } else if (billingType === "Listrik") {
+            const matchedElectricOption = electricOptions.find(
+                (item) => item.label === value.apartType?.name
+            );
+            // console.log("dd", matchedElectricOption);
+            if (matchedElectricOption) {
+                setElectricTypeSelected(matchedElectricOption.value.toString());
+
+                setData((prevValue) => ({
+                    ...prevValue,
+                    electric_type: matchedElectricOption.value.toString(),
+                    unit_price: matchedElectricOption?.price,
+                    minimum_charge: matchedElectricOption?.minimum_charge,
+                }));
+            }
         } else {
             setMaintenanceTypeSelected("");
             setData((prevValue) => ({
@@ -255,15 +270,29 @@ export default function AddBiling({
 
     const handleTowerChange = (value) => {
         setTower(value);
+        const filteredRooms = mappedRoomNumber.filter((room) => {
+            return room.apartmentTowerId === value.value;
+        });
+
+        setRoomOptions(filteredRooms);
+
+        setRoom(null);
         setData((prevValue) => ({
             ...prevValue,
             tower_id: value.value,
+            room_no: "",
         }));
     };
 
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
-
+        setResidence((prevState) => ({
+            ...prevState,
+            name: "",
+            apartTypeName: "",
+            apartTypeId: "",
+        }));
+        setRoom(null);
         if (value === "Air" && WaterPriceData) {
             setData((prevValues) => ({
                 ...prevValues,
@@ -348,6 +377,12 @@ export default function AddBiling({
             }));
             setMaintenanceTypeSelected("");
             setVehicleTypeSelected("");
+            setResidence((prevState) => ({
+                ...prevState,
+                name: "",
+                apartTypeName: "",
+                apartTypeId: "",
+            }));
         }
     }
 
@@ -501,7 +536,13 @@ export default function AddBiling({
                                             <InputSelect
                                                 value={room}
                                                 onChange={handleRoomChange}
-                                                options={mappedRoomNumber}
+                                                options={roomOptions}
+                                                disabled={
+                                                    !tower.value ||
+                                                    tower.value === ""
+                                                        ? true
+                                                        : false
+                                                }
                                             />
                                             {errors.room_no && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
@@ -591,6 +632,12 @@ export default function AddBiling({
                                                             label="Kategori / Jenis Tagihan"
                                                             value={
                                                                 electricTypeSelected
+                                                            }
+                                                            disabled={
+                                                                billingType ===
+                                                                "Listrik"
+                                                                    ? true
+                                                                    : false
                                                             }
                                                             id="electric_type"
                                                             onChange={

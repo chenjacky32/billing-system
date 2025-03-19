@@ -58,6 +58,7 @@ class BillingController extends Controller
         ]);
     }
 
+
     public function add()
     {
 
@@ -68,7 +69,7 @@ class BillingController extends Controller
         // query to get the water price
         $WaterPrice = BillingsCategory::where('apartment_id', $apartmentId)
         ->where('billing_type','Air')
-        ->where('category_name','PDAM')
+        ->where('category_name','AIR')
         ->first();
 
         if($WaterPrice){
@@ -77,6 +78,9 @@ class BillingController extends Controller
             $WaterPriceMinimumCharge = $WaterPrice->minimum_charge ?? null;
         } else{
             $WaterPriceData = 'Price Water not found';
+            return back()->with('error', "Harga Air Tidak Ditemukan di Master Billing Category, Silahkan Input dulu di Master Billing Category, dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR' atau jika sebelumnya
+            sudah diinput dan sudah ada di Master Billing Category, silahkan lakukan perubahan di Master Billing Category dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR'.
+            ");
         }
 
 
@@ -342,7 +346,7 @@ class BillingController extends Controller
         // query to get the water price
         $WaterPrice = BillingsCategory::where('apartment_id', $apartment_id)
         ->where('billing_type','Air')
-        ->where('category_name','PDAM')
+        ->where('category_name','AIR')
         ->first();
         
         if($WaterPrice){
@@ -351,6 +355,9 @@ class BillingController extends Controller
             $WaterPriceMinimumCharge = $WaterPrice->minimum_charge ?? null;
         } else{
             $WaterPriceData = 'Price Water not found';
+            return back()->with('error', "Harga Air Tidak Ditemukan di Master Billing Category, Silahkan Input dulu di Master Billing Category, dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR' atau jika sebelumnya
+            sudah diinput dan sudah ada di Master Billing Category, silahkan lakukan perubahan di Master Billing Category dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR'.
+            ");
         }
         
         // $ownerQuery = ApartmentOwner::query();
@@ -628,8 +635,20 @@ class BillingController extends Controller
     public function destroy(Request $request)
     {
         $billing = Billing::find($request->id);
+        if (!$billing) {
+            return redirect('/billing')->with('error', 'Billing data not found!');
+        }
+    
+        if ($billing->end_meter_image_path) {
+            $filePath = 'public/' . $billing->end_meter_image_path;
+    
+            if (Storage::exists($filePath)) {
+                Storage::delete($filePath); 
+            }
+        }
+    
         $billing->delete();
-        return redirect('/billing')->with('success', 'Billing data has been deleted!');
+        return redirect()->back()->with('success', 'Billing data has been deleted!');
     }
 
     public function calculateFine(Request $request, $billingType, $ownerId) {

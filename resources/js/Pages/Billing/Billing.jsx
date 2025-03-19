@@ -142,7 +142,10 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
         if (flash.message) {
             toast.success(flash.message);
         }
-    }, [flash.message]);
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash.message, flash.error]);
 
     const handleDelete = (id) => {
         toast.info(

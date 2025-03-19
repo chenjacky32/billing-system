@@ -9,7 +9,9 @@ import {
     Option,
     Button,
 } from "@material-tailwind/react";
-
+import CustomDatePicker from "@/Components/CustomDatePicker";
+import InputSearch from "@/Components/InputSearch";
+import CustomSelect from "@/Components/CustomSelect";
 import { router } from "@inertiajs/react";
 import { useState } from "react";
 import moment from "moment";
@@ -20,13 +22,21 @@ import "react-toastify/dist/ReactToastify.css";
 import InputLabel from "@/Components/InputLabel";
 import BillingRow from "@/Components/BillingRow";
 import CustomInput from "@/Components/CustomInput";
+import { TypeBilling } from "@/utils/constant";
+import dayjs from "dayjs";
 
 const TABLE_HEAD = [
+    "No Unit",
+    "Nama Pemilik",
+    "Tower",
+    "Tipe Unit",
+    "Periode",
     "Jenis Tagihan",
     "Biaya Tagihan",
     "Denda",
     "Tanggal Tagihan Dibuat",
     "Tanggal Jatuh Tempo",
+    "Total Tagihan",
     "Tanggal Pembayaran",
     "Status Pembayaran",
 ];
@@ -39,9 +49,13 @@ export default function Billing({
     ownerId,
     ownerName,
 }) {
+    const [search, setSearch] = useState("");
     const [status, setStatus] = useState("");
-    const [fromDate, setFromDate] = useState("");
-    const [untilDate, setUntilDate] = useState("");
+    const [period, setPeriod] = useState(null);
+    const [billingType, setBillingType] = useState(null);
+    // const [fromDate, setFromDate] = useState("");
+    // const [untilDate, setUntilDate] = useState("");
+    console.log(data.data);
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -64,8 +78,10 @@ export default function Billing({
         // Construct the query parameters including status, from_date, and until_date
         const queryParams = {
             status: status,
-            from_date: fromDate,
-            until_date: untilDate,
+            period: period,
+            billingType: billingType,
+            // from_date: fromDate,
+            // until_date: untilDate,
         };
 
         // Make the API request to filter the data based on the queryParams
@@ -75,26 +91,68 @@ export default function Billing({
         });
     };
 
+    function formattedDate(date) {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    const handleChangePeriod = (value) => {
+        const firstDate = value.date(1);
+        setPeriod(formattedDate(firstDate.$d));
+    };
+
+    const applyClearFilters = () => {
+        setStatus(null);
+        setPeriod(null);
+        setBillingType(null);
+        setTimeout(() => {
+            router.get(
+                route(route().current(), { id: ownerId }),
+                {
+                    status: null,
+                    period: null,
+                    billingType: null,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                }
+            );
+        }, 0);
+    };
+
     function getPaginationUrl(
         baseUrl,
         statusQuery,
-        fromDateQuery,
-        untilDateQuery
+        periodQuery,
+        billingTypeQuery
+        // fromDateQuery,
+        // untilDateQuery
     ) {
         let url = baseUrl;
         const params = [];
+
+        if (periodQuery) {
+            params.push(`period=${encodeURIComponent(periodQuery)}`);
+        }
 
         if (statusQuery) {
             params.push(`status=${encodeURIComponent(statusQuery)}`);
         }
 
-        if (fromDateQuery) {
-            params.push(`from_date=${encodeURIComponent(fromDateQuery)}`);
+        if (billingTypeQuery) {
+            params.push(`billingType=${encodeURIComponent(billingTypeQuery)}`);
         }
+        // if (fromDateQuery) {
+        //     params.push(`from_date=${encodeURIComponent(fromDateQuery)}`);
+        // }
 
-        if (untilDateQuery) {
-            params.push(`until_date=${encodeURIComponent(untilDateQuery)}`);
-        }
+        // if (untilDateQuery) {
+        //     params.push(`until_date=${encodeURIComponent(untilDateQuery)}`);
+        // }
 
         // Check if baseUrl already has a query parameter
         if (baseUrl.includes("?")) {
@@ -113,7 +171,7 @@ export default function Billing({
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Billing History
                 </h2>
             }
@@ -121,7 +179,7 @@ export default function Billing({
             <Head title="Billing History" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-[50rem] mobile:w-full bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -131,7 +189,7 @@ export default function Billing({
                         </Link>
                         <Link
                             href={route("owner.report.index")}
-                            className="opacity-60 text-primary font-bold"
+                            className="font-bold opacity-60 text-primary"
                         >
                             Unit Owner Report
                         </Link>
@@ -139,21 +197,22 @@ export default function Billing({
                             href={route("owner.report.show", {
                                 id: ownerId,
                             })}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             {Name}'s Billing History
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                handleSearch={(event) =>
-                                    handleInputChange(
-                                        event.target.value,
-                                        "search"
-                                    )
-                                }
+                                // handleSearch={(event) =>
+                                //     handleInputChange(
+                                //         event.target.value,
+                                //         "search"
+                                //     )
+                                // }
+                                showInput={false}
                                 title={`${Name}'s Billing History`}
                                 description={`Informasi Data Billing ${Name}`}
                                 buttonLabel={"Tambah Billing"}
@@ -163,8 +222,8 @@ export default function Billing({
                                 showSearch={false}
                                 showAddButton={false}
                             />
-                            <div className="mt-5">
-                                <div className=" flex flex-wrap">
+                            {/* <div className="mt-5">
+                                <div className="flex flex-wrap ">
                                     <div className="w-[21rem] mr-4 tablet:w-full">
                                         <InputLabel>
                                             Status Pembyaran
@@ -189,7 +248,7 @@ export default function Billing({
                                             </Option>
                                         </Select>
                                     </div>
-                                    <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Dari Tanggal</InputLabel>
                                         <CustomInput
                                             id="from_date"
@@ -200,7 +259,7 @@ export default function Billing({
                                             type="date"
                                         />
                                     </div>
-                                    <div className="w-52 mr-4 tablet:w-full tablet:mt-5">
+                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
                                         <InputLabel>Sampai Tanggal</InputLabel>
                                         <CustomInput
                                             id="until_date"
@@ -213,7 +272,7 @@ export default function Billing({
                                     </div>
                                 </div>
                                 <div className="tablet:mr-4">
-                                    <div className="text-red-500 font-extrabold text-sm mobile:text-xs mt-2">
+                                    <div className="mt-2 text-sm font-extrabold text-red-500 mobile:text-xs">
                                         **Harap isi semua filter di atas untuk
                                         melakukan filter data
                                     </div>
@@ -226,9 +285,77 @@ export default function Billing({
                                     </Button>
                                 </div>
                             </div>
-                            <CardBody className="overflow-scroll px-0">
+                             */}
+                            <div className="mt-5">
+                                <div className="flex flex-row flex-wrap items-center justify-start w-full">
+                                    <div className="w-full mr-4 tablet:w-full tablet:mt-5">
+                                        <CustomDatePicker
+                                            value={
+                                                period ? dayjs(period) : null
+                                            }
+                                            onChange={handleChangePeriod}
+                                            placeholderText={
+                                                "Pilih Periode Bulan"
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-row flex-wrap justify-start w-full">
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
+                                        <CustomSelect
+                                            id="billing_type"
+                                            title="Jenis Tagihan"
+                                            value={billingType}
+                                            options={TypeBilling}
+                                            onChange={(selectedValue) =>
+                                                setBillingType(selectedValue)
+                                            }
+                                            variant="labelAsValue"
+                                        />
+                                    </div>
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
+                                        <Select
+                                            id="status"
+                                            color="blue"
+                                            label="Status Pembayaran"
+                                            value={status}
+                                            onChange={(e) => setStatus(e)}
+                                        >
+                                            <Option value="">
+                                                Status Pembayaran
+                                            </Option>
+                                            <Option value="Pending">
+                                                Pending
+                                            </Option>
+                                            <Option value="Success">
+                                                Success
+                                            </Option>
+                                            <Option value="Cancel">
+                                                Cancel
+                                            </Option>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full ">
+                                    <Button
+                                        className="w-full bg-white tablet:w-full tablet:mr-4 border-primary text-primary"
+                                        variant="outlined"
+                                        onClick={applyFilters}
+                                    >
+                                        Filter
+                                    </Button>
+                                    <Button
+                                        className="w-full text-red-400 bg-white border-red-400 tablet:w-full tablet:mr-4"
+                                        variant="outlined"
+                                        onClick={applyClearFilters}
+                                    >
+                                        Clear
+                                    </Button>
+                                </div>
+                            </div>
+                            <CardBody className="px-0 overflow-scroll">
                                 <table
-                                    className="mt-4 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -239,7 +366,7 @@ export default function Billing({
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="border-y  bg-primary py-4 pl-4"
+                                                    className="py-4 pl-4 border-y bg-primary"
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -257,7 +384,10 @@ export default function Billing({
                                                 (
                                                     {
                                                         id,
+                                                        residence,
+                                                        tower,
                                                         billing_type,
+                                                        period,
                                                         billing_fee,
                                                         status,
                                                         billing_date,
@@ -277,8 +407,101 @@ export default function Billing({
                                                     return (
                                                         <tr
                                                             key={id}
-                                                            className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                            className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                         >
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            residence.roomNo
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            residence
+                                                                                .user
+                                                                                .fullname
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            tower.tower_name
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            residence
+                                                                                .apartmentTypeData
+                                                                                .name
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {period
+                                                                            ? moment(
+                                                                                  period
+                                                                              ).format(
+                                                                                  "MMMM, YYYY"
+                                                                              )
+                                                                            : "-"}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
                                                             <td
                                                                 className={
                                                                     classes
@@ -330,81 +553,16 @@ export default function Billing({
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
-                                                                        {(() => {
-                                                                            const today =
-                                                                                new Date();
-                                                                            // Extracting the date part of today's date
-                                                                            const todayDate =
-                                                                                new Date(
-                                                                                    today.getFullYear(),
-                                                                                    today.getMonth(),
-                                                                                    today.getDate()
-                                                                                );
-
-                                                                            if (
-                                                                                status ===
-                                                                                "Success"
-                                                                            ) {
-                                                                                if (
-                                                                                    new Date(
-                                                                                        paid_date
-                                                                                    ) >
-                                                                                    new Date(
-                                                                                        due_date
-                                                                                    )
-                                                                                ) {
-                                                                                    return (
-                                                                                        <div className="text-red-500 font-bold">
-                                                                                            {new Intl.NumberFormat(
-                                                                                                "id-ID",
-                                                                                                {
-                                                                                                    style: "currency",
-                                                                                                    currency:
-                                                                                                        "IDR",
-                                                                                                }
-                                                                                            ).format(
-                                                                                                fine
-                                                                                            )}
-                                                                                        </div>
-                                                                                    );
-                                                                                } else {
-                                                                                    return "Tidak Ada";
-                                                                                }
-                                                                            } else if (
-                                                                                status ===
-                                                                                "Pending"
-                                                                            ) {
-                                                                                // Extracting the date part of due_date
-                                                                                const dueDate =
-                                                                                    new Date(
-                                                                                        due_date
-                                                                                    );
-
-                                                                                if (
-                                                                                    todayDate >
-                                                                                    dueDate
-                                                                                ) {
-                                                                                    return (
-                                                                                        <div className="text-red-500 font-bold">
-                                                                                            {new Intl.NumberFormat(
-                                                                                                "id-ID",
-                                                                                                {
-                                                                                                    style: "currency",
-                                                                                                    currency:
-                                                                                                        "IDR",
-                                                                                                }
-                                                                                            ).format(
-                                                                                                fine
-                                                                                            )}
-                                                                                        </div>
-                                                                                    );
-                                                                                } else {
-                                                                                    return "Tidak Ada";
-                                                                                }
-                                                                            } else {
-                                                                                return "Tidak Ada";
+                                                                        {new Intl.NumberFormat(
+                                                                            "id-ID",
+                                                                            {
+                                                                                style: "currency",
+                                                                                currency:
+                                                                                    "IDR",
                                                                             }
-                                                                        })()}
+                                                                        ).format(
+                                                                            fine
+                                                                        )}
                                                                     </Typography>
                                                                 </div>
                                                             </td>
@@ -448,6 +606,31 @@ export default function Billing({
                                                                     classes
                                                                 }
                                                             >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-semibold capitalize"
+                                                                    >
+                                                                        {new Intl.NumberFormat(
+                                                                            "id-ID",
+                                                                            {
+                                                                                style: "currency",
+                                                                                currency:
+                                                                                    "IDR",
+                                                                            }
+                                                                        ).format(
+                                                                            billing_fee +
+                                                                                fine
+                                                                        )}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal"
@@ -459,7 +642,7 @@ export default function Billing({
                                                                             "LL"
                                                                         )
                                                                     ) : (
-                                                                        <span className="text-red-500 font-bold">
+                                                                        <span className="font-bold text-red-500">
                                                                             BELUM
                                                                             ADA
                                                                             PEMBAYARAN
@@ -492,7 +675,7 @@ export default function Billing({
                                             <tr>
                                                 <td
                                                     colSpan={TABLE_HEAD.length}
-                                                    className="text-center py-4"
+                                                    className="py-4 text-center"
                                                 >
                                                     Belum Terdapat Transaksi
                                                 </td>
@@ -512,9 +695,12 @@ export default function Billing({
                                 getPaginationUrl={(baseUrl) =>
                                     getPaginationUrl(
                                         baseUrl,
+                                        filters.search,
                                         filters.status,
-                                        filters.from_date,
-                                        filters.until_date
+                                        filters.period,
+                                        filters.billingType
+                                        // filters.from_date,
+                                        // filters.until_date
                                     )
                                 }
                             />

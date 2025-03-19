@@ -36,6 +36,7 @@ class Billing extends Model
         return $this->belongsTo(Apartment::class, 'apartment_id');
     }
 
+
     public function tower(){
         return $this->belongsTo(ApartmentTower::class, 'tower_id');
     }

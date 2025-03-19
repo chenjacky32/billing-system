@@ -36,14 +36,23 @@ export default function Edit({
         label: `No - ${number.label}`,
     }));
 
+    const findTower = towerData.find(
+        (item) => item.value === billingData?.tower_id
+    );
+
+    const initialRoomOptions = findTower
+        ? mappedRoomNumber.filter(
+              (room) => room.apartmentTowerId === findTower.value
+          )
+        : [];
+
     const findRoomNumber = mappedRoomNumber.find(
         (item) => item.value == billingData?.residence_id
     );
 
-    const [room, setRoom] = useState(findRoomNumber || mappedRoomNumber[0]);
-    const [tower, setTower] = useState(
-        towerData.find((items) => items.value === billingData.tower_id)
-    );
+    const [tower, setTower] = useState(findTower || { value: "" });
+    const [roomOptions, setRoomOptions] = useState(initialRoomOptions);
+    const [room, setRoom] = useState(findRoomNumber || null);
 
     // const [owner, setOwner] = useState(
     //     ownerData.find((item) => item.value === billingData.owner_id)
@@ -89,7 +98,7 @@ export default function Edit({
         billing_type: billingData.billing_type,
         water_type: waterTypeSelected,
         electric_type: electricTypeSelected,
-        room_no: room.value,
+        room_no: room ? room.value : "",
         status: billingData.status,
         period: billingData.period,
         end_meter_image_path: billingData.end_meter_image_path || null,
@@ -253,10 +262,10 @@ export default function Edit({
 
     const handleRoomChange = (value) => {
         setRoom(value);
-        const findOwnerTower = towerData.find(
-            (item) => item.value == value.apartmentTowerId
-        );
-        setTower(findOwnerTower);
+        // const findOwnerTower = towerData.find(
+        //     (item) => item.value == value.apartmentTowerId
+        // );
+        // setTower(findOwnerTower);
         setResidence((prevState) => ({
             ...prevState,
             name: value.ownerName,
@@ -265,8 +274,8 @@ export default function Edit({
         setData((prevValue) => ({
             ...prevValue,
             room_no: value.value,
-            tower_id: value.apartmentTowerId,
             owner_id: value.value,
+            // tower_id: value.apartmentTowerId,
         }));
         if (billingType === "Maintenance") {
             const matchedMaintenanceOption = maintenanceOptions.find(
@@ -283,6 +292,21 @@ export default function Edit({
                     maintenance_type: matchedMaintenanceOption.value.toString(),
                 }));
             }
+        } else if (billingType === "Listrik") {
+            const matchedElectricOption = electricOptions.find(
+                (item) => item.label === value.apartType?.name
+            );
+            // console.log("dd", matchedElectricOption);
+            if (matchedElectricOption) {
+                setElectricTypeSelected(matchedElectricOption.value.toString());
+
+                setData((prevValue) => ({
+                    ...prevValue,
+                    electric_type: matchedElectricOption.value.toString(),
+                    unit_price: matchedElectricOption?.price,
+                    minimum_charge: matchedElectricOption?.minimum_charge,
+                }));
+            }
         } else {
             setMaintenanceTypeSelected("");
             setData((prevValue) => ({
@@ -294,14 +318,28 @@ export default function Edit({
 
     const handleTowerChange = (value) => {
         setTower(value);
+        const filteredRooms = mappedRoomNumber.filter((room) => {
+            return room.apartmentTowerId === value.value;
+        });
+
+        setRoomOptions(filteredRooms);
+        setRoom({ value: "", label: "" });
         setData((prevValue) => ({
             ...prevValue,
             tower_id: value.value,
+            room_no: "",
         }));
     };
 
     const handleBillingTypeChange = (value) => {
         setBillingType(value);
+        setResidence((prevState) => ({
+            ...prevState,
+            name: "",
+            apartTypeName: "",
+            apartTypeId: "",
+        }));
+        setRoom(null);
         setWaterTypeSelected(waterPriceId);
         if (value === "Air" && WaterPriceData) {
             setData((prevValues) => ({
@@ -398,6 +436,12 @@ export default function Edit({
             }));
             setMaintenanceTypeSelected("");
             setVehicleTypeSelected("");
+            setResidence((prevState) => ({
+                ...prevState,
+                name: "",
+                apartTypeName: "",
+                apartTypeId: "",
+            }));
         }
     }
 
@@ -551,7 +595,13 @@ export default function Edit({
                                             <InputSelect
                                                 value={room}
                                                 onChange={handleRoomChange}
-                                                options={mappedRoomNumber}
+                                                options={roomOptions}
+                                                disabled={
+                                                    !tower.value ||
+                                                    tower.value === ""
+                                                        ? true
+                                                        : false
+                                                }
                                             />
                                             {errors.room_no && (
                                                 <p className="mt-3 ml-0 text-sm text-red-500">
@@ -645,6 +695,12 @@ export default function Edit({
                                                             id="electric_type"
                                                             value={
                                                                 electricTypeSelected
+                                                            }
+                                                            disabled={
+                                                                billingType ===
+                                                                "Listrik"
+                                                                    ? true
+                                                                    : false
                                                             }
                                                             onChange={
                                                                 handleElectricChange

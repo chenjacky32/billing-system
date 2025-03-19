@@ -9,7 +9,7 @@ import {
     Breadcrumbs,
 } from "@material-tailwind/react";
 import { router, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
@@ -20,19 +20,25 @@ const TABLE_HEAD = [
     "No Identitas",
     "Nama Owner",
     "Nomor HP",
+    "Email",
     "Apartemen",
-    "No Apartemen",
+    "Tower",
+    "No Unit",
+    "Tipe Unit",
     "View",
 ];
 
 export default function OwnerReport({ auth, errors, data, filters }) {
     const { flash } = usePage().props;
+    const [search, setSearch] = useState("");
 
-    function handleSearch(event) {
-        console.log(event.target.value);
+    function handleSearch(value, type) {
+        if (type === "search") {
+            setSearch(value);
+        }
         router.get(
             route(route().current()),
-            { search: event.target.value },
+            { search: type === "search" ? value : search },
             {
                 preserveState: true,
                 replace: true,
@@ -43,7 +49,9 @@ export default function OwnerReport({ auth, errors, data, filters }) {
     function getPaginationUrl(baseUrl, searchQuery) {
         if (searchQuery) {
             // Include the search query in the URL
-            return `${baseUrl}&search=${searchQuery}`;
+            return `${baseUrl}${
+                baseUrl.includes("?") ? "&" : "?"
+            }search=${encodeURIComponent(searchQuery)}`;
         } else {
             // Don't include the search query
             return baseUrl;
@@ -63,7 +71,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Unit Owner Report
                 </h2>
             }
@@ -71,7 +79,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
             <Head title="Unit Owner Report" />
 
             <div className="py-12">
-                <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full">
+                <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
                     <Breadcrumbs className="ml-[-0.9rem] w-96 bg-transparent">
                         <Link
                             href={route("dashboard")}
@@ -81,16 +89,19 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                         </Link>
                         <Link
                             href={route("owner.report.index")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Unit Owner Report
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                handleSearch={handleSearch}
+                                searchValue={search}
+                                handleSearch={(event) =>
+                                    handleSearch(event.target.value, "search")
+                                }
                                 title={"Unit Owner Report"}
                                 description={
                                     "Informasi Data Tagihan dari Setiap Owner"
@@ -100,9 +111,9 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                 label="Cari Nama Unit Owner"
                                 showAddButton={false}
                             />
-                            <CardBody className="overflow-scroll px-0">
+                            <CardBody className="px-0 overflow-scroll">
                                 <table
-                                    className="mt-4 mobile:mt-0 w-full min-w-max table-auto text-left border "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -113,7 +124,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                             {TABLE_HEAD.map((head) => (
                                                 <th
                                                     key={head}
-                                                    className="border-y  bg-primary py-4 pl-4 "
+                                                    className="py-4 pl-4 border-y bg-primary "
                                                 >
                                                     <Typography
                                                         variant="small"
@@ -129,11 +140,13 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                         {data.data.map(
                                             (
                                                 {
-                                                    identity_no,
+                                                    userId,
+                                                    user,
                                                     owner_name,
-                                                    phone,
+                                                    roomNo,
+                                                    apartmentTower,
+                                                    apartmentTypeData,
                                                     apartment,
-                                                    room_no,
                                                     id,
                                                 },
                                                 index
@@ -148,7 +161,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                 return (
                                                     <tr
                                                         key={id}
-                                                        className="bg-primary/15 hover:bg-primary/5 transition duration-300 text-black"
+                                                        className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
@@ -156,20 +169,30 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
+                                                                    {userId}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
                                                                     {
-                                                                        identity_no
+                                                                        user?.fullname
                                                                     }
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {owner_name}
+                                                                    {user.phone}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -179,11 +202,10 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {phone}
+                                                                    {user.email}
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -196,14 +218,37 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {room_no}
+                                                                    {
+                                                                        apartmentTower.tower_name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {roomNo}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        apartmentTypeData.name
+                                                                    }
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -222,7 +267,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                 as="button"
                                                             >
                                                                 <Tooltip
-                                                                    content={`View ${owner_name}'s Billing History`}
+                                                                    content={`View ${user.fullname}'s Billing History`}
                                                                     animate={{
                                                                         mount: {
                                                                             scale: 1,
@@ -241,7 +286,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                         // color="blue"
                                                                         className="bg-primary hover:bg-primaryHover"
                                                                     >
-                                                                        <EyeIcon className="h-4 w-4" />
+                                                                        <EyeIcon className="w-4 h-4" />
                                                                     </IconButton>
                                                                 </Tooltip>
                                                             </Link>

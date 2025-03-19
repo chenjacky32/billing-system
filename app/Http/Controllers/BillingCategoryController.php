@@ -125,18 +125,23 @@ class BillingCategoryController extends Controller
             'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
 
-        if($validateData['billing_type'] === "Maintenance"){
+        $billingTypesToCheck = ['Maintenance', 'Listrik'];
+
+        if (in_array($validateData['billing_type'], $billingTypesToCheck)) {
             $existingData = BillingsCategory::where('apartment_id', $validateData['apartment_id'])
-                ->where('billing_type', 'Maintenance')
+                ->where('billing_type', $validateData['billing_type'])
                 ->where('category_name', $validateData['category_name'])
                 ->exists();
+
             Log::info('existingData', ['existingData' => $existingData]);
 
             if ($existingData) {
-                return back()->withErrors(['category_name' => 'Kategori tagihan untuk tipe apartemen ini sudah tersedia. Jika perlu melakukan perubahan, silakan edit kategori yang sudah ada atau gunakan Tipe Apartemen lain'])->withInput();
+                return back()->withErrors([
+                    'category_name' => 'Kategori tagihan untuk tipe apartemen ini sudah tersedia. Jika perlu melakukan perubahan, silakan edit kategori yang sudah ada atau gunakan Tipe Apartemen lain'
+                ])->withInput();
             }
-        }   
-
+        }
+    
         $validateData['created_by'] = Auth::id();
 
         BillingsCategory::create($validateData);
@@ -155,15 +160,18 @@ class BillingCategoryController extends Controller
             'minimum_charge' => 'required|integer|min:0|max:999999999999999',
         ]);
 
-        if($validatedData['billing_type'] === "Maintenance"){
-            $existingData = BillingsCategory::where('billing_type', 'Maintenance')
-                ->where('apartment_id', $validatedData['apartment_id'])
-                ->where('category_name', $validatedData['category_name'])
-                ->where('id', '!=', $id)
-                ->exists();
-            if($existingData) {
+        $billingTypesToCheck = ['Maintenance', 'Listrik'];
+
+        if (in_array($validatedData['billing_type'], $billingTypesToCheck)) {
+            $existingData = BillingsCategory::where('billing_type', $validatedData['billing_type'])
+            ->where('apartment_id', $validatedData['apartment_id'])
+            ->where('category_name', $validatedData['category_name'])
+            ->where('id', '!=', $id) 
+            ->exists();
+
+            if ($existingData) {
                 return back()->withErrors([
-                    'category_name'=>"Kategori '{$validatedData['category_name']}' untuk tipe apartemen ini sudah ada di sistem. Silakan gunakan Tipe Apartemen lain."
+                    'category_name' => "Kategori '{$validatedData['category_name']}' untuk tipe apartemen ini sudah ada di sistem. Silakan gunakan Tipe Apartemen lain."
                 ])->withInput();
             }
         }
