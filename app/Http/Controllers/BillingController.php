@@ -7,6 +7,7 @@ use App\Events\BillingPaid;
 use App\Models\Apartment;
 use App\Models\ApartmentOwner;
 use App\Models\ApartmentTower;
+use App\Models\ApartmentType;
 use App\Models\Billing;
 use App\Models\BillingFineRules;
 use App\Models\BillingsCategory;
@@ -30,8 +31,31 @@ class BillingController extends Controller
         $userApartId = $user->apartment_id;
         $ApartmentId = Apartment::find($userApartId);
 
+        $towerQuery = ApartmentTower::query();
+        $apartmentType =  ApartmentType::query();
+
+        if($role !== 'SUPER ADMIN'){
+            $towerQuery->where('apartment_id', $user->apartment_id);
+        }
+
+        $tower_data = $towerQuery->get()->map( function ($tower) {
+            return [
+                'label' => $tower->tower_name,
+                'value' => $tower->id
+            ];
+            })->values()->toArray();
+        
+        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
+            return [
+                'label' => $apartmentType->name,
+                'value' => $apartmentType->id
+            ];
+        })->values()->toArray();
+
         return Inertia::render('Billing/Billing', [
             'apartmentId'=> $ApartmentId,
+            'towerData'=> $tower_data,
+            'apartmentType'=> $apartmentTypeData,
             'filters' => $request->only('search', 'status'),  // Include 'status' in the filters
             'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user'])
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
@@ -52,6 +76,23 @@ class BillingController extends Controller
                 ->when($request->filled('status'), function ($query) use ($request) {  // Check if 'status' is not only present but also filled
                     $status = $request->input('status');
                     $query->where('status', $status);
+                })
+                ->when($request->filled('period'), function($query) use ($request){
+                    $period = $request->input('period');
+                    $query->where('period','like',"%$period%");
+                })
+                ->when($request->filled('billingType'), function($query) use ($request){
+                        $billingType = $request->input('billingType');
+                        $query->where('billing_type','like',"%$billingType%");
+                })->when($request->filled('towerId'), function($query) use ($request){
+                        $tower = $request->input('towerId');
+                        $query->where('tower_id','like',"%$tower%");
+                })->when($request->filled('unitType'), function($query) use ($request){
+                        $unitType = $request->input('unitType');
+                        $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
+                            ->pluck('id') // Ambil hanya kolom `id`
+                            ->toArray();
+                        $query->whereIn('residence_id', $matchingResidenceIds);
                 })
                 ->orderByDesc('id')
                 ->paginate(10),

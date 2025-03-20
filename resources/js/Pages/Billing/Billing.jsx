@@ -1,5 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import axios from "axios";
+import CustomDatePicker from "@/Components/CustomDatePicker";
 import { Head, Link } from "@inertiajs/react";
 import {
     Card,
@@ -32,6 +33,10 @@ import "react-toastify/dist/ReactToastify.css";
 import InputLabel from "@/Components/InputLabel";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import BillingRow from "@/Components/BillingRow";
+import CustomSelect from "@/Components/CustomSelect";
+import InputSearch from "@/Components/InputSearch";
+import dayjs from "dayjs";
+import { TypeBilling } from "@/utils/constant";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -52,12 +57,25 @@ const TABLE_HEAD = [
     "Delete",
 ];
 
-export default function Billing({ auth, errors, data, filters, apartmentId }) {
+export default function Billing({
+    auth,
+    errors,
+    data,
+    filters,
+    apartmentId,
+    towerData,
+    unitTypeData,
+    apartmentType,
+}) {
     const role = auth.user.role;
 
     const { flash } = usePage().props;
-    const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+    const [status, setStatus] = useState("");
+    const [period, setPeriod] = useState(null);
+    const [tower, setTower] = useState("");
+    const [billingType, setBillingType] = useState(null);
+    const [unitType, setUnitType] = useState(null);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [passwordError, setPasswordError] = useState("");
     const [pendingEditId, setPendingEditId] = useState("");
@@ -83,6 +101,50 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                 return ""; // Default background color
         }
     }
+
+    const applyFilters = () => {
+        router.get(
+            route(route().current()),
+            {
+                search: search,
+                period: period,
+                towerId: tower,
+                unitType: unitType,
+                billingType: billingType,
+                status: status,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    };
+
+    const applyClearFilters = () => {
+        setSearch("");
+        setBillingType(null);
+        setPeriod(null);
+        setTower(null);
+        setUnitType(null);
+        setTimeout(() => {
+            router.get(
+                route(route().current()),
+                {
+                    search: "",
+                    period: null,
+                    towerId: null,
+                    unitType: null,
+                    billingType: null,
+                    status: null,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                }
+            );
+        }, 0);
+    };
+
     const handleInputChange = (value, type) => {
         if (type === "search") {
             setSearch(value);
@@ -90,17 +152,17 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
             setStatus(value);
         }
 
-        router.get(
-            route(route().current()),
-            {
-                search: type === "search" ? value : search,
-                status: type === "status" ? value : status,
-            },
-            {
-                preserveState: true,
-                replace: true,
-            }
-        );
+        // router.get(
+        //     route(route().current()),
+        //     {
+        //         search: type === "search" ? value : search,
+        //         status: type === "status" ? value : status,
+        //     },
+        //     {
+        //         preserveState: true,
+        //         replace: true,
+        //     }
+        // );
     };
 
     function handleSearch(event) {
@@ -115,7 +177,15 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
         );
     }
 
-    function getPaginationUrl(baseUrl, searchQuery, statusQuery) {
+    function getPaginationUrl(
+        baseUrl,
+        searchQuery,
+        statusQuery,
+        periodQuery,
+        towerQuery,
+        unitTypeQuery,
+        billingTypeQuery
+    ) {
         let url = baseUrl;
         const params = [];
 
@@ -124,6 +194,18 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
         }
         if (statusQuery) {
             params.push(`status=${encodeURIComponent(statusQuery)}`);
+        }
+        if (periodQuery) {
+            params.push(`status=${encodeURIComponent(periodQuery)}`);
+        }
+        if (towerQuery) {
+            params.push(`status=${encodeURIComponent(towerQuery)}`);
+        }
+        if (unitTypeQuery) {
+            params.push(`status=${encodeURIComponent(unitTypeQuery)}`);
+        }
+        if (billingTypeQuery) {
+            params.push(`status=${encodeURIComponent(billingTypeQuery)}`);
         }
 
         // Check if baseUrl already has a query parameter
@@ -233,6 +315,19 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
         }
     };
 
+    function formattedDate(date) {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    const handleChangePeriod = (value) => {
+        const firstDate = value.date(1);
+        setPeriod(formattedDate(firstDate.$d));
+    };
+
     return (
         <AuthenticatedLayout
             auth={auth}
@@ -265,6 +360,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
+                                showInput={true}
                                 searchValue={search}
                                 handleSearch={(event) =>
                                     handleInputChange(
@@ -279,17 +375,62 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                 buttonLabel={"Tambah Billing"}
                                 icon={buttonIcon}
                                 addRoute={"billing.add"}
-                                label="Cari Nama Unit Owner / Room"
+                                label="Cari Nama Unit Owner / Nomor Unit"
                                 hasFilter={true}
                             />
 
                             <div className="mt-5">
-                                <div className="flex flex-wrap ">
-                                    <div className="w-[21rem] mr-4 tablet:w-full">
-                                        <InputLabel>
-                                            Status Pembayaran
-                                        </InputLabel>
+                                <div className="flex flex-row flex-wrap items-center justify-start w-full">
+                                    <div className="w-full mr-4 tablet:w-full tablet:mt-5">
+                                        <CustomDatePicker
+                                            value={
+                                                period ? dayjs(period) : null
+                                            }
+                                            onChange={handleChangePeriod}
+                                            placeholderText={
+                                                "Pilih Periode Bulan"
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-row flex-wrap justify-start w-full">
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
+                                        <CustomSelect
+                                            id="tower"
+                                            value={tower}
+                                            title="Tipe Tower"
+                                            options={towerData}
+                                            onChange={(selectedValue) =>
+                                                setTower(selectedValue)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
+                                        <CustomSelect
+                                            id="Unit Type"
+                                            value={unitType}
+                                            title="Tipe Unit"
+                                            options={apartmentType}
+                                            onChange={(selectedValue) =>
+                                                setUnitType(selectedValue)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
+                                        <CustomSelect
+                                            id="billing_type"
+                                            title="Tipe Billing"
+                                            value={billingType}
+                                            options={TypeBilling}
+                                            onChange={(selectedValue) =>
+                                                setBillingType(selectedValue)
+                                            }
+                                            variant="labelAsValue"
+                                        />
+                                    </div>
+                                    <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
                                         <Select
+                                            label="Status Pembayaran"
                                             id="status"
                                             color="blue"
                                             value={status}
@@ -314,39 +455,27 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                             </Option>
                                         </Select>
                                     </div>
-                                    {/* <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Dari Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="from_date"
-                                            onChange={(value) =>
-                                                handleInputChange(
-                                                    value,
-                                                    "from_date"
-                                                )
-                                            }
-                                            className=""
-                                            type="date"
-                                        />
-                                    </div>
-                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Sampai Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="until_date"
-                                            onChange={(value) =>
-                                                handleInputChange(
-                                                    value,
-                                                    "status"
-                                                )
-                                            }
-                                            className=""
-                                            type="date"
-                                        />
-                                    </div> */}
+                                </div>
+                                <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full ">
+                                    <Button
+                                        className="w-full bg-white tablet:w-full tablet:mr-4 border-primary text-primary"
+                                        variant="outlined"
+                                        onClick={applyFilters}
+                                    >
+                                        Filter
+                                    </Button>
+                                    <Button
+                                        className="w-full text-red-400 bg-white border-red-400 tablet:w-full tablet:mr-4"
+                                        variant="outlined"
+                                        onClick={applyClearFilters}
+                                    >
+                                        Clear
+                                    </Button>
                                 </div>
                             </div>
-                            <CardBody className="px-0 overflow-scroll">
+                            <CardBody className="px-0 overflow-x-auto">
                                 <table
-                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
+                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max"
                                     style={{
                                         borderRadius: "10px",
                                         overflow: "hidden",
@@ -537,15 +666,6 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                                             </Typography>
                                                         </td>
 
-                                                        {/* <BillingRow
-                                                            billing_fee={
-                                                                billing_fee
-                                                            }
-                                                            fine={fine}
-                                                            due_date={due_date}
-                                                            classes={classes}
-                                                        /> */}
-
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
@@ -560,7 +680,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                                         <td className={classes}>
                                                             <Typography
                                                                 variant="small"
-                                                                className="font-normal"
+                                                                className="font-semibold"
                                                             >
                                                                 {new Intl.NumberFormat(
                                                                     "id-ID",
@@ -674,6 +794,7 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                                                 )}
                                                             </Tooltip>
                                                         </td>
+
                                                         <td className={classes}>
                                                             <Tooltip
                                                                 content="Delete Billing"
@@ -793,7 +914,11 @@ export default function Billing({ auth, errors, data, filters, apartmentId }) {
                                     getPaginationUrl(
                                         baseUrl,
                                         filters.search,
-                                        filters.status
+                                        filters.status,
+                                        filters.period,
+                                        filters.towerId,
+                                        filters.unitType,
+                                        filters.billing_type
                                     )
                                 }
                             />

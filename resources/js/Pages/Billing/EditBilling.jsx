@@ -415,8 +415,22 @@ export default function Edit({
     // ! Handle Clear Count Billing
     function handleClearCountBilling() {
         if (billingType === "Listrik" || billingType === "Air") {
+            setRoom({ value: "", label: "" });
+            setTower({ value: "" });
+            setResidence((prevState) => ({
+                ...prevState,
+                name: "",
+                apartTypeName: "",
+                apartTypeId: "",
+            }));
             setData((prevValues) => ({
                 ...prevValues,
+                period: "",
+                billing_date: "",
+                due_date: "",
+                tower_id: "",
+                room_no: "",
+                owner_id: "",
                 start_meter: "",
                 end_meter: "",
                 meter_reading: "",
@@ -433,6 +447,14 @@ export default function Edit({
                 billing_fee: "",
                 maintenance_type: "",
                 vehicle_type_parking: "",
+                total_amount: "",
+                fine: "",
+                period: "",
+                billing_date: "",
+                due_date: "",
+                tower_id: "",
+                room_no: "",
+                owner_id: "",
             }));
             setMaintenanceTypeSelected("");
             setVehicleTypeSelected("");
@@ -442,6 +464,8 @@ export default function Edit({
                 apartTypeName: "",
                 apartTypeId: "",
             }));
+            setRoom({ value: "", label: "" });
+            setTower({ value: "" });
         }
     }
 

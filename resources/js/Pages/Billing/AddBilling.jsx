@@ -52,9 +52,9 @@ export default function AddBiling({
 
     const { flash } = usePage().props;
     const { data, setData, post, processing, errors } = useForm({
-        billing_fee: flash?.billing_fee || "",
-        total_amount: flash?.total_amount || "",
-        meter_reading: flash?.meter_reading || "",
+        billing_fee: "",
+        total_amount: "",
+        meter_reading: "",
         billing_date: "",
         due_days: 10,
         billing_type: billingType,
@@ -62,7 +62,7 @@ export default function AddBiling({
         minimum_charge: "",
         due_date: "",
         apartment_id: apartmentId,
-        start_meter: flash?.new_start_meter || "",
+        start_meter: "",
         end_meter: "",
         end_meter_image_path: null,
         unit_price: "",
@@ -356,13 +356,25 @@ export default function AddBiling({
     // ! Handle Clear Count Billing
     function handleClearCountBilling() {
         if (billingType === "Listrik" || billingType === "Air") {
+            setRoom(null);
+            setTower({ value: "", label: "Pilih Tower" });
+            setResidence((prevState) => ({
+                ...prevState,
+                name: "",
+                apartTypeName: "",
+                apartTypeId: "",
+            }));
             setData((prevValues) => ({
                 ...prevValues,
+                period: "",
+                billing_date: "",
+                due_date: "",
                 start_meter: "",
+                tower_id: "",
+                room_no: "",
+                owner_id: "",
                 end_meter: "",
                 meter_reading: "",
-                unit_price: "",
-                minimum_charge: "",
                 billing_fee: "",
                 total_amount: "",
                 fine: "",
@@ -372,11 +384,21 @@ export default function AddBiling({
                 ...prevValues,
                 meter_reading: null,
                 billing_fee: "",
+                total_amount: "",
+                fine: "",
                 maintenance_type: "",
                 vehicle_type_parking: "",
+                period: "",
+                billing_date: "",
+                due_date: "",
+                tower_id: "",
+                room_no: "",
+                owner_id: "",
             }));
             setMaintenanceTypeSelected("");
             setVehicleTypeSelected("");
+            setRoom(null);
+            setTower({ value: "", label: "Pilih Tower" });
             setResidence((prevState) => ({
                 ...prevState,
                 name: "",

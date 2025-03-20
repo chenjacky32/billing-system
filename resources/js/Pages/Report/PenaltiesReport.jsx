@@ -264,7 +264,7 @@ export default function PenaltiesReport({
                                 <div className="flex flex-row flex-wrap justify-start w-full">
                                     <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
                                         <InputSearch
-                                            label="Cari Nama Unit Owner"
+                                            label="Cari Nama Unit Owner / Nomor Unit"
                                             searchValue={search}
                                             handleSearch={(event) =>
                                                 handleInputChange(

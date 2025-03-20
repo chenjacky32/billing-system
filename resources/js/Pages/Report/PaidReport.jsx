@@ -49,12 +49,6 @@ export default function PaidReport({
     const [billingType, setBillingType] = useState(null);
     const [unitType, setUnitType] = useState(null);
 
-    // console.log(data.data);
-    console.log("period", period);
-    console.log("tower", tower);
-    console.log("billingType", billingType);
-    console.log("unitType", unitType);
-
     function getStatusColor(status) {
         switch (status) {
             case "Pending":
@@ -218,7 +212,7 @@ export default function PaidReport({
                                 buttonLabel={"Tambah Billing"}
                                 // icon={buttonIcon}
                                 addRoute={"billing.add"}
-                                label="Cari Nama Unit Owner"
+                                label="Cari Nama Unit Owner / Nomor Unit"
                                 hasFilter={true}
                                 showAddButton={false}
                                 showCard={true}
@@ -244,7 +238,7 @@ export default function PaidReport({
                                 <div className="flex flex-row flex-wrap justify-start w-full">
                                     <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
                                         <InputSearch
-                                            label="Cari Nama Unit Owner"
+                                            label="Cari Nama Unit Owner / Nomor Unit"
                                             searchValue={search}
                                             handleSearch={(event) =>
                                                 handleInputChange(
