@@ -33,7 +33,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
-import { TypeBilling } from "@/utils/constant";
+import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -53,12 +53,6 @@ const TABLE_HEAD = [
     "Edit",
     "Delete",
 ];
-
-const stickyColumnStyles = {
-    baseClass: "sticky-col",
-    background: "bg-blue-50",
-    positions: ["0px", "160px", "320px", "480px"],
-};
 
 export default function Billing({
     auth,

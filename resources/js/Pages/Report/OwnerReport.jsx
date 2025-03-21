@@ -15,6 +15,7 @@ import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { EyeIcon } from "@heroicons/react/24/outline";
+import { stickyColumnStyles } from "@/utils/constant";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -111,199 +112,259 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                 label="Cari Nama Unit Owner / Nomor Unit"
                                 showAddButton={false}
                             />
-                            <CardBody className="px-0 overflow-scroll">
-                                <table
-                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
-                                    style={{
-                                        borderRadius: "10px",
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <thead>
-                                        <tr>
-                                            {TABLE_HEAD.map((head) => (
-                                                <th
-                                                    key={head}
-                                                    className="py-4 pl-4 border-y bg-primary "
-                                                >
-                                                    <Typography
-                                                        variant="small"
-                                                        className="font-bold text-textColor"
-                                                    >
-                                                        {head}
-                                                    </Typography>
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {data.data.map(
-                                            (
-                                                {
-                                                    userId,
-                                                    user,
-                                                    owner_name,
-                                                    roomNo,
-                                                    apartmentTower,
-                                                    apartmentTypeData,
-                                                    apartment,
-                                                    id,
-                                                },
-                                                index
-                                            ) => {
-                                                const isLast =
-                                                    index ===
-                                                    data.data.length - 1;
-                                                const classes = isLast
-                                                    ? "pl-4 "
-                                                    : "pl-4   border-b border-blue-gray-150";
-
-                                                return (
-                                                    <tr
-                                                        key={id}
-                                                        className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
-                                                    >
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {roomNo}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        user?.fullname
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        apartmentTower.tower_name
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        apartmentTypeData.name
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        apartment.name
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {user.phone}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {user.email}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {userId}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
-                                                            <Link
-                                                                href={route(
-                                                                    "owner.report.show",
-                                                                    {
-                                                                        id: id,
-                                                                    }
-                                                                )}
-                                                                method="get"
-                                                                data={{
-                                                                    id: undefined,
-                                                                }}
-                                                                as="button"
+                            <CardBody className="px-0">
+                                <div className="w-full overflow-auto">
+                                    <table className="w-full mt-4 text-left border-collapse table-auto mobile:mt-0 min-w-max tablet-rounded">
+                                        <thead>
+                                            <tr>
+                                                {TABLE_HEAD.map(
+                                                    (head, index) => (
+                                                        <th
+                                                            key={head}
+                                                            className={`text-left py-4 pl-4 border-y bg-primary ${
+                                                                index < 4
+                                                                    ? "sticky-col"
+                                                                    : ""
+                                                            }`}
+                                                            style={{
+                                                                left:
+                                                                    index < 4
+                                                                        ? `${
+                                                                              index *
+                                                                              160
+                                                                          }px`
+                                                                        : "auto",
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="small"
+                                                                className="font-bold text-textColor"
                                                             >
-                                                                <Tooltip
-                                                                    content={`View ${user.fullname}'s Billing History`}
-                                                                    animate={{
-                                                                        mount: {
-                                                                            scale: 1,
-                                                                            y: 0,
-                                                                        },
-                                                                        unmount:
-                                                                            {
-                                                                                scale: 0,
-                                                                                y: 25,
-                                                                            },
-                                                                    }}
-                                                                    className="bg-primary/80"
-                                                                >
-                                                                    <IconButton
-                                                                        variant="fill"
-                                                                        // color="blue"
-                                                                        className="bg-primary hover:bg-primaryHover"
+                                                                {head}
+                                                            </Typography>
+                                                        </th>
+                                                    )
+                                                )}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.data.map(
+                                                (
+                                                    {
+                                                        userId,
+                                                        user,
+                                                        owner_name,
+                                                        roomNo,
+                                                        apartmentTower,
+                                                        apartmentTypeData,
+                                                        apartment,
+                                                        id,
+                                                    },
+                                                    index
+                                                ) => {
+                                                    const isLast =
+                                                        index ===
+                                                        data.data.length - 1;
+                                                    const classes = isLast
+                                                        ? "pl-4 "
+                                                        : "pl-4   border-b border-blue-gray-150";
+
+                                                    return (
+                                                        <tr
+                                                            key={id}
+                                                            className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
+                                                        >
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} 
+                                                                `}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[0],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
                                                                     >
-                                                                        <EyeIcon className="w-4 h-4" />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                            </Link>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            }
-                                        )}
-                                    </tbody>
-                                </table>
+                                                                        {roomNo}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background}`}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[1],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            user?.fullname
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[2],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            apartmentTower.tower_name
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[3],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            apartmentTypeData.name
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            apartment.name
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            user.phone
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {
+                                                                            user.email
+                                                                        }
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
+                                                                        {userId}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <Link
+                                                                    href={route(
+                                                                        "owner.report.show",
+                                                                        {
+                                                                            id: id,
+                                                                        }
+                                                                    )}
+                                                                    method="get"
+                                                                    data={{
+                                                                        id: undefined,
+                                                                    }}
+                                                                    as="button"
+                                                                >
+                                                                    <Tooltip
+                                                                        content={`View ${user.fullname}'s Billing History`}
+                                                                        animate={{
+                                                                            mount: {
+                                                                                scale: 1,
+                                                                                y: 0,
+                                                                            },
+                                                                            unmount:
+                                                                                {
+                                                                                    scale: 0,
+                                                                                    y: 25,
+                                                                                },
+                                                                        }}
+                                                                        className="bg-primary/80"
+                                                                    >
+                                                                        <IconButton
+                                                                            variant="fill"
+                                                                            // color="blue"
+                                                                            className="bg-primary hover:bg-primaryHover"
+                                                                        >
+                                                                            <EyeIcon className="w-4 h-4" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Link>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </CardBody>
                             <Pagination
                                 current_page={data.current_page}

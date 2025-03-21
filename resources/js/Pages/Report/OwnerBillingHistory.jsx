@@ -10,7 +10,6 @@ import {
     Button,
 } from "@material-tailwind/react";
 import CustomDatePicker from "@/Components/CustomDatePicker";
-import InputSearch from "@/Components/InputSearch";
 import CustomSelect from "@/Components/CustomSelect";
 import { router } from "@inertiajs/react";
 import { useState } from "react";
@@ -19,10 +18,7 @@ import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import InputLabel from "@/Components/InputLabel";
-import BillingRow from "@/Components/BillingRow";
-import CustomInput from "@/Components/CustomInput";
-import { TypeBilling } from "@/utils/constant";
+import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
 import dayjs from "dayjs";
 
 const TABLE_HEAD = [
@@ -353,336 +349,361 @@ export default function Billing({
                                     </Button>
                                 </div>
                             </div>
-                            <CardBody className="px-0 overflow-scroll">
-                                <table
-                                    className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
-                                    style={{
-                                        borderRadius: "10px",
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <thead>
-                                        <tr>
-                                            {TABLE_HEAD.map((head) => (
-                                                <th
-                                                    key={head}
-                                                    className="py-4 pl-4 border-y bg-primary"
-                                                >
-                                                    <Typography
-                                                        variant="small"
-                                                        className="font-bold text-textColor"
-                                                    >
-                                                        {head}
-                                                    </Typography>
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {data.data && data.data.length > 0 ? (
-                                            data.data.map(
-                                                (
-                                                    {
-                                                        id,
-                                                        residence,
-                                                        tower,
-                                                        billing_type,
-                                                        period,
-                                                        billing_fee,
-                                                        status,
-                                                        billing_date,
-                                                        due_date,
-                                                        fine,
-                                                        paid_date,
-                                                    },
-                                                    index
-                                                ) => {
-                                                    const isLast =
-                                                        index ===
-                                                        data.length - 1;
-                                                    const classes = isLast
-                                                        ? "pl-4 py-2"
-                                                        : "pl-4 py-2 border-b border-blue-gray-150";
-
-                                                    return (
-                                                        <tr
-                                                            key={id}
-                                                            className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
+                            <CardBody className="px-0">
+                                <div className="w-full overflow-auto">
+                                    <table className="w-full mt-4 text-left border-collapse table-auto mobile:mt-0 min-w-max tablet-rounded">
+                                        <thead>
+                                            <tr>
+                                                {TABLE_HEAD.map(
+                                                    (head, index) => (
+                                                        <th
+                                                            key={head}
+                                                            className={`text-left py-4 pl-4 border-y bg-primary ${
+                                                                index < 4
+                                                                    ? "sticky-col"
+                                                                    : ""
+                                                            }`}
+                                                            style={{
+                                                                left:
+                                                                    index < 4
+                                                                        ? `${
+                                                                              index *
+                                                                              160
+                                                                          }px`
+                                                                        : "auto",
+                                                            }}
                                                         >
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
+                                                            <Typography
+                                                                variant="small"
+                                                                className="font-bold text-textColor"
                                                             >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {
-                                                                            residence.roomNo
-                                                                        }
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
+                                                                {head}
+                                                            </Typography>
+                                                        </th>
+                                                    )
+                                                )}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.data &&
+                                            data.data.length > 0 ? (
+                                                data.data.map(
+                                                    (
+                                                        {
+                                                            id,
+                                                            residence,
+                                                            tower,
+                                                            billing_type,
+                                                            period,
+                                                            billing_fee,
+                                                            status,
+                                                            billing_date,
+                                                            due_date,
+                                                            fine,
+                                                            paid_date,
+                                                        },
+                                                        index
+                                                    ) => {
+                                                        const isLast =
+                                                            index ===
+                                                            data.length - 1;
+                                                        const classes = isLast
+                                                            ? "pl-4 py-2"
+                                                            : "pl-4 py-2 border-b border-blue-gray-150";
 
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
+                                                        return (
+                                                            <tr
+                                                                key={id}
+                                                                className="text-black transition duration-300 bg-primary/15 hover:bg-primary/5"
                                                             >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {
-                                                                            residence
-                                                                                .user
-                                                                                .fullname
-                                                                        }
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {
-                                                                            tower.tower_name
-                                                                        }
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {
-                                                                            residence
-                                                                                .apartmentTypeData
-                                                                                .name
-                                                                        }
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {period
-                                                                            ? moment(
-                                                                                  period
-                                                                              ).format(
-                                                                                  "MMMM, YYYY"
-                                                                              )
-                                                                            : "-"}
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {
-                                                                            billing_type
-                                                                        }
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {new Intl.NumberFormat(
-                                                                            "id-ID",
-                                                                            {
-                                                                                style: "currency",
-                                                                                currency:
-                                                                                    "IDR",
-                                                                            }
-                                                                        ).format(
-                                                                            billing_fee
-                                                                        )}
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-normal capitalize"
-                                                                    >
-                                                                        {new Intl.NumberFormat(
-                                                                            "id-ID",
-                                                                            {
-                                                                                style: "currency",
-                                                                                currency:
-                                                                                    "IDR",
-                                                                            }
-                                                                        ).format(
-                                                                            fine
-                                                                        )}
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal"
+                                                                <td
+                                                                    className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} 
+                                                                `}
+                                                                    style={{
+                                                                        left: stickyColumnStyles
+                                                                            .positions[0],
+                                                                    }}
                                                                 >
-                                                                    {moment(
-                                                                        billing_date
-                                                                    ).format(
-                                                                        "LL"
-                                                                    )}
-                                                                </Typography>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal"
-                                                                >
-                                                                    {moment(
-                                                                        due_date
-                                                                    ).format(
-                                                                        "LL"
-                                                                    )}
-                                                                </Typography>
-                                                            </td>
-
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
-                                                                    <Typography
-                                                                        variant="small"
-                                                                        className="font-semibold capitalize"
-                                                                    >
-                                                                        {new Intl.NumberFormat(
-                                                                            "id-ID",
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
                                                                             {
-                                                                                style: "currency",
-                                                                                currency:
-                                                                                    "IDR",
+                                                                                residence.roomNo
                                                                             }
-                                                                        ).format(
-                                                                            billing_fee +
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background}`}
+                                                                    style={{
+                                                                        left: stickyColumnStyles
+                                                                            .positions[1],
+                                                                    }}
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {
+                                                                                residence
+                                                                                    .user
+                                                                                    .fullname
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
+                                                                    style={{
+                                                                        left: stickyColumnStyles
+                                                                            .positions[2],
+                                                                    }}
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {
+                                                                                tower.tower_name
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
+                                                                    style={{
+                                                                        left: stickyColumnStyles
+                                                                            .positions[3],
+                                                                    }}
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {
+                                                                                residence
+                                                                                    .apartmentTypeData
+                                                                                    .name
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {period
+                                                                                ? moment(
+                                                                                      period
+                                                                                  ).format(
+                                                                                      "MMMM, YYYY"
+                                                                                  )
+                                                                                : "-"}
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {
+                                                                                billing_type
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {new Intl.NumberFormat(
+                                                                                "id-ID",
+                                                                                {
+                                                                                    style: "currency",
+                                                                                    currency:
+                                                                                        "IDR",
+                                                                                }
+                                                                            ).format(
+                                                                                billing_fee
+                                                                            )}
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-normal capitalize"
+                                                                        >
+                                                                            {new Intl.NumberFormat(
+                                                                                "id-ID",
+                                                                                {
+                                                                                    style: "currency",
+                                                                                    currency:
+                                                                                        "IDR",
+                                                                                }
+                                                                            ).format(
                                                                                 fine
-                                                                        )}
-                                                                    </Typography>
-                                                                </div>
-                                                            </td>
+                                                                            )}
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
 
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal"
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
                                                                 >
-                                                                    {paid_date ? (
-                                                                        moment(
-                                                                            paid_date
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal"
+                                                                    >
+                                                                        {moment(
+                                                                            billing_date
                                                                         ).format(
                                                                             "LL"
-                                                                        )
-                                                                    ) : (
-                                                                        <span className="font-bold text-red-500">
-                                                                            BELUM
-                                                                            ADA
-                                                                            PEMBAYARAN
-                                                                        </span>
-                                                                    )}
-                                                                </Typography>
-                                                            </td>
+                                                                        )}
+                                                                    </Typography>
+                                                                </td>
 
-                                                            <td
-                                                                className={
-                                                                    classes
-                                                                }
-                                                            >
-                                                                <div className="flex flex-col">
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
                                                                     <Typography
                                                                         variant="small"
-                                                                        className={`font-bold capitalize  ${getStatusColor(
-                                                                            status
-                                                                        )} text-white rounded-2xl w-20 flex justify-center`}
+                                                                        className="font-normal"
                                                                     >
-                                                                        {status}
+                                                                        {moment(
+                                                                            due_date
+                                                                        ).format(
+                                                                            "LL"
+                                                                        )}
                                                                     </Typography>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                }
-                                            )
-                                        ) : (
-                                            <tr>
-                                                <td
-                                                    colSpan={TABLE_HEAD.length}
-                                                    className="py-4 text-center"
-                                                >
-                                                    Belum Terdapat Transaksi
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className="font-semibold capitalize"
+                                                                        >
+                                                                            {new Intl.NumberFormat(
+                                                                                "id-ID",
+                                                                                {
+                                                                                    style: "currency",
+                                                                                    currency:
+                                                                                        "IDR",
+                                                                                }
+                                                                            ).format(
+                                                                                billing_fee +
+                                                                                    fine
+                                                                            )}
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal"
+                                                                    >
+                                                                        {paid_date ? (
+                                                                            moment(
+                                                                                paid_date
+                                                                            ).format(
+                                                                                "LL"
+                                                                            )
+                                                                        ) : (
+                                                                            <span className="font-bold text-red-500">
+                                                                                BELUM
+                                                                                ADA
+                                                                                PEMBAYARAN
+                                                                            </span>
+                                                                        )}
+                                                                    </Typography>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex flex-col">
+                                                                        <Typography
+                                                                            variant="small"
+                                                                            className={`font-bold capitalize  ${getStatusColor(
+                                                                                status
+                                                                            )} text-white rounded-2xl w-20 flex justify-center`}
+                                                                        >
+                                                                            {
+                                                                                status
+                                                                            }
+                                                                        </Typography>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    }
+                                                )
+                                            ) : (
+                                                <tr>
+                                                    <td
+                                                        colSpan={
+                                                            TABLE_HEAD.length
+                                                        }
+                                                        className="py-4 text-center"
+                                                    >
+                                                        Belum Terdapat Transaksi
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </CardBody>
                             <Pagination
                                 current_page={data.current_page}
