@@ -52,11 +52,11 @@ export default function UnpaidReport({
     const [billingType, setBillingType] = useState(null);
     const [unitType, setUnitType] = useState(null);
 
-    console.log(data.data);
-    console.log("period", period);
-    console.log("tower", tower);
-    console.log("billingType", billingType);
-    console.log("unitType", unitType);
+    // console.log(data.data);
+    // console.log("period", period);
+    // console.log("tower", tower);
+    // console.log("billingType", billingType);
+    // console.log("unitType", unitType);
 
     function getStatusColor(status) {
         switch (status) {

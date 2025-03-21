@@ -55,7 +55,7 @@ export default function Billing({
     const [billingType, setBillingType] = useState(null);
     // const [fromDate, setFromDate] = useState("");
     // const [untilDate, setUntilDate] = useState("");
-    console.log(data.data);
+    // console.log(data.data);
 
     const handleStatusChange = (value) => {
         setStatus(value);

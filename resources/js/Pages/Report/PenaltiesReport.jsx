@@ -53,7 +53,7 @@ export default function PenaltiesReport({
     const [billingType, setBillingType] = useState(null);
     const [unitType, setUnitType] = useState(null);
 
-    console.log(data.data);
+    // console.log(data.data);
     function getStatusColor(status) {
         switch (status) {
             case "Pending":

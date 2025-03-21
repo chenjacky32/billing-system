@@ -21,7 +21,7 @@ export default function EditApartement({ auth, apartementData }) {
         total_room: apartementData.total_room,
         logo_company: apartementData.logo_company,
     });
-    console.log(data.logo_company);
+    // console.log(data.logo_company);
     const { flash } = usePage().props;
 
     const dataID = apartementData.id;

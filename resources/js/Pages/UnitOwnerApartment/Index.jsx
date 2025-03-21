@@ -240,7 +240,7 @@ const UserApartment = ({
     useEffect(() => {
         if (flash.message) {
             toast.success(flash.message);
-            console.log("useEffect 1");
+            // console.log("useEffect 1");
         }
     }, [flash.message]);
 

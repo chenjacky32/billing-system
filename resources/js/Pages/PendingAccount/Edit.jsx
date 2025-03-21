@@ -45,7 +45,7 @@ const EditPendingAccount = ({
         apartmentTower: apartmentTower?.tower_name,
     });
 
-    console.log(userApartment);
+    // console.log(userApartment);
     const [apartment, setApartment] = React.useState(
         apartmenetData.find((item) => item.value === userApartment.apartmentId)
     );

@@ -17,14 +17,14 @@ import "react-toastify/dist/ReactToastify.css";
 import { EyeIcon } from "@heroicons/react/24/outline";
 
 const TABLE_HEAD = [
-    "No Identitas",
+    "No Unit",
     "Nama Owner",
+    "Tower",
+    "Tipe Unit",
+    "Apartemen",
     "Nomor HP",
     "Email",
-    "Apartemen",
-    "Tower",
-    "No Unit",
-    "Tipe Unit",
+    "No Identitas",
     "View",
 ];
 
@@ -64,7 +64,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
         }
     }, [flash.message]);
 
-    console.log(data.data);
+    // console.log(data.data);
 
     return (
         <AuthenticatedLayout
@@ -108,7 +108,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                 }
                                 buttonLabel={"Tambah Unit Owner"}
                                 addRoute={"unitowner.add"}
-                                label="Cari Nama Unit Owner"
+                                label="Cari Nama Unit Owner / Nomor Unit"
                                 showAddButton={false}
                             />
                             <CardBody className="px-0 overflow-scroll">
@@ -169,7 +169,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {userId}
+                                                                    {roomNo}
                                                                 </Typography>
                                                             </div>
                                                         </td>
@@ -186,38 +186,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {user.phone}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {user.email}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {
-                                                                        apartment.name
-                                                                    }
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
+
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -230,16 +199,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-                                                        <td className={classes}>
-                                                            <div className="flex flex-col">
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="font-normal capitalize"
-                                                                >
-                                                                    {roomNo}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
+
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -252,6 +212,53 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                 </Typography>
                                                             </div>
                                                         </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {
+                                                                        apartment.name
+                                                                    }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {user.phone}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {user.email}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {userId}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+
                                                         <td className={classes}>
                                                             <Link
                                                                 href={route(

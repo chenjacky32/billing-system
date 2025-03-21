@@ -5,3 +5,49 @@
 /* * { */
 /* outline: 3px solid red; */
 /* } */
+
+/* Responsive for table view */
+@media (max-width: 1023px) {
+    .tablet-rounded {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+}
+
+tr:hover td.sticky-col {
+    background-color: rgb(255, 255, 255);
+    transition: all 300ms ease-in-out;
+}
+
+th,
+td {
+    min-width: 160px;
+    white-space: nowrap;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    /* background: #727272;
+    color: #ffffff; */
+    z-index: 50;
+}
+
+/* Freeze 4 first columns */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 30;
+}
+
+/* Pastikan freeze kolom header lebih tinggi */
+thead .sticky-col {
+    /* background: #727272 !important; */
+    z-index: 60;
+}
+
+/* Pastikan freeze area terlihat jelas */
+.sticky-col {
+    /* background: #d5b14e; */
+    /* border-right: 1px solid #bbb; */
+}
