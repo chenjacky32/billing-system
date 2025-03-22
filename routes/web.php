@@ -82,7 +82,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/apartement/{id}/edit', [ApartementController::class, 'edit'])->name('apartement.edit');
     Route::post('/apartement/{id}/update', [ApartementController::class, 'update'])->name('apartement.update');
 
-    
     // !Apartement Tower
     Route::get('/apartement-tower', [ApartementTower::class, 'index'])->name('apartementTower.index');
     Route::get('/apartement-tower/add',[ApartementTower::class,'add'])->name('apartementTower.add');
@@ -137,6 +136,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing/delete', [BillingController::class, 'destroy'])->name('billing.delete');
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
     Route::post('/billing/previous-meter',[BillingController::class,'getStartMeter'])->name('billing.previousMeter');
+
+
+    // !Export Billing List
+    Route::get('/billing/export', [BillingController::class, 'export'])->name('billing.export');
+
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');

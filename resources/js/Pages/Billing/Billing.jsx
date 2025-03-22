@@ -30,7 +30,7 @@ import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
@@ -325,6 +325,18 @@ export default function Billing({
         setPeriod(formattedDate(firstDate.$d));
     };
 
+    const handleExport = () => {
+        const params = new URLSearchParams({
+            search: search || "",
+            status: status || "",
+            period: period || "",
+            towerId: tower || "",
+            unitType: unitType || "",
+            billingType: billingType || "",
+        }).toString();
+        window.location.href = route("billing.export") + "?" + params;
+    };
+
     return (
         <AuthenticatedLayout
             auth={auth}
@@ -453,7 +465,7 @@ export default function Billing({
                                         </Select>
                                     </div>
                                 </div>
-                                <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full ">
+                                <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full mobile:flex-col mobile:mr-5 ">
                                     <Button
                                         className="w-full bg-white tablet:w-full tablet:mr-4 border-primary text-primary"
                                         variant="outlined"
@@ -467,6 +479,14 @@ export default function Billing({
                                         onClick={applyClearFilters}
                                     >
                                         Clear
+                                    </Button>
+                                    <Button
+                                        className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors duration-200 bg-blue-500 border border-blue-600 rounded-md hover:bg-blue-600 tablet:w-full tablet:mr-4"
+                                        variant="outlined"
+                                        onClick={handleExport}
+                                    >
+                                        <DocumentArrowDownIcon class="h-6 w-6 text-white" />
+                                        Export
                                     </Button>
                                 </div>
                             </div>

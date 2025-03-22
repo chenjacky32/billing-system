@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BillingCreated;
 use App\Events\BillingPaid;
+use App\Exports\Billing as ExportsBilling;
 use App\Models\Apartment;
 use App\Models\ApartmentOwner;
 use App\Models\ApartmentTower;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BillingController extends Controller
 {
@@ -927,4 +929,57 @@ class BillingController extends Controller
             ]);
         }
     }
+
+    public function export(Request $request)
+    {       
+            $user = Auth::user();
+            $role = $user->role;
+        
+            // Query dasar dengan kondisi apartment_id
+            $query = Billing::with(['owner', 'createdBy', 'tower', 'residence.user'])
+                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
+                    return $query->where('apartment_id', $user->apartment_id);
+                });
+        
+            // Terapkan filter yang sama seperti di method index
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('fullname', 'like', "%$searchTerm%");
+                    })
+                    ->orWhere('roomNo', 'like', "%$searchTerm%")
+                    ->pluck('id')
+                    ->toArray();
+                $query->whereIn('residence_id', $matchingResidenceIds);
+            }
+        
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+        
+            if ($request->filled('period')) {
+                $query->where('period', 'like', "%{$request->input('period')}%");
+            }
+        
+            if ($request->filled('billingType')) {
+                $query->where('billing_type', 'like', "%{$request->input('billingType')}%");
+            }
+        
+            if ($request->filled('towerId')) {
+                $query->where('tower_id', $request->input('towerId'));
+            }
+        
+            if ($request->filled('unitType')) {
+                $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $request->input('unitType'))
+                    ->pluck('id')
+                    ->toArray();
+                $query->whereIn('residence_id', $matchingResidenceIds);
+            }
+        
+            // Ambil semua data tanpa pagination
+            $data = $query->orderByDesc('id')->get();
+            
+            // Ekspor data
+            return Excel::download(new ExportsBilling($data), 'billing.xlsx');
+        }
 }
