@@ -5,11 +5,11 @@
 </head>
 <body class="p-6 text-gray-900">
     <h2 class="mb-4 text-xl font-semibold">Payment Confirmation</h2>
-    <p class="mb-2">Dear <span class="font-medium">{{ $billing->owner->owner_name  }}</span>,</p>
+    <p class="mb-2">Dear <span class="font-medium">{{ $billing->residence->user->fullname  }}</span>,</p>
     <p class="mb-4">We have received your payment for invoice <strong>{{ $billing->id }}</strong>.</p>
     
     <p class="p-4 text-green-700 bg-green-100 border-l-4 border-green-500 rounded">
-        Thank you for your business!
+        Thank you for completing your payment. We're dedicated to providing you with a comfortable living experience and appreciate your cooperation.
     </p>
 </body>
 </html>

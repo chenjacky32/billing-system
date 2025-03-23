@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Billing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceMail extends Mailable 
 {
@@ -19,7 +20,8 @@ class InvoiceMail extends Mailable
     
     public function build()
     {
-        return $this->subject('Invoice Billing for ' . $this->billing->owner->owner_name)
+        Log::info('Mail/InvoiceMail', ['billing' => $this->billing, 'pdfPath' => $this->pdfPath, 'email' => $this->billing->residence->user->fullname]);
+        return $this->subject('Invoice Billing for ' . $this->billing->residence->user->fullname)
             ->view('emails.invoice')
             ->attach($this->pdfPath, [
                 'as' => "invoice_{$this->billing->id}.pdf",

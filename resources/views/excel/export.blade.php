@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Export Excel</title>
 </head>
 <body>
     <table>
@@ -35,14 +35,14 @@
                     <td>{{ $billings->residence->apartmentTypeData->name ?? '-' }}</td>
                     <td>{{ $billings->period ? \Carbon\Carbon::parse($billings->period)->format('F Y') : '-' }}</td>
                     <td>{{ $billings->billing_type }}</td>
-                    <td>{{ number_format($billings->fine, 2) }}</td>
-                    <td>{{ number_format($billings->billing_fee, 2) }}</td>
+                    <td>{{ number_format($billings->fine, 2, '.', '') }}</td>
+                    <td>{{ number_format($billings->billing_fee, 2, '.', '') }}</td>
                     <td>{{ $billings->billing_date ? \Carbon\Carbon::parse($billings->billing_date)->format('d/m/Y') : '-' }}</td>
                     <td>{{ $billings->due_date ? \Carbon\Carbon::parse($billings->due_date)->format('d/m/Y') : '-' }}</td>
-                    <td>{{ number_format($billings->billing_fee + $billings->fine, 2) }}</td>
+                    <td>{{ number_format($billings->billing_fee + $billings->fine, 2, '.', '') }}</td>
                     <td>{{ $billings->status }}</td>
                     <td>{{ $billings->paid_date ? \Carbon\Carbon::parse($billings->paid_date)->format('d/m/Y') : '-' }}</td>
-                    <td>{{ $billings->created_by->name ?? '-' }}</td>
+                    <td>{{ $billings->createdBy->name ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>

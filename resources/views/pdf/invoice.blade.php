@@ -122,14 +122,16 @@
       <tr>
         <td>
           <span class="address-label">To:</span>
-          <div>{{ $billing->owner->owner_name }}</div>
-          <div><strong>Phone:</strong> {{ $billing->owner->phone }}</div>
-          <div><strong>Email:</strong> {{ $billing->owner->email }}</div>
+          <div>{{ $billing->residence->user->fullname ?? '-' }}</div>
+          <div><strong>Phone:</strong> {{  $billing->residence->user->phone ?? '-'}}</div>
+          <div><strong>Email:</strong> {{  $billing->residence->user->email ?? '-'}}</div>
+          <div><strong>Tower:</strong> {{  $billing->tower->tower_name ?? '-'}}</div>
+          <div><strong>Unit Type:</strong> {{ $billing->residence->apartmentTypeData->name ?? '-'}}</div>
         </td>
         <td>
           <span class="address-label">From:</span>
-          <div>{{ $billing->apartment->name }}</div>
-          <div>{{ $billing->apartment->address }}</div>
+          <div>{{ $billing->apartment->name ?? '-' }}</div>
+          <div>{{ $billing->apartment->address ?? '-' }}</div>
         </td>
       </tr>
     </table>
@@ -138,7 +140,7 @@
 	<table class="product-table">
 		<thead>
 		  <tr>
-			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd;">Product</th>
+			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd;">Billing Type</th>
 			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd;">Description</th>
 			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd; text-align: right;">Price</th>
 		  </tr>
@@ -156,16 +158,20 @@
 		</tbody>
 		<tfoot>
 		  <tr>
-			<td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Sub Total:</td>
-			<td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Sub Total:</td>
+			  <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+		  </tr>
+      <tr>
+        <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Penalty:</td>
+        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. {{ number_format($billing->fine, 2) }}</td>
+      </tr>
+		  <tr>
+			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Tax:</td>
+			  <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. 0.00</td>
 		  </tr>
 		  <tr>
-			<td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Tax:</td>
-			<td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. 0.00</td>
-		  </tr>
-		  <tr>
-			<td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Amount:</td>
-			<td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Amount:</td>
+        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->billing_fee + ($billing->fine ?? 0), 2) }}</td>
 		  </tr>
 		</tfoot>
 	  </table>

@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\BillingCreated;
 use App\Jobs\SendEmailJob;
+use Illuminate\Support\Facades\Log;
 
 class SendInvoiceEmail  
 {
@@ -11,7 +12,9 @@ class SendInvoiceEmail
     {
         $billing = $event->billing;
         $pdfPath = $event->pdfPath;
-        $email = $billing->owner->email;
+        // $email = $billing->owner->email;
+        $email = $billing->residence->user->email;
+        Log::info('sendInvoiceEmail', ['email' => $email, 'billing' => $billing, 'pdfPath' => $pdfPath]);
 
         SendEmailJob::dispatch([
             'email' => $email,

@@ -460,10 +460,11 @@ export default function UnpaidReport({
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
-                                                                        {residence
-                                                                            ?.apartmentTypeData
-                                                                            .name ??
-                                                                            "-"}
+                                                                        {residence?.apartmentTypeData
+                                                                            ? residence
+                                                                                  .apartmentTypeData
+                                                                                  .name
+                                                                            : "-"}
                                                                     </Typography>
                                                                 </div>
                                                             </td>

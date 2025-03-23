@@ -436,10 +436,11 @@ export default function PaidReport({
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
-                                                                        {residence
-                                                                            .apartmentTypeData
-                                                                            .name ??
-                                                                            "-"}
+                                                                        {residence?.apartmentTypeData
+                                                                            ? residence
+                                                                                  .apartmentTypeData
+                                                                                  .name
+                                                                            : "-"}
                                                                     </Typography>
                                                                 </div>
                                                             </td>
