@@ -107,11 +107,30 @@ export default function Edit({
         paid_date: billingData.paid_date,
         owner_id: billingData.residence_id,
         fine: billingData.fine ?? 0,
-        total_amount: flash?.total_amount,
+        total_amount:
+            billingData.fine + billingData.billing_fee || flash?.total_amount,
         due_date: billingData.due_date,
     });
 
     const role = auth.user.role;
+
+    //LOGGING INPUT REQUEST
+    // console.log("SUB PERIODE", data.period);
+    // console.log("NAMA TOWER", data.tower_id);
+    // console.log("State Tower", tower);
+    // console.log("TIPE BILLING", billingType);
+    // console.log("State Billing", data.billing_type);
+    // console.log("METERAN AWAL", data.start_meter);
+    // console.log("METERAN AKHIR", data.end_meter);
+    // console.log("TOTAL METERAN", data.meter_reading);
+    // console.log("HARGA", data.unit_price);
+    // console.log("MINIMUM CHARGE", data.minimum_charge);
+    // console.log("UPLOAD FOTO", data.end_meter_image_path);
+    // console.log("DENDA PERIODE SEBELUMNYA", data.fine);
+    // console.log("TOTAL TAGIHAN", data.total_amount);
+    // console.log("TANGGAL TAGIHAN", data.billing_date);
+    // console.log("TANGGAL JATUH TEMPO", data.due_date);
+    // console.log("STATUS", data.status);
 
     const getOptionsForType = (type) => {
         const filteredCategory = billingCategory.find(
@@ -423,49 +442,54 @@ export default function Edit({
                 apartTypeName: "",
                 apartTypeId: "",
             }));
+            setStatus("Pending");
             setData((prevValues) => ({
                 ...prevValues,
                 period: "",
                 billing_date: "",
                 due_date: "",
+                start_meter: "",
                 tower_id: "",
                 room_no: "",
                 owner_id: "",
-                start_meter: "",
                 end_meter: "",
                 meter_reading: "",
-                unit_price: "",
-                minimum_charge: "",
+                end_meter_image_path: null,
                 billing_fee: "",
                 total_amount: "",
+                paid_date: "",
                 fine: "",
+                status: "Pending",
             }));
         } else if (billingType === "Maintenance" || billingType === "Parkir") {
             setData((prevValues) => ({
                 ...prevValues,
                 meter_reading: null,
                 billing_fee: "",
-                maintenance_type: "",
-                vehicle_type_parking: "",
                 total_amount: "",
                 fine: "",
+                maintenance_type: "",
+                vehicle_type_parking: "",
                 period: "",
                 billing_date: "",
                 due_date: "",
                 tower_id: "",
+                end_meter_image_path: null,
                 room_no: "",
                 owner_id: "",
+                paid_date: "",
+                status: "Pending",
             }));
             setMaintenanceTypeSelected("");
             setVehicleTypeSelected("");
+            setRoom({ value: "", label: "" });
+            setTower({ value: "" });
             setResidence((prevState) => ({
                 ...prevState,
                 name: "",
                 apartTypeName: "",
                 apartTypeId: "",
             }));
-            setRoom({ value: "", label: "" });
-            setTower({ value: "" });
         }
     }
 
@@ -1140,6 +1164,31 @@ export default function Edit({
                                                     billingType !== "Parkir"
                                                 }
                                                 errors={errors.fine}
+                                                className="tablet:mt-0"
+                                            />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-8">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Total Tagihan
+                                            </Typography>
+                                            <CustomInput
+                                                label="Total Tagihan"
+                                                id="total"
+                                                disabled={true}
+                                                value={
+                                                    data.total_amount
+                                                        ? data.total_amount
+                                                              .toString()
+                                                              .replace(
+                                                                  /\B(?=(\d{3})+(?!\d))/g,
+                                                                  "."
+                                                              )
+                                                        : ""
+                                                }
+                                                errors={errors.total_amount}
                                                 className="tablet:mt-0"
                                             />
                                         </div>

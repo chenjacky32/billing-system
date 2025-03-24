@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { XCircleIcon, CloudArrowUpIcon } from "@heroicons/react/24/solid";
 import { toast } from "react-toastify";
 
@@ -9,12 +9,12 @@ const InputUpload = ({
     error,
     currentImage,
 }) => {
-    const imageUrl = new URL(`/storage/${currentImage}`, window.location.origin)
-        .href;
+    // const imageUrl = new URL(`/storage/${currentImage}`, window.location.origin)
+    //     .href;
 
     const [isDragActive, setIsDragActive] = useState(false);
     const [fileName, setFileName] = useState("");
-    const [preview, setPreview] = useState(currentImage ? imageUrl : null);
+    const [preview, setPreview] = useState(null);
 
     const handleDragFile = (e) => {
         e.preventDefault();
@@ -71,6 +71,20 @@ const InputUpload = ({
         setPreview(null);
         onChange?.(null);
     };
+
+    useEffect(() => {
+        if (currentImage) {
+            const imageUrl = new URL(
+                `/storage/${currentImage}`,
+                window.location.origin
+            ).href;
+            setPreview(imageUrl);
+            setFileName(currentImage);
+        } else {
+            setPreview(null);
+            setFileName("");
+        }
+    }, [currentImage]);
 
     return (
         <div className={`flex flex-col w-full ${className}`}>

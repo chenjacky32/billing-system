@@ -834,6 +834,7 @@ class BillingController extends Controller
             'billing_type' => 'required|string|in:Air,Listrik,Parkir,Maintenance',
             'billing_date' => 'required|date',
             'owner_id' => 'required|integer',
+            'tower_id' => 'required|integer|exists:apartment_tower,id',
             'room_no' => 'required|integer|min:1|max:999999999999999',
         ];
     
