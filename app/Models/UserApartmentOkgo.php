@@ -35,4 +35,9 @@ class UserApartmentOkgo extends Model
             ->where('id', $this->apartmentType)
             ->first();
     }
+
+    public function apartment()
+    {
+        return $this->belongsTo(Apartment::class,'apartmentId','id');
+    }
 }

@@ -19,6 +19,15 @@ class Apartment extends Model
         return $this->hasMany(ApartmentOwner::class, 'apartment_id');
     }
 
+    public function towers()
+    {
+        return $this->hasMany(ApartmentTower::class, 'apartment_id');
+    }
+
+    public function userApartments()
+    {
+        return $this->hasMany(UserApartmentOkgo::class, 'apartmentId', 'id');
+    }
 
     use HasFactory;
 }
