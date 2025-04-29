@@ -12,7 +12,7 @@ class Billing extends Model
         'billing_type','billing_category_id', 'billing_fee','start_meter', 
         'end_meter', 'end_meter_image_path','unit_price', 'minimum_charge', 
         'billing_date', 'period', 'owner_id', 'meter_reading', 'is_paid', 
-        'paid_date', 'status', 'created_by', 'fine', 'due_date', 
+        'paid_date', 'status', 'created_by', 'fine','total_amount', 'due_date', 
         'apartment_id','residence_id', 'tower_id'
     ];
 

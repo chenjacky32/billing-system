@@ -58,7 +58,7 @@ class BillingController extends Controller
             'apartmentId'=> $ApartmentId,
             'towerData'=> $tower_data,
             'apartmentType'=> $apartmentTypeData,
-            'filters' => $request->only('search', 'status'),  // Include 'status' in the filters
+            'filters' => $request->only('search', 'status', 'period', 'billingType','towerId', 'unitType'),  // Include 'status' in the filters
             'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user'])
                 ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
                     return $query->where('apartment_id', $user->apartment_id);
@@ -100,7 +100,6 @@ class BillingController extends Controller
                 ->paginate(10),
         ]);
     }
-
 
     public function add()
     {
@@ -361,7 +360,9 @@ class BillingController extends Controller
         $apartmentId = $ownerApartment->apartmentId;
         $validatedData['apartment_id'] = $apartmentId;
         $validatedData['residence_id'] = $ownerId;
+        $validatedData['total_amount'] = $validatedData['billing_fee'] + $validatedData['fine'];
         $validatedData['owner_id'] = NULL;
+        
         // $owner = ApartmentOwner::findOrFail($ownerId);
         // $apartmentId = $owner->apartment_id;
         // $validatedData['apartment_id'] = $apartmentId;
@@ -661,6 +662,7 @@ class BillingController extends Controller
         $validatedData['apartment_id'] = $apartmentId;
         $validatedData['residence_id'] = $ownerId;
         $validatedData['owner_id'] = NULL;
+        $validatedData['total_amount'] = $validatedData['billing_fee'] + $validatedData['fine'];
         // $owner = ApartmentOwner::findOrFail($ownerId);
         // $apartment_id = $owner->apartment_id;
         // $validatedData['apartment_id'] = $apartment_id;
@@ -981,6 +983,6 @@ class BillingController extends Controller
             $data = $query->orderByDesc('id')->get();
             
             // Ekspor data
-            return Excel::download(new ExportsBilling($data), 'billing.xlsx');
-        }
+            return Excel::download(new ExportsBilling(data: $data), 'billing.xlsx');
+    }
 }

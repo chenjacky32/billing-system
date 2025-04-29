@@ -6,6 +6,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { TypeBilling } from "@/utils/constant";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
     Breadcrumbs,
     Button,
@@ -175,6 +177,12 @@ export default function Edit({
         flash?.total_amount,
         flash?.new_start_meter,
     ]);
+
+    useEffect(() => {
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash.error]);
 
     useEffect(() => {
         if (billingType === "Air" && WaterPriceData) {
@@ -1331,6 +1339,7 @@ export default function Edit({
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </AuthenticatedLayout>
     );
 }

@@ -4,6 +4,8 @@ import PageHeader from "@/Components/PageHeader";
 import InputUpload from "@/Components/InputUpload";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import {
     Breadcrumbs,
@@ -137,6 +139,12 @@ export default function AddBiling({
         flash?.total_amount,
         flash?.new_start_meter,
     ]);
+
+    useEffect(() => {
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash.error]);
 
     useEffect(() => {
         if (billingType === "Air" && WaterPriceData) {
@@ -1207,6 +1215,7 @@ export default function AddBiling({
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </AuthenticatedLayout>
     );
 }

@@ -34,6 +34,7 @@ import { XMarkIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
+import { filter } from "lodash";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -70,7 +71,7 @@ export default function Billing({
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("");
     const [period, setPeriod] = useState(null);
-    const [tower, setTower] = useState("");
+    const [tower, setTower] = useState(null);
     const [billingType, setBillingType] = useState(null);
     const [unitType, setUnitType] = useState(null);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -119,6 +120,7 @@ export default function Billing({
 
     const applyClearFilters = () => {
         setSearch("");
+        setStatus("");
         setBillingType(null);
         setPeriod(null);
         setTower(null);
@@ -193,16 +195,16 @@ export default function Billing({
             params.push(`status=${encodeURIComponent(statusQuery)}`);
         }
         if (periodQuery) {
-            params.push(`status=${encodeURIComponent(periodQuery)}`);
+            params.push(`period=${encodeURIComponent(periodQuery)}`);
         }
         if (towerQuery) {
-            params.push(`status=${encodeURIComponent(towerQuery)}`);
+            params.push(`towerId=${encodeURIComponent(towerQuery)}`);
         }
         if (unitTypeQuery) {
-            params.push(`status=${encodeURIComponent(unitTypeQuery)}`);
+            params.push(`unitType=${encodeURIComponent(unitTypeQuery)}`);
         }
         if (billingTypeQuery) {
-            params.push(`status=${encodeURIComponent(billingTypeQuery)}`);
+            params.push(`billingType=${encodeURIComponent(billingTypeQuery)}`);
         }
 
         // Check if baseUrl already has a query parameter
@@ -216,6 +218,15 @@ export default function Billing({
     }
 
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
+
+    useEffect(() => {
+        setSearch(filters.search || "");
+        setStatus(filters.status || "");
+        setPeriod(filters.period || null);
+        setTower(Number(filters.towerId) || null);
+        setBillingType(filters.billingType || null);
+        setUnitType(Number(filters.unitType) || null);
+    }, [filters]);
 
     useEffect(() => {
         if (flash.message) {
@@ -327,14 +338,15 @@ export default function Billing({
 
     const handleExport = () => {
         const params = new URLSearchParams({
-            search: search || "",
-            status: status || "",
-            period: period || "",
-            towerId: tower || "",
-            unitType: unitType || "",
-            billingType: billingType || "",
+            search: filters.search || "",
+            status: filters.status || "",
+            period: filters.period || "",
+            towerId: filters.towerId || "",
+            unitType: filters.unitType || "",
+            billingType: filters.billingType || "",
         }).toString();
         window.location.href = route("billing.export") + "?" + params;
+        console.log("params", params);
     };
 
     return (
@@ -543,6 +555,7 @@ export default function Billing({
                                                         paid_date,
                                                         residence,
                                                         fine,
+                                                        total_amount,
                                                     },
                                                     index
                                                 ) => {
@@ -774,8 +787,8 @@ export default function Billing({
                                                                                 "IDR",
                                                                         }
                                                                     ).format(
-                                                                        billing_fee +
-                                                                            fine
+                                                                        total_amount ??
+                                                                            0
                                                                     )}
                                                                 </Typography>
                                                             </td>
@@ -954,7 +967,7 @@ export default function Billing({
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Unit Owner."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Billing."
                                                 }
                                                 showSearch={false}
                                             />
@@ -1016,7 +1029,7 @@ export default function Billing({
                                 prev_page_url={data.prev_page_url}
                                 next_page_url={data.next_page_url}
                                 search={filters.search}
-                                status={filters.status} // Pass the status filter to the Pagination component
+                                status={filters.status}
                                 getPaginationUrl={(baseUrl) =>
                                     getPaginationUrl(
                                         baseUrl,
