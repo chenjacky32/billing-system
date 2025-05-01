@@ -12,7 +12,7 @@ import {
 import CustomDatePicker from "@/Components/CustomDatePicker";
 import CustomSelect from "@/Components/CustomSelect";
 import { router } from "@inertiajs/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
@@ -159,6 +159,12 @@ export default function Billing({
 
         return url;
     }
+
+    useEffect(() => {
+        setPeriod(filters.period || null);
+        setStatus(filters.status || "");
+        setBillingType(filters.billingType || null);
+    }, [filters]);
 
     const Name = ownerName;
 
@@ -711,12 +717,10 @@ export default function Billing({
                                 prev_page_url={data.prev_page_url}
                                 next_page_url={data.next_page_url}
                                 status={filters.status} // Pass the status filter to the Pagination component
-                                from_date={filters.from_date} // Pass the from_date filter to the Pagination component
-                                until_date={filters.until_date}
+                                // until_date={filters.until_date}
                                 getPaginationUrl={(baseUrl) =>
                                     getPaginationUrl(
                                         baseUrl,
-                                        filters.search,
                                         filters.status,
                                         filters.period,
                                         filters.billingType

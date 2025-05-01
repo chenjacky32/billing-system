@@ -34,7 +34,6 @@ import { XMarkIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
-import { filter } from "lodash";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -346,7 +345,6 @@ export default function Billing({
             billingType: filters.billingType || "",
         }).toString();
         window.location.href = route("billing.export") + "?" + params;
-        console.log("params", params);
     };
 
     return (

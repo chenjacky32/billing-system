@@ -354,7 +354,7 @@ class ReportController extends Controller
         }
 
         // Fetch data with pagination
-        $data = $query->paginate(20);
+        $data = $query->paginate(10);
 
         $tower_data = $towerQuery->get()->map( function ($tower) {
             return [

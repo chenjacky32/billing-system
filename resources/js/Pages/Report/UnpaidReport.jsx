@@ -8,7 +8,7 @@ import {
     Breadcrumbs,
 } from "@material-tailwind/react";
 import { router } from "@inertiajs/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
@@ -175,6 +175,14 @@ export default function UnpaidReport({
         return url;
     }
 
+    useEffect(() => {
+        setSearch(filters.search || "");
+        setPeriod(filters.period || null);
+        setTower(Number(filters.towerId) || null);
+        setBillingType(filters.billingType || null);
+        setUnitType(Number(filters.unitType) || null);
+    }, [filters]);
+
     function formattedDate(date) {
         if (!date) return null;
         const year = date.getFullYear();
@@ -187,11 +195,6 @@ export default function UnpaidReport({
         const firstDate = value.date(1);
         setPeriod(formattedDate(firstDate.$d));
     };
-
-    const dataIsUnPaid = data.data.map((items) => items.billing_fee);
-    const sumDataIsUnPaid = dataIsUnPaid.reduce((acc, currentValue) => {
-        return acc + currentValue;
-    }, 0);
 
     return (
         <AuthenticatedLayout
@@ -648,7 +651,10 @@ export default function UnpaidReport({
                                     getPaginationUrl(
                                         baseUrl,
                                         filters.search,
-                                        filters.status
+                                        filters.period,
+                                        filters.towerId,
+                                        filters.unitType,
+                                        filters.billingType
                                     )
                                 }
                             />

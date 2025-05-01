@@ -19,6 +19,7 @@ import CustomSelect from "@/Components/CustomSelect";
 import InputSearch from "@/Components/InputSearch";
 import "react-toastify/dist/ReactToastify.css";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
+import { useEffect } from "react";
 
 const TABLE_HEAD = [
     "No Unit",
@@ -165,6 +166,14 @@ export default function PenaltiesReport({
         return url;
     }
 
+    useEffect(() => {
+        setSearch(filters.search || "");
+        setPeriod(filters.period || null);
+        setTower(Number(filters.towerId) || null);
+        setBillingType(filters.billingType || null);
+        setUnitType(Number(filters.unitType) || null);
+    }, [filters]);
+
     function formattedDate(date) {
         if (!date) return null;
         const year = date.getFullYear();
@@ -177,18 +186,6 @@ export default function PenaltiesReport({
         const firstDate = value.date(1);
         setPeriod(formattedDate(firstDate.$d));
     };
-
-    function totalsAllBillings(params) {
-        return params.reduce((acc, currenValue) => {
-            return acc + currenValue;
-        }, 0);
-    }
-
-    const dataWithPenalties = data.data.map((items) => items.billing_fee);
-    const dataFine = data.data.map((items) => items.fine);
-
-    const sumDataWithPenalties = totalsAllBillings(dataWithPenalties);
-    const sumDataFine = totalsAllBillings(dataFine);
 
     return (
         <AuthenticatedLayout
@@ -652,7 +649,10 @@ export default function PenaltiesReport({
                                     getPaginationUrl(
                                         baseUrl,
                                         filters.search,
-                                        filters.status
+                                        filters.period,
+                                        filters.towerId,
+                                        filters.unitType,
+                                        filters.billingType
                                     )
                                 }
                             />

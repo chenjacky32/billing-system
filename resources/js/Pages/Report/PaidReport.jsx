@@ -8,7 +8,7 @@ import {
     Breadcrumbs,
 } from "@material-tailwind/react";
 import { router, usePage } from "@inertiajs/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
@@ -158,6 +158,14 @@ export default function PaidReport({
 
         return url;
     }
+
+    useEffect(() => {
+        setSearch(filters.search || "");
+        setPeriod(filters.period || null);
+        setTower(Number(filters.towerId) || null);
+        setBillingType(filters.billingType || null);
+        setUnitType(Number(filters.unitType) || null);
+    }, [filters]);
 
     function formattedDate(date) {
         if (!date) return null;
@@ -580,13 +588,11 @@ export default function PaidReport({
                                 next_page_url={data.next_page_url}
                                 search={filters.search}
                                 period={filters.period}
-                                status={filters.status} // Pass the status filter to the Pagination component
                                 getPaginationUrl={(baseUrl) =>
                                     getPaginationUrl(
                                         baseUrl,
                                         filters.search,
                                         filters.period,
-                                        filters.status,
                                         filters.towerId,
                                         filters.unitType,
                                         filters.billingType
