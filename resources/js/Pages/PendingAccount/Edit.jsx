@@ -5,6 +5,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import InputSelect from "@/Components/InputSelect";
 import ImageContainer from "@/Components/ImageContainer";
+import ImageItems from "@/Components/ImageItems";
 import {
     Breadcrumbs,
     Button,
@@ -269,10 +270,14 @@ const EditPendingAccount = ({
                                             >
                                                 Foto KTP
                                             </Typography>
-                                            <ImageContainer
-                                                imageUrl={`https://apis.okgo.co.id/apartment-id/${userApartment.identityImage}`}
-                                                altText="ktp"
+                                            <ImageItems
+                                                imagePath={
+                                                    userApartment.identityImage
+                                                }
+                                                alt="ktp"
+                                                imageType="id"
                                                 errorMesssageImg="Foto KTP Tidak Tersedia"
+                                                variant="preview"
                                             />
                                         </div>
                                         <div className="w-full mr-4 tablet:mt-8 h-fit">
@@ -282,10 +287,14 @@ const EditPendingAccount = ({
                                             >
                                                 Foto Wajah
                                             </Typography>
-                                            <ImageContainer
-                                                imageUrl={`https://apis.okgo.co.id/apartment-user/${userApartment.userImage}`}
-                                                altText="userSignature"
+                                            <ImageItems
+                                                imagePath={
+                                                    userApartment.userImage
+                                                }
+                                                alt="userSignature"
+                                                imageType="user"
                                                 errorMesssageImg="Foto Wajah Tidak Tersedia"
+                                                variant="preview"
                                             />
                                         </div>
                                     </div>

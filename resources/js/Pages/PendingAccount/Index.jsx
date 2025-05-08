@@ -18,6 +18,7 @@ import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InputLabel from "@/Components/InputLabel";
+import ImageItems from "@/Components/ImageItems";
 
 const TABLE_HEAD = [
     "No",
@@ -98,6 +99,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                 return ""; // Default background color
         }
     }
+
     return (
         <AuthenticatedLayout
             auth={auth}
@@ -202,7 +204,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                     identityImage,
                                                     roomNo,
                                                     apartType,
-                                                    userImage,
                                                     active,
                                                 },
                                                 index,
@@ -229,7 +230,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -240,7 +240,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -253,7 +252,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -264,7 +262,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -275,7 +272,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -290,7 +286,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -303,7 +298,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -315,7 +309,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -327,7 +320,6 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                 </Typography>
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
                                                                 <Typography
@@ -346,15 +338,16 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
 
                                                         <td className={classes}>
                                                             <div className="flex flex-col">
-                                                                <img
-                                                                    src={`https://apis.okgo.co.id/apartment-user/${userImage}`}
-                                                                    alt="Foto Wajah"
+                                                                <ImageItems
+                                                                    imagePath={
+                                                                        identityImage
+                                                                    }
+                                                                    alt="Foto KTP"
                                                                     loading="lazy"
-                                                                    className="object-cover h-[50px] rounded-md"
+                                                                    imageType="id"
                                                                 />
                                                             </div>
                                                         </td>
-
                                                         <td className={classes}>
                                                             <Link
                                                                 href={route(
