@@ -10,7 +10,7 @@ export const generateGetImageKey = (payload) => {
 };
 
 export const getImageIdUrl = async (imagePath) => {
-    if (!imagePath) return null;
+    if (!imagePath) throw new Error("Image path not found");
 
     const payload = {
         grantType: "client_credentials",
@@ -51,7 +51,7 @@ export const getImageIdUrl = async (imagePath) => {
 };
 
 export const getImageUserUrl = async (imagePath) => {
-    if (!imagePath) return null;
+    if (!imagePath) throw new Error("Image path not found");
 
     const payload = {
         grantType: "client_credentials",

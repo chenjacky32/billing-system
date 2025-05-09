@@ -25,7 +25,8 @@ const ImageItems = ({
                     }
                 })
                 .catch((error) => {
-                    console.error("Error:", error);
+                    setIsError(true);
+                    console.error(error.message);
                 });
         }
 
@@ -38,7 +39,8 @@ const ImageItems = ({
                     }
                 })
                 .catch((error) => {
-                    console.error("Error:", error);
+                    setIsError(true);
+                    console.error(error.message);
                 });
         }
 
@@ -50,12 +52,20 @@ const ImageItems = ({
 
     const imgVariant = {
         base: (
-            <img
-                src={src}
-                alt={alt}
-                loading={loading}
-                className="object-cover h-[50px] rounded-md"
-            />
+            <>
+                {!isError && src ? (
+                    <img
+                        src={src}
+                        alt={alt}
+                        loading={loading}
+                        className="object-cover h-[50px] rounded-md"
+                    />
+                ) : (
+                    <span className="h-full text-sm font-normal text-gray-700">
+                        {errorMesssageImg}
+                    </span>
+                )}
+            </>
         ),
         preview: (
             <div

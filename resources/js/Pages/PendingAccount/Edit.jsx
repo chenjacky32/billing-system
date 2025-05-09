@@ -4,7 +4,6 @@ import PageHeader from "@/Components/PageHeader";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import InputSelect from "@/Components/InputSelect";
-import ImageContainer from "@/Components/ImageContainer";
 import ImageItems from "@/Components/ImageItems";
 import {
     Breadcrumbs,
