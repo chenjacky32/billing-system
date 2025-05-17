@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'bri'=>[
+        'client_key' => env('BRI_CLIENT_KEY'),
+        'client_secret' => env('BRI_CLIENT_SECRET'),
+    ],
+
 ];

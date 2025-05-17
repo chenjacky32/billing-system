@@ -14,6 +14,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UnitOwnerApartmentController;
 use App\Http\Controllers\UnitOwnerController;
 use App\Http\Controllers\UserApartmentController;
+use App\Http\Controllers\VAMonitoringController;
 use App\Http\Controllers\VerifyAccessPasswordController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -61,7 +62,6 @@ Route::middleware(['auth', 'verified', 'role:SUPER ADMIN'])->group(function () {
     })->name('apartement.add');
     Route::post('/apartement/store', [ApartementController::class, 'store'])->name('apartement.store');
 
-
     // !Admin 
     Route::get('/admin/add', [AdminController::class, 'add'])->name('admin.add');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -77,7 +77,6 @@ Route::middleware('auth')->group(function () {
     // !Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
     // !Apartement
     Route::get('/apartement/{id}/edit', [ApartementController::class, 'edit'])->name('apartement.edit');
     Route::post('/apartement/{id}/update', [ApartementController::class, 'update'])->name('apartement.update');
@@ -89,7 +88,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/apartement-tower/store', [ApartementTower::class, 'store'])->name('apartementTower.store');
     Route::post('/apartement-tower/{id}/update', [ApartementTower::class, 'update'])->name('apartementTower.update');
     Route::post('/apartement-tower/delete', [ApartementTower::class, 'destroy'])->name('apartementTower.delete');
-
 
     // !Unit Owner
     Route::get('/unit-owner/add', [UnitOwnerController::class, 'add'])->name('unitowner.add');
@@ -126,7 +124,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/account-pending/{id}/edit', [AccountActivationController::class, 'edit'])->name('accountActivation.edit');
     Route::post('/account-pending/{id}/update', [AccountActivationController::class, 'update'])->name('accountActivation.update');
 
-
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
@@ -137,10 +134,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
     Route::post('/billing/previous-meter',[BillingController::class,'getStartMeter'])->name('billing.previousMeter');
 
+    // !Virtual Account 
+    Route::get('/va-monitoring', [VAMonitoringController::class, 'index'])->name('VAMonitoring.index');
+    Route::patch('/va-monitoring/{id}/update', [VAMonitoringController::class, 'patchExpiredVA'])->name('VAMonitoring.update');
+    Route::post('/va-monitoring/{id}/delete',[VAMonitoringController::class, 'deleteExpiredVA'])->name('VAMonitoring.delete');
+    Route::get('/va-monitoring/report', [VAMonitoringController::class, 'reportVaReport'])->name('VAMonitoring.report');
 
     // !Export Billing List
     Route::get('/billing/export', [BillingController::class, 'export'])->name('billing.export');
-
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');
@@ -148,7 +149,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/billing-with-penalty-report', [ReportController::class, 'showPenalties'])->name('billing.penalties.index');
     Route::get('/owner-report', [ReportController::class, 'ownerReport'])->name('owner.report.index');
     Route::get('/owner-report/{id}/show', [ReportController::class, 'show'])->name('owner.report.show');
-
 
     // !Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

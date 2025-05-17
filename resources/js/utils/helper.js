@@ -4,6 +4,17 @@ import { ApiService } from "@/service/ApiService";
 import { NetworkEndpoint } from "@/service/ApiEndpoint";
 import { baseURL } from "@/utils/constant";
 
+export const formatTime = (ms) => {
+    const totalSeconds = Math.max(Math.floor(ms / 1000), 0);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+        2,
+        "0"
+    );
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${hours}:Jam ${minutes}:Menit ${seconds}:Detik`;
+};
+
 export const generateGetImageKey = (payload) => {
     const raw = loadImageSecretKey + JSON.stringify(payload);
     return CryptoJS.SHA256(raw).toString(CryptoJS.enc.Hex);

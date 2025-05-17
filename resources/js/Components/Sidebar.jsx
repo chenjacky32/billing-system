@@ -11,6 +11,7 @@ import {
     AccordionBody,
 } from "@material-tailwind/react";
 import {
+    BanknotesIcon,
     UserCircleIcon,
     PowerIcon,
     BuildingOffice2Icon,
@@ -130,17 +131,6 @@ export default function Sidebar({ user, classname, auth }) {
                                     Account Pending
                                 </ListItem>
                             </Link>
-                            {/* <Link href={route("unitowner.index")}>
-                                <ListItem className="hover:text-primary ">
-                                    <ListItemPrefix>
-                                        <ChevronRightIcon
-                                            strokeWidth={3}
-                                            className="w-5 h-3"
-                                        />
-                                    </ListItemPrefix>
-                                    Unit Owner
-                                </ListItem>
-                            </Link> */}
                             <Link href={route("unitOwnerApartment.index")}>
                                 <ListItem className="hover:text-primary ">
                                     <ListItemPrefix>
@@ -204,6 +194,63 @@ export default function Sidebar({ user, classname, auth }) {
                     >
                         <AccordionHeader
                             onClick={() => handleOpen(2)}
+                            className="p-3 border-b-0 group text-textColor group-hover:text-primary"
+                        >
+                            <ListItemPrefix>
+                                <BuildingOffice2Icon className="w-5 h-5 group-hover:text-primary" />
+                            </ListItemPrefix>
+                            <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
+                                VA (Virtual Account)
+                            </Typography>
+                        </AccordionHeader>
+                    </ListItem>
+                    <AccordionBody className="py-1 ">
+                        <List className="p-0 text-textColor ">
+                            <Link href={route("VAMonitoring.index")}>
+                                <ListItem className="hover:text-primary ">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    VA Monitoring
+                                </ListItem>
+                            </Link>
+                        </List>
+                        <List className="p-0 text-textColor ">
+                            <Link href={route("VAMonitoring.report")}>
+                                <ListItem className="hover:text-primary ">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Get VA Report
+                                </ListItem>
+                            </Link>
+                        </List>
+                    </AccordionBody>
+                </Accordion>
+
+                <Accordion
+                    open={open === 3}
+                    icon={
+                        <ChevronDownIcon
+                            strokeWidth={2.5}
+                            className={`mx-auto h-4 w-4 transition-transform ${
+                                open === 2 ? "rotate-180" : ""
+                            }`}
+                        />
+                    }
+                >
+                    <ListItem
+                        className="p-0 hover:text-primary "
+                        selected={open === 3}
+                    >
+                        <AccordionHeader
+                            onClick={() => handleOpen(3)}
                             className="p-3 border-b-0 group text-textColor group-hover:text-primary"
                         >
                             <ListItemPrefix>
