@@ -35,27 +35,30 @@
     </style>
 </head>
 <body>
-    <div class="header">Invoice for Your Apartment Billing</div>
+    <div class="header">Tagihan Apartment Anda</div>
 
-    <p>Dear <strong>{{ $billing->residence->user->fullname ?? '-' }}</strong>,</p>
-    <p>Thank you for being a valued resident. Below is the details of your invoice for your reference:</p>
+    <p>Kepada Yth. <strong>{{ $billing->residence->user->fullname ?? '-' }}</strong>,</p>
+    <p>Terima kasih atas kepercayaan Anda sebagai penghuni kami. Berikut kami sampaikan rincian tagihan apartemen Anda:</p>
 
     <div class="invoice-container">
-        <p><strong>Invoice Number:</strong> {{ $billing->id ?? '-' }}</p>
-        <p><strong>Invoice Date:</strong> {{ $billing->billing_date ?? '-' }}</p>
-        <p><strong>Customer Name:</strong> {{ $billing->residence->user->fullname ?? '-' }}</p>
-        <p><strong>Phone Number:</strong> {{ $billing->residence->user->phone ?? '-' }}</p>
-        <p><strong>Email Address:</strong> {{ $billing->residence->user->email ?? '-' }}</p>
-        <p><strong>Billing Type:</strong> {{ $billing->billing_type ?? '-' }}</p>
-        <p><strong>Billing Fee:</strong> {{ number_format($billing->billing_fee, 2) ?? '-'}}</p>
+        <p><strong>Invoice ID:</strong> {{ $billing->id ?? '-' }}</p>
+        <p><strong>Peiode Tagihan:</strong> {{ \Carbon\Carbon::parse($billing->period)->format('d F Y') ?? '-' }}</p>
+        <p><strong>Tanggal Tagihan:</strong> {{ \Carbon\Carbon::parse($billing->billing_date)->format('d F Y') ?? '-' }}</p>
+        <p><strong>Nama Penghuni:</strong> {{ $billing->residence->user->fullname ?? '-' }}</p>
+        <p><strong>No. Hp:</strong> {{ $billing->residence->user->phone ?? '-' }}</p>
+        <p><strong>Email:</strong> {{ $billing->residence->user->email ?? '-' }}</p>
+        <p><strong>Jenis Tagihan:</strong> {{ $billing->billing_type ?? '-' }}</p>
+        <p><strong>Harga/Tarif Tagihan:</strong> {{ number_format($billing->billing_fee, 2) ?? '-'}}</p>
+        <p><strong>Denda Periode Sebelumnya:</strong> {{ number_format($billing->fine, 2) ?? '-'}}</p>
+        <p><strong>Total Tagihan:</strong> {{ number_format($billing->total_amount, 2) ?? '-'}}</p>
         <p><strong>From:</strong> {{ $billing->apartment->name ?? '-' }}</p>
     </div>
 
-    <p>If you have any questions regarding this invoice, please feel free to contact us.</p>
+    <p>Jika Anda memiliki pertanyaan terkait tagihan ini, silakan hubungi pihak manajemen kami.</p>
 
     <div class="footer">
-        <p>Best Regards,</p>
-        <p>{{ $billing->apartment->name }} Management</p>
+        <p>Hormat Kami,</p>
+        <p>Manajemen {{ $billing->apartment->name }}</p>
     </div>
 </body>
 </html>

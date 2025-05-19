@@ -35,4 +35,5 @@ Route::middleware(['api','api.secret'])->group(function () {
     Route::post('/billings/by-id',[BillingTransactionController::class, 'fetchBillingById']);
     Route::get('/billings',[BillingTransactionController::class, 'fetchAllBilling']);
     Route::put('/billings/{id}',[BillingTransactionController::class, 'editBilling']);
+    Route::post('/email/send-payment-success-notification', [BillingTransactionController::class, 'sendPaymentSuccessNotification']);
 });

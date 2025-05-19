@@ -50,6 +50,7 @@
 
       .address-label {
         font-weight: bold;
+        font-size: 13px;
         display: block;
         margin-bottom: 5px;
       }
@@ -101,6 +102,18 @@
         text-align: right;
         background-color: #f1f5f9;
       }
+
+      .invoice-meta {
+        font-size: 12px;
+        font-weight: normal;
+        margin-top: 4px;
+        color: #555;
+      }
+
+      .recipient-info div {
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
     </style>
   </head>
 
@@ -109,10 +122,13 @@
     <table class="header-table">
       <tr>
         <td class="logo-cell">
-          <img src="{{ storage_path('app/public/' . $billing->apartment->logo_company) }}" alt="Apartment Logo" width="200">
+          <img src="{{ storage_path('app/public/' . $billing->apartment->logo_company) }}" alt="Apartment Logo" width="200" />
         </td>
         <td class="invoice-id">
-          Invoice ID: {{ $billing->id }}
+          <div>Invoice ID: {{ $billing->id }}</div>
+          <div class="invoice-meta">Periode Tagihan: {{ \Carbon\Carbon::parse($billing->period)->format('F Y') }}</div>
+          <div class="invoice-meta">Tanggal Tagihan: {{ \Carbon\Carbon::parse($billing->billing_date)->format('d F Y') }}</div>
+          <div class="invoice-meta">Jatuh Tempo: {{ \Carbon\Carbon::parse($billing->due_date)->format('d F Y') }}</div>
         </td>
       </tr>
     </table>
@@ -120,16 +136,16 @@
     <!-- Address Section -->
     <table class="address-table">
       <tr>
-        <td>
-          <span class="address-label">To:</span>
+        <td class="recipient-info">
+          <span class="address-label">Untuk:</span>
           <div>{{ $billing->residence->user->fullname ?? '-' }}</div>
-          <div><strong>Phone:</strong> {{  $billing->residence->user->phone ?? '-'}}</div>
-          <div><strong>Email:</strong> {{  $billing->residence->user->email ?? '-'}}</div>
-          <div><strong>Tower:</strong> {{  $billing->tower->tower_name ?? '-'}}</div>
-          <div><strong>Unit Type:</strong> {{ $billing->residence->apartmentTypeData->name ?? '-'}}</div>
+          <div><strong>No. Hp:</strong> {{ $billing->residence->user->phone ?? '-'}}</div>
+          <div><strong>Email:</strong> {{ $billing->residence->user->email ?? '-'}}</div>
+          <div><strong>Tower:</strong> {{ $billing->tower->tower_name ?? '-'}}</div>
+          <div><strong>Tipe Unit:</strong> {{ $billing->residence->apartmentTypeData->name ?? '-'}}</div>
         </td>
         <td>
-          <span class="address-label">From:</span>
+          <span class="address-label">Dari:</span>
           <div>{{ $billing->apartment->name ?? '-' }}</div>
           <div>{{ $billing->apartment->address ?? '-' }}</div>
         </td>
@@ -137,48 +153,48 @@
     </table>
 
     <!-- Product Table -->
-	<table class="product-table">
-		<thead>
-		  <tr>
-			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd;">Billing Type</th>
-			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd;">Description</th>
-			<th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd; text-align: right;">Price</th>
-		  </tr>
-		</thead>
-		<tbody>
-		  <tr>
-			<td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left;">{{ $billing->billing_type }}</td>
-			@if ($billing->billing_category_id)
-			<td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left;">{{ $billing->billingCategory->category_name }}</td>
-			@else
-			<td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left;">-</td>
-			@endif
-			<td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: right;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
-		  </tr>
-		</tbody>
-		<tfoot>
-		  <tr>
-			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Sub Total:</td>
-			  <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
-		  </tr>
-      <tr>
-        <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Penalty:</td>
-        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. {{ number_format($billing->fine, 2) }}</td>
-      </tr>
-		  <tr>
-			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Tax:</td>
-			  <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600;">Rp. 0.00</td>
-		  </tr>
-		  <tr>
-			  <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Amount:</td>
-        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->billing_fee + ($billing->fine ?? 0), 2) }}</td>
-		  </tr>
-		</tfoot>
-	  </table>
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd">Jenis Tagihan</th>
+          <th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd">Keterangan</th>
+          <th style="width: 33.33%; background-color: #60a5fa; color: white; padding: 10px; font-weight: 600; border: 1px solid #ddd; text-align: right">Harga/Tarif</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left">{{ $billing->billing_type }}</td>
+          @if ($billing->billing_category_id)
+          <td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left">{{ $billing->billingCategory->category_name }}</td>
+          @else
+          <td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: left">-</td>
+          @endif
+          <td style="width: 33.33%; background-color: white; padding: 10px; border: 1px solid #ddd; text-align: right">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Sub Total:</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Denda Periode Sebelumnya:</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Rp. {{ number_format($billing->fine, 2) }}</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Tax:</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600">Rp. 0.00</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9">Total Tagihan:</td>
+          <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: 600; background-color: #f1f5f9">Rp. {{ number_format($billing->billing_fee + ($billing->fine ?? 0), 2) }}</td>
+        </tr>
+      </tfoot>
+    </table>
 
     <!-- Footer Section -->
     <div class="footer">
-      <p>Thank you, <br />{{ $billing->apartment->name }}</p>
+      <p>Terima Kasih, <br />{{ $billing->apartment->name }}</p>
     </div>
   </body>
 </html>

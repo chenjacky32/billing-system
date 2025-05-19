@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\InvoiceMail;
+use App\Models\EmailsLogs;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,7 +18,12 @@ class SendEmailJob implements ShouldQueue
 
     protected $details;
     public $tries = 3;
-    public $backoff = 60;
+    // public $backoff = 60;
+
+    public function backoff()
+    {
+        return [60, 300, 600]; // Retry after 1m, 5m, then 10m
+    }
 
     /**
      * Create a new job instance.
@@ -41,7 +47,7 @@ class SendEmailJob implements ShouldQueue
         $pdfPath = $this->details['pdfPath'];
         $email = $this->details['email'];
         
-        try{
+        try {
             // Send email with invoice
             Mail::to($email)->send(new InvoiceMail($billing, $pdfPath));
         
@@ -49,16 +55,51 @@ class SendEmailJob implements ShouldQueue
             if(file_exists($this->details['pdfPath'])){
                 unlink($this->details['pdfPath']);
             }
+
+            EmailsLogs::create([
+                'recipient_email' => $email,
+                'subject' => "Tagihan Apartemen " . ($billing->residence->user->fullname ?? '') . "- Invoice ID:" . $billing->id,
+                'content' => '',
+                'status' => 'sent',
+                'email_type' => 'invoice_attachment',
+                'billing_id' => $billing->id,
+                'error_message' => null,
+                'sent_at' => now()
+            ]);
         } catch (\Exception $e) {
-            Log::error('Failed to send invoice email: ' . $e->getMessage());
+            EmailsLogs::create([
+                'recipient_email' => $billing->residence->user->email ?? 'No Email',
+                'subject' => "Tagihan Apartemen " . ($billing->residence->user->fullname ?? ''),
+                'content' => '',
+                'status' => 'failed',
+                'email_type' => 'invoice_attachment',
+                'billing_id' => $billing->id,
+                'error_message' => $e->getMessage(),
+                'sent_at' => now()
+            ]);
+            
             throw $e;
         }
     }
 
     public function failed(\Exception  $exception)
     {
-          // Cleanup if the job fails
-          if (file_exists($this->details['pdfPath'])) {
+        $billing = $this->details['billing'] ?? null;
+
+        EmailsLogs::create([
+            'recipient_email' => $billing?->residence?->user?->email ?? 'No Email',
+            'subject' => "Tagihan Apartemen " . ($billing->residence->user->fullname ?? ''),
+            'content' => '',
+            'status' => 'failed',
+            'email_type' => 'invoice_attachment',
+            'billing_id' => $billing?->id,
+            'error_message' => $exception->getMessage(),
+            'sent_at' => now()
+        ]);
+
+
+        // Cleanup if the job fails
+        if (file_exists($this->details['pdfPath'])) {
             unlink($this->details['pdfPath']);
         }
     }

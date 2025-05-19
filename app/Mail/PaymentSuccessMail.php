@@ -17,7 +17,7 @@ class PaymentSuccessMail extends Mailable
     
     public function build()
     {
-        return $this->subject('Payment Confirmation for Invoice ' . $this->billing->id)
-                    ->view('emails.payment_success');
+    return $this->subject('Pembayaran Diterima - Invoice #' . $this->billing->id)
+                ->view('emails.payment_success');
     }
 }

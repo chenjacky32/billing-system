@@ -6,6 +6,7 @@ use App\Models\Billing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class InvoiceMail extends Mailable 
 {
@@ -21,7 +22,14 @@ class InvoiceMail extends Mailable
     public function build()
     {
         Log::info('Mail/InvoiceMail', ['billing' => $this->billing, 'pdfPath' => $this->pdfPath, 'email' => $this->billing->residence->user->fullname]);
-        return $this->subject('Invoice Billing for ' . $this->billing->residence->user->fullname)
+        
+        $periodFormatted = "";
+
+        if ($this->billing->period) {
+            $periodFormatted = Carbon::parse($this->billing->period)->isoFormat('MMMM YYYY');
+        }
+        
+        return $this->subject("Tagihan Apartemen " . ($this->billing->residence->user->fullname ?? '-') . " (" . $this->billing->billing_type . ") - " . $periodFormatted)
             ->view('emails.invoice')
             ->attach($this->pdfPath, [
                 'as' => "invoice_{$this->billing->id}.pdf",

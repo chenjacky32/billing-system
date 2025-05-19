@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\BillingPaid;
 use App\Http\Controllers\Controller;
 use App\Models\ApartmentOwner;
 use App\Models\Billing;
 use App\Models\BillingsCategory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class BillingTransactionController extends Controller
@@ -202,5 +204,39 @@ class BillingTransactionController extends Controller
             'message' => 'Billing updated successfully',
             'data' => $billing->fresh()
         ], 200);
+    }
+
+    public function sendPaymentSuccessNotification(Request $request)
+    {
+        $billingId = $request->input('billingId');
+
+        if (!$billingId) {
+            return response()->json([
+                'status' =>'fail',
+                'message' =>'Bad Request missing billingId',
+            ],400);
+        }
+
+        try {
+            $billing = Billing::findOrFail($billingId); 
+            event(new BillingPaid($billing));
+
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Email Notification sent successfully',
+                'data' => $billing
+            ],200);
+
+        } catch (\Throwable $e) {
+            $statusCode = $e instanceof ModelNotFoundException ? 404 : 500;
+            $message = $e instanceof ModelNotFoundException
+                ? 'Billing not found'
+                : 'Error sending email notification: ' . $e->getMessage();
+
+            return response()->json([
+                'status' => 'fail',
+                'message' => $message,
+            ], $statusCode);
+        }
     }
 }
