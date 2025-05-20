@@ -28,6 +28,7 @@ const TABLE_HEAD = [
     "Periode",
     "Jenis Tagihan",
     "Biaya Tagihan",
+    "Denda",
     "Total Tagihan",
     "Tanggal Tagihan Dibayar",
     "Status Pembayaran",
@@ -39,6 +40,7 @@ export default function PaidReport({
     data,
     filters,
     totalBillingIsPaid,
+    totalFine,
     totalCountSuccess,
     towerData,
     apartmentType,
@@ -224,8 +226,13 @@ export default function PaidReport({
                                 hasFilter={true}
                                 showAddButton={false}
                                 showCard={true}
-                                labelBilling={"Total Tagihan Lunas"}
-                                labelPaidorUnpaid={"Jumlah Pembayaran Lunas"}
+                                labelBilling={"Total Tagihan Yang Sudah Lunas"}
+                                labelPaidorUnpaid={
+                                    "Jumlah Pembayaran Yang Sudah Lunas"
+                                }
+                                labelFine={"Total Denda"}
+                                countFine={totalFine}
+                                isFine={true}
                                 countBilling={totalBillingIsPaid}
                                 countPaidorUnpaid={totalCountSuccess}
                             />
@@ -354,7 +361,7 @@ export default function PaidReport({
                                                         billing_type,
                                                         billing_fee,
                                                         residence,
-                                                        apartment,
+                                                        total_amount,
                                                         fine,
                                                         period,
                                                         tower,
@@ -533,8 +540,31 @@ export default function PaidReport({
                                                                                     "IDR",
                                                                             }
                                                                         ).format(
-                                                                            billing_fee +
-                                                                                fine
+                                                                            fine
+                                                                        )}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-semibold capitalize"
+                                                                    >
+                                                                        {new Intl.NumberFormat(
+                                                                            "id-ID",
+                                                                            {
+                                                                                style: "currency",
+                                                                                currency:
+                                                                                    "IDR",
+                                                                            }
+                                                                        ).format(
+                                                                            total_amount
                                                                         )}
                                                                     </Typography>
                                                                 </div>

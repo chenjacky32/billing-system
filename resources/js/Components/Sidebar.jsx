@@ -271,7 +271,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Paid Billings
+                                    Paid Billing
                                 </ListItem>
                             </Link>
                             <Link href={route("billing.unpaid.index")}>
@@ -282,7 +282,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Unpaid Billings
+                                    Unpaid Billing
                                 </ListItem>
                             </Link>
                             <Link href={route("billing.penalties.index")}>
@@ -293,7 +293,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Billings With Penalty
+                                    Overdue Billing
                                 </ListItem>
                             </Link>
                             <Link href={route("owner.report.index")}>

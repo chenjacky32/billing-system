@@ -49,6 +49,7 @@ export default function UnpaidReport({
     filters,
     totalBillingIsUnpaid,
     totalCountPending,
+    totalFine,
     towerData,
     apartmentType,
 }) {
@@ -202,7 +203,7 @@ export default function UnpaidReport({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unpaid Billings
+                    Unpaid Billing
                 </h2>
             }
         >
@@ -231,7 +232,7 @@ export default function UnpaidReport({
                                 showInput={false}
                                 title={"Unpaid Billing"}
                                 description={
-                                    "Informasi Data Billing Yang Belum Lunas"
+                                    "Informasi Data Billing Yang Belum Lunas Dan Belum Jatuh Tempo"
                                 }
                                 buttonLabel={"Tambah Billing"}
                                 // icon={buttonIcon}
@@ -240,10 +241,15 @@ export default function UnpaidReport({
                                 hasFilter={true}
                                 showAddButton={false}
                                 showCard={true}
-                                labelBilling={"Total Tagihan yang Belum Lunas"}
-                                labelPaidorUnpaid={
-                                    "Jumlah Pembayaran yang Belum Lunas"
+                                labelBilling={
+                                    "Total Tagihan Yang Belum Jatuh Tempo"
                                 }
+                                labelPaidorUnpaid={
+                                    "Jumlah Pembayaran Yang Belum Jatuh Tempo"
+                                }
+                                labelFine={"Total Denda"}
+                                countFine={totalFine}
+                                isFine={true}
                                 countBilling={totalBillingIsUnpaid}
                                 countPaidorUnpaid={totalCountPending}
                             />
@@ -372,7 +378,7 @@ export default function UnpaidReport({
                                                         billing_type,
                                                         billing_fee,
                                                         residence,
-                                                        apartment,
+                                                        total_amount,
                                                         fine,
                                                         tower,
                                                         period,
@@ -566,7 +572,7 @@ export default function UnpaidReport({
                                                                 <div className="flex flex-col">
                                                                     <Typography
                                                                         variant="small"
-                                                                        className="font-normal capitalize"
+                                                                        className="font-semibold capitalize"
                                                                     >
                                                                         {new Intl.NumberFormat(
                                                                             "id-ID",
@@ -576,8 +582,7 @@ export default function UnpaidReport({
                                                                                     "IDR",
                                                                             }
                                                                         ).format(
-                                                                            billing_fee +
-                                                                                fine
+                                                                            total_amount
                                                                         )}
                                                                     </Typography>
                                                                 </div>

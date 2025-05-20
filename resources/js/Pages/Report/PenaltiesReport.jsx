@@ -193,7 +193,7 @@ export default function PenaltiesReport({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unpaid Billings
+                    Overdue Billing
                 </h2>
             }
         >
@@ -212,7 +212,7 @@ export default function PenaltiesReport({
                             href={route("billing.penalties.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing With Penalty
+                            Overdue Billing
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -220,9 +220,9 @@ export default function PenaltiesReport({
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 showInput={false}
-                                title={"Billing With Penalty"}
+                                title={"Overdue Billing"}
                                 description={
-                                    "Informasi Data Billing Yang Belum Lunas dan Terkena Denda"
+                                    "Informasi Data Billing Yang Belum Lunas Dan Sudah Jatuh Tempo"
                                 }
                                 buttonLabel={"Tambah Billing"}
                                 // icon={buttonIcon}
@@ -232,10 +232,10 @@ export default function PenaltiesReport({
                                 showAddButton={false}
                                 showCard={true}
                                 labelBilling={
-                                    "Total Tagihan Belum Lunas dan Terkena Denda"
+                                    "Total Tagihan Yang Belum Lunas Dan Sudah Jatuh Tempo"
                                 }
                                 labelPaidorUnpaid={
-                                    "Jumlah Pembayaran yang Belum Lunas dan Terkena Denda"
+                                    "Jumlah Pembayaran Yang Belum Lunas Dan Sudah Jatuh Tempo"
                                 }
                                 labelFine={"Total Denda"}
                                 countBilling={BillingFee}
@@ -369,7 +369,7 @@ export default function PenaltiesReport({
                                                         billing_type,
                                                         billing_fee,
                                                         residence,
-                                                        apartment,
+                                                        total_amount,
                                                         fine,
                                                         tower,
                                                         period,
@@ -563,7 +563,7 @@ export default function PenaltiesReport({
                                                                 <div className="flex flex-col">
                                                                     <Typography
                                                                         variant="small"
-                                                                        className="font-normal capitalize"
+                                                                        className="font-semibold capitalize"
                                                                     >
                                                                         {new Intl.NumberFormat(
                                                                             "id-ID",
@@ -573,8 +573,7 @@ export default function PenaltiesReport({
                                                                                     "IDR",
                                                                             }
                                                                         ).format(
-                                                                            billing_fee +
-                                                                                fine
+                                                                            total_amount
                                                                         )}
                                                                     </Typography>
                                                                 </div>

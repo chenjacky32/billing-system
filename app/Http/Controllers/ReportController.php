@@ -31,7 +31,8 @@ class ReportController extends Controller
             $towerQuery->where('apartment_id', $apartmentId);
         }
         $totalCountSuccess = $queryBySuccess->count();
-        $totalBillingFee = $queryBySuccess->sum('billing_fee');
+        $totalBillingFee = $queryBySuccess->sum('total_amount');
+        $totalFine = $queryBySuccess->sum('fine');
     
         $tower_data = $towerQuery->get()->map( function ($tower) {
             return [
@@ -87,6 +88,7 @@ class ReportController extends Controller
                 ->paginate(10),
             'totalBillingIsPaid' => $totalBillingFee,
             'totalCountSuccess' => $totalCountSuccess,
+            'totalFine' => $totalFine,
             'towerData' => $tower_data,
             'apartmentType' => $apartmentTypeData
         ]);
@@ -107,7 +109,8 @@ class ReportController extends Controller
             $towerQuery->where('apartment_id', $apartmentId);
         }
         $totalCountPending = $queryByPending->count();
-        $totalBillingFee = $queryByPending->sum('billing_fee');
+        $totalBillingFee = $queryByPending->sum('total_amount');
+        $totalFine = $queryByPending->sum('fine');
 
         $tower_data = $towerQuery->get()->map( function ($tower) {
             return [
@@ -165,6 +168,7 @@ class ReportController extends Controller
                 
             'totalBillingIsUnpaid' => $totalBillingFee,
             'totalCountPending' => $totalCountPending,
+            'totalFine'=> $totalFine,
             'towerData' => $tower_data,
             'apartmentType' => $apartmentTypeData
         ]);
@@ -186,7 +190,7 @@ class ReportController extends Controller
             $towerQuery->where('apartment_id', $apartmentId);
         }
         $totalBillingWithPenalties = $queryByPenalties->count();
-        $totalBillingFee = $queryByPenalties->sum('billing_fee');
+        $totalBillingFee = $queryByPenalties->sum('total_amount');
         $totalFine = $queryByPenalties->sum('fine');
 
         $tower_data = $towerQuery->get()->map( function ($tower) {

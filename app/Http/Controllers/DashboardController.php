@@ -224,12 +224,12 @@ class DashboardController extends Controller
                         'percentage' => $total > 0 ? ($paidData / $total) * 100 : 0,
                     ],
                     [
-                        'label' => 'Belum Lunas',
+                        'label' => 'Belum Lunas dan Belum Jatuh Tempo',
                         'count' => $unpaidData,
                         'percentage' => $total > 0 ? ($unpaidData / $total) * 100 : 0,
                     ],
                     [
-                        'label' => 'Belum Lunas dan terkena Denda',
+                        'label' => 'Belum Lunas dan Sudah Jatuh Tempo',
                         'count' => $penaltyData,
                         'percentage' => $total > 0 ? ($penaltyData / $total) * 100 : 0,
                     ],

@@ -146,7 +146,7 @@ Route::middleware('auth')->group(function () {
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');
     Route::get('/unpaid-billing-report', [ReportController::class, 'showUnpaid'])->name('billing.unpaid.index');
-    Route::get('/billing-with-penalty-report', [ReportController::class, 'showPenalties'])->name('billing.penalties.index');
+    Route::get('/overdue-billing-report', [ReportController::class, 'showPenalties'])->name('billing.penalties.index');
     Route::get('/owner-report', [ReportController::class, 'ownerReport'])->name('owner.report.index');
     Route::get('/owner-report/{id}/show', [ReportController::class, 'show'])->name('owner.report.show');
 
