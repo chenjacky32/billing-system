@@ -27,10 +27,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //Logging database queries
-        DB::listen(function (QueryExecuted $query) {
-            Log::info($query->sql);
-            Log::info('Bindings: ' . json_encode($query->bindings));
-            Log::info('Time: ' . $query->time . ' ms');
+            DB::listen(function (QueryExecuted $query) {
+            Log::info(
+                $query->sql,
+                [
+                    'bindings' => $query->bindings,
+                    'time' => $query->time . 'ms',
+                    'connection' => $query->connectionName
+                ]
+            );
         });
     }
 }

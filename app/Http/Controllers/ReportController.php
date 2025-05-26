@@ -13,6 +13,8 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use App\Helpers\LookupCache;
 
 class ReportController extends Controller
 {
@@ -22,75 +24,102 @@ class ReportController extends Controller
         $role = $user->role;
         $apartmentId = $user->apartment_id;
 
-        $queryBySuccess = Billing::where('status', 'success');
-        $towerQuery = ApartmentTower::query();
-        $apartmentType = ApartmentType::query();
+        // Handle search & unitType → filter manual with whereIn
+        $matchingResidenceIds = null;
 
-        if($role !== 'SUPER ADMIN'){
-            $queryBySuccess->where('apartment_id', $user->apartment_id);
-            $towerQuery->where('apartment_id', $apartmentId);
+        if ($request->has('search') || $request->filled('unitType')) {
+            $residenceQuery = UserApartmentOkgo::query();
+
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $residenceQuery->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('user', fn ($q2) =>
+                        $q2->where('fullname', 'like', "%{$searchTerm}%")
+                    )->orWhere('roomNo', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            if ($request->filled('unitType')) {
+                $residenceQuery->where('apartmentType', $request->unitType);
+            }
+
+            $matchingResidenceIds = $residenceQuery->pluck('id')->toArray();
         }
-        $totalCountSuccess = $queryBySuccess->count();
-        $totalBillingFee = $queryBySuccess->sum('total_amount');
-        $totalFine = $queryBySuccess->sum('fine');
-    
-        $tower_data = $towerQuery->get()->map( function ($tower) {
-            return [
-                'label' => $tower->tower_name,
-                'value' => $tower->id
-            ];
-            })->values()->toArray();
-        
-        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
-            return [
-                'label' => $apartmentType->name,
-                'value' => $apartmentType->id
-            ];
-        })->values()->toArray();
+
+        // Build query Billing
+        $queryBySuccess = Billing::where('status', 'success')
+            ->when($role !== 'SUPER ADMIN', fn ($query) =>
+                $query->where('apartment_id', $apartmentId)
+            )
+            ->when($matchingResidenceIds, fn ($query) =>
+                $query->whereIn('residence_id', $matchingResidenceIds)
+            )
+            ->when($request->filled('period'), fn ($q) =>
+                $q->where('period', $request->input('period')) 
+            )
+            ->when($request->filled('billingType'), fn ($q) =>
+                $q->where('billing_type', $request->input('billingType')) 
+            )
+            ->when($request->filled('towerId'), fn ($q) =>
+                $q->where('tower_id', $request->input('towerId'))    
+            );
+
+        // Get Billing Data
+        $data = (clone $queryBySuccess)
+            ->select(
+                'id',
+                'period',
+                'billing_type',
+                'billing_fee',
+                'fine',
+                'total_amount',
+                'residence_id',
+                'tower_id',
+                'apartment_id',
+                'paid_date',
+                'status',
+            )
+            ->with([
+                'tower:id,tower_name',
+                'residence:id,userId,apartmentTowerId,apartmentId,roomNo,apartmentType',
+                'residence.user:id,fullname',
+            ])
+            ->orderByDesc('id')
+            ->paginate(10);
+
+        $totalCountSuccess = $data->total();
+        $totalBillingFee = (clone $queryBySuccess)->sum('total_amount');
+        $totalFine = (clone $queryBySuccess)->sum('fine');
+
+        // Get Mapping apartmentType name
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+
+        // Inject Mapping billing/residence
+        $data->getCollection()->transform(function ($billing) use ($apartmentTypeMap) {
+            if ($billing->residence) {
+                $apartmentTypeId = $billing->residence->apartmentType;
+                $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$apartmentTypeId])
+                    ? [
+                        'id' => $apartmentTypeId,
+                        'name' => $apartmentTypeMap[$apartmentTypeId],
+                    ]
+                    : null;
+            }
+            return $billing;
+        });
+
+        // Get Master Data Tower and UnitType
+        $tower_data = LookupCache::towerList($apartmentId, $role);
+        $apartmentTypeData = LookupCache::apartmentTypeList();
 
         return Inertia::render('Report/PaidReport', [
-            'filters' => $request->only('search','period','towerId','unitType','billingType'),
-            'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user','apartment'])
-                ->where('status', 'success')  // Only include records where status is "success"
-                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
-                    return $query->where('apartment_id', $user->apartment_id);
-                })
-                ->when($request->has('search'), function ($query) use ($request) {
-                    $searchTerm = $request->input('search');
-
-                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
-                        $q->where('fullname', 'like', "%$searchTerm%");
-                    })
-                    ->orWhere('roomNo', 'like', "%$searchTerm%")
-                    ->pluck('id') // Ambil hanya kolom `id`
-                    ->toArray();
-            
-                $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->when($request->filled('period'), function($query) use ($request){
-                    $period = $request->input('period');
-                    $query->where('period','like',"%$period%");
-                })
-                ->when($request->filled('billingType'), function($query) use ($request){
-                        $billingType = $request->input('billingType');
-                        $query->where('billing_type','like',"%$billingType%");
-                })->when($request->filled('towerId'), function($query) use ($request){
-                        $tower = $request->input('towerId');
-                        $query->where('tower_id','like',"%$tower%");
-                })->when($request->filled('unitType'), function($query) use ($request){
-                        $unitType = $request->input('unitType');
-                        $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
-                            ->pluck('id') // Ambil hanya kolom `id`
-                            ->toArray();
-                        $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->orderByDesc('id')
-                ->paginate(10),
+            'filters'=> $request->only('search','period','towerId','unitType','billingType'),
+            'data' => $data,
             'totalBillingIsPaid' => $totalBillingFee,
             'totalCountSuccess' => $totalCountSuccess,
             'totalFine' => $totalFine,
             'towerData' => $tower_data,
-            'apartmentType' => $apartmentTypeData
+            'apartmentType' => $apartmentTypeData,
         ]);
     }
 
@@ -100,158 +129,213 @@ class ReportController extends Controller
         $role = $user->role;
         $apartmentId = $user->apartment_id;
 
-        $queryByPending = Billing::where('status', 'pending')->where('due_date', '>=', today());
-        $towerQuery = ApartmentTower::query();
-        $apartmentType = ApartmentType::query();
+        // Handle search & unitType → filter manual with whereIn
+        $matchingResidenceIds = null;
 
-        if($role !== 'SUPER ADMIN'){
-            $queryByPending->where('apartment_id', $user->apartment_id);
-            $towerQuery->where('apartment_id', $apartmentId);
+        if ($request->has('search') || $request->filled('unitType')) {
+            $residenceQuery = UserApartmentOkgo::query();
+
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $residenceQuery->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('user', fn ($q2) =>
+                        $q2->where('fullname', 'like', "%{$searchTerm}%")
+                    )->orWhere('roomNo', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            if ($request->filled('unitType')) {
+                $residenceQuery->where('apartmentType', $request->unitType);
+            }
+
+            $matchingResidenceIds = $residenceQuery->pluck('id')->toArray();
         }
-        $totalCountPending = $queryByPending->count();
-        $totalBillingFee = $queryByPending->sum('total_amount');
-        $totalFine = $queryByPending->sum('fine');
 
-        $tower_data = $towerQuery->get()->map( function ($tower) {
-            return [
-                'label' => $tower->tower_name,
-                'value' => $tower->id
-            ];
-        })->values()->toArray();
-        
-        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
-            return [
-                'label' => $apartmentType->name,
-                'value' => $apartmentType->id
-            ];
-        })->values()->toArray();
+        // Build query Billing
+        $queryByPending = Billing::where('status', 'pending')
+            ->where('due_date', '>=', today())
+            ->when($role !== 'SUPER ADMIN', fn ($query) =>
+                $query->where('apartment_id', $apartmentId)
+            )
+            ->when($matchingResidenceIds, fn ($query) =>
+                $query->whereIn('residence_id', $matchingResidenceIds)
+            )
+            ->when($request->filled('period'), fn ($q) =>
+                $q->where('period', $request->input('period')) 
+            )
+            ->when($request->filled('billingType'), fn ($q) =>
+                $q->where('billing_type', $request->input('billingType')) 
+            )
+            ->when($request->filled('towerId'), fn ($q) =>
+                $q->where('tower_id', $request->input('towerId'))
+            );
+
+        // Get Billing Data
+        $data = (clone $queryByPending)
+            ->select(
+                'id',
+                'period',
+                'billing_type',
+                'billing_fee',
+                'fine',
+                'total_amount',
+                'residence_id',
+                'tower_id',
+                'apartment_id',
+                'paid_date',
+                'status',
+                'billing_date',
+                'due_date',
+            )
+            ->with([
+                'tower:id,tower_name',
+                'residence:id,userId,apartmentTowerId,apartmentId,roomNo,apartmentType',
+                'residence.user:id,fullname',
+            ])
+            ->orderByDesc('id')
+            ->paginate(10);
+
+        $totalCountPending = $data->total();
+        $totalBillingFee = (clone $queryByPending)->sum('total_amount');
+        $totalFine = (clone $queryByPending)->sum('fine');
+
+        // Get Mapping apartmentType name
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+
+        // Inject Mapping billing/residence
+        $data->getCollection()->transform(function ($billing) use ($apartmentTypeMap) {
+            if ($billing->residence) {
+                $apartmentTypeId = $billing->residence->apartmentType;
+                $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$apartmentTypeId])
+                    ? [
+                        'id' => $apartmentTypeId,
+                        'name' => $apartmentTypeMap[$apartmentTypeId],
+                    ]
+                    : null;
+            }
+            return $billing;
+        });
+
+        // Get Master Data Tower and UnitType
+        $tower_data = LookupCache::towerList($apartmentId, $role);
+        $apartmentTypeData = LookupCache::apartmentTypeList();
 
         return Inertia::render('Report/UnpaidReport', [
-            'filters' => $request->only('search','period','towerId','unitType','billingType'),  // Remove 'status' from the filters
-            'data' => Billing::with(['owner', 'createdBy', 'tower', 'residence.user','apartment'])
-                ->where('status', 'pending')  // Only include records where status is "pending"
-                ->where('due_date', '>=', today()) // Only include records where due_date is today or in the future
-                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
-                    return $query->where('apartment_id', $user->apartment_id);
-                })
-                ->when($request->has('search'), function ($query) use ($request) {
-                    $searchTerm = $request->input('search');
-                    
-                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
-                        $q->where('fullname', 'like', "%$searchTerm%");
-                    })
-                    ->orWhere('roomNo', 'like', "%$searchTerm%")
-                    ->pluck('id') // Ambil hanya kolom `id`
-                    ->toArray();
-            
-                $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->when($request->filled('period'), function($query) use ($request){
-                        $period = $request->input('period');
-                        $query->where('period','like',"%$period%");
-                })
-                ->when($request->filled('billingType'), function($query) use ($request){
-                        $billingType = $request->input('billingType');
-                        $query->where('billing_type','like',"%$billingType%");
-                })->when($request->filled('towerId'), function($query) use ($request){
-                        $tower = $request->input('towerId');
-                        $query->where('tower_id','like',"%$tower%");
-                })->when($request->filled('unitType'), function($query) use ($request){
-                        $unitType = $request->input('unitType');
-                        $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
-                            ->pluck('id') // Ambil hanya kolom `id`
-                            ->toArray();
-                    $query->whereIn('residence_id', $matchingResidenceIds);
-            })
-                ->orderByDesc('id')
-                ->paginate(10),
-                
+            'filters'=> $request->only('search','period','towerId','unitType','billingType'),
+            'data' => $data,
             'totalBillingIsUnpaid' => $totalBillingFee,
             'totalCountPending' => $totalCountPending,
-            'totalFine'=> $totalFine,
+            'totalFine' => $totalFine,
             'towerData' => $tower_data,
-            'apartmentType' => $apartmentTypeData
+            'apartmentType' => $apartmentTypeData,
         ]);
     }
 
     public function showPenalties(Request $request)
-    {
+    {        
         $user = Auth::user();
         $role = $user->role;
         $apartmentId = $user->apartment_id;
-
-        $queryByPenalties = Billing::where('status', 'pending')->where('due_date', '<', today());
-        $towerQuery = ApartmentTower::query();
-        $apartmentType = ApartmentType::query();
-
-
-        if($role !== 'SUPER ADMIN'){
-            $queryByPenalties->where('apartment_id', $user->apartment_id);
-            $towerQuery->where('apartment_id', $apartmentId);
-        }
-        $totalBillingWithPenalties = $queryByPenalties->count();
-        $totalBillingFee = $queryByPenalties->sum('total_amount');
-        $totalFine = $queryByPenalties->sum('fine');
-
-        $tower_data = $towerQuery->get()->map( function ($tower) {
-            return [
-                'label' => $tower->tower_name,
-                'value' => $tower->id
-            ];
-            })->values()->toArray();
         
-        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
-            return [
-                'label' => $apartmentType->name,
-                'value' => $apartmentType->id
-            ];
-        })->values()->toArray();
-    
-        return Inertia::render('Report/PenaltiesReport', [
-            'filters' => $request->only('search','period','towerId','unitType','billingType'),  // Remove 'status' from the filters
-            'data' => Billing::with(['owner', 'createdBy','tower','residence.user','apartment'])
-                ->where('status', 'pending')  // Only include records where status is "pending"
-                ->where('due_date', '<', today()) // Only include records where due_date is today or in the future
-                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
-                    return $query->where('apartment_id', $user->apartment_id);
-                })
-                ->when($request->has('search'), function ($query) use ($request) {
-                    $searchTerm = $request->input('search');
-                    
-                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
-                        $q->where('fullname', 'like', "%$searchTerm%");
-                    })
-                    ->orWhere('roomNo', 'like', "%$searchTerm%")
-                    ->pluck('id') // Ambil hanya kolom `id`
-                    ->toArray();
-            
-                $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->when($request->filled('period'), function($query) use ($request){
-                    $period = $request->input('period');
-                    $query->where('period','like',"%$period%");
-                })
-                ->when($request->filled('billingType'), function($query) use ($request){
-                        $billingType = $request->input('billingType');
-                        $query->where('billing_type','like',"%$billingType%");
-                })->when($request->filled('towerId'), function($query) use ($request){
-                        $tower = $request->input('towerId');
-                        $query->where('tower_id','like',"%$tower%");
-                })->when($request->filled('unitType'), function($query) use ($request){
-                        $unitType = $request->input('unitType');
-                        $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
-                            ->pluck('id') // Ambil hanya kolom `id`
-                            ->toArray();
-                    $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->orderByDesc('id')
-                ->paginate(10),
+        // Handle search & unitType → filter manual with whereIn
+        $matchingResidenceIds = null;
 
+        if ($request->has('search') || $request->filled('unitType')) {
+            $residenceQuery = UserApartmentOkgo::query();
+
+            if ($request->has('search')) {
+                $searchTerm = $request->input('search');
+                $residenceQuery->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('user', fn ($q2) =>
+                        $q2->where('fullname', 'like', "%{$searchTerm}%")
+                    )->orWhere('roomNo', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            if ($request->filled('unitType')) {
+                $residenceQuery->where('apartmentType', $request->unitType);
+            }
+
+            $matchingResidenceIds = $residenceQuery->pluck('id')->toArray();
+        }
+
+        // Build query Billing
+        $queryByPenalty = Billing::where('status', 'pending')
+            ->where('due_date', '<', today())
+            ->when($role !== 'SUPER ADMIN', fn ($query) =>
+                $query->where('apartment_id', $apartmentId)
+            )
+            ->when($matchingResidenceIds, fn ($query) =>
+                $query->whereIn('residence_id', $matchingResidenceIds)
+            )
+            ->when($request->filled('period'), fn ($q) =>
+                $q->where('period', $request->input('period')) 
+            )
+            ->when($request->filled('billingType'), fn ($q) =>
+                $q->where('billing_type', $request->input('billingType')) 
+            )
+            ->when($request->filled('towerId'), fn ($q) =>
+                $q->where('tower_id', $request->input('towerId'))
+            );
+
+        // Get Billing Data
+        $data = (clone $queryByPenalty)
+            ->select(
+                'id',
+                'period',
+                'billing_type',
+                'billing_fee',
+                'fine',
+                'total_amount',
+                'residence_id',
+                'tower_id',
+                'apartment_id',
+                'paid_date',
+                'status',
+                'billing_date',
+                'due_date',
+            )
+            ->with([
+                'tower:id,tower_name',
+                'residence:id,userId,apartmentTowerId,apartmentId,roomNo,apartmentType',
+                'residence.user:id,fullname',
+            ])
+            ->orderByDesc('id')
+            ->paginate(10);
+
+        $totalBillingWithPenalties = $data->total();
+        $totalBillingFee = (clone $queryByPenalty)->sum('total_amount');
+        $totalFine = (clone $queryByPenalty)->sum('fine');
+
+        // Get Mapping apartmentType name
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+
+        // Inject Mapping billing/residence
+        $data->getCollection()->transform(function ($billing) use ($apartmentTypeMap) {
+            if ($billing->residence) {
+                $apartmentTypeId = $billing->residence->apartmentType;
+                $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$apartmentTypeId])
+                    ? [
+                        'id' => $apartmentTypeId,
+                        'name' => $apartmentTypeMap[$apartmentTypeId],
+                    ]
+                    : null;
+            }
+            return $billing;
+        });
+
+        // Get Master Data Tower and UnitType
+        $tower_data = LookupCache::towerList($apartmentId, $role);
+        $apartmentTypeData = LookupCache::apartmentTypeList();
+
+        return Inertia::render('Report/PenaltiesReport', [
+            'filters'=> $request->only('search','period','towerId','unitType','billingType'),
+            'data' => $data,
             'BillingFee' => $totalBillingFee,
             'BillingWithPenalties' => $totalBillingWithPenalties,
             'totalFine' => $totalFine,
             'towerData' => $tower_data,
-            'apartmentType' => $apartmentTypeData
+            'apartmentType' => $apartmentTypeData,
         ]);
     }
 
@@ -259,12 +343,16 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+        $apartId = $user->apartment_id;
     
-        $userApartmentsQuery = UserApartmentOkgo::with(['user'])
+        $userApartmentsQuery = UserApartmentOkgo::select([
+            'id', 'userId', 'apartmentId', 'apartmentTowerId' ,
+            'roomNo', 'apartmentType', 'active'])
+        ->with(['user:id,fullname,email,phone'])
             ->where('active', 1);
     
         if ($role !== 'SUPER ADMIN') {
-            $userApartmentsQuery->where('apartmentId', $user->apartment_id);
+            $userApartmentsQuery->where('apartmentId', $apartId);
         }
 
         if ($request->has('search')) {
@@ -276,15 +364,51 @@ class ReportController extends Controller
         }
     
         $userApartments = $userApartmentsQuery->orderByDesc('id')->paginate(10);
-    
-        $apartmentTowers = ApartmentTower::get()->keyBy('id');
-        $apartments = Apartment::get()->keyBy('id');
-    
-    
-        $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTowers, $apartments) {
-            $userApartment->apartmentTower = $apartmentTowers[$userApartment->apartmentTowerId] ?? null;
-            $userApartment->apartment = $apartments[$userApartment->apartmentId] ?? null;
-            return $userApartment;
+        
+        // Lookup reference data
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentTowers = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartments = LookupCache::apartmentMap($apartId, $role);
+
+        // Transform response
+        $userApartments->getCollection()->transform(function ($item) use ($apartmentTypeMap, $apartmentTowers, $apartments) {
+            // Inject apartmentTypeData
+            $apartmentTypeId = $item->apartmentType;
+            $item->apartmentTypeData = isset($apartmentTypeMap[$apartmentTypeId])
+                ? [
+                    'id' => $apartmentTypeId,
+                    'name' => $apartmentTypeMap[$apartmentTypeId],
+                ]
+                : null;
+
+            // Tower
+            if ($tower = $apartmentTowers[$item->apartmentTowerId] ?? null) {
+                $item->apartmentTower = [
+                    'id' => $tower->id,
+                    'tower_name' => $tower->tower_name,
+                ];
+            }
+
+            // Apartment
+            if ($apartment = $apartments[$item->apartmentId] ?? null) {
+                $item->apartment = [
+                    'id' => $apartment->id,
+                    'name' => $apartment->name,
+                ];
+            }
+
+            // User Okgo
+            if ($item->user) {
+                $item->user = [
+                    'id' => $item->user->id,
+                    'fullname' => $item->user->fullname,
+                    'email' => $item->user->email,
+                    'phone' => $item->user->phone,
+                    'type' => $item->user->type,
+                ];
+            }
+
+            return $item;
         });
     
         return Inertia::render('Report/OwnerReport', [
@@ -295,55 +419,33 @@ class ReportController extends Controller
 
     public function show(Request $request)
     {
-        // Retrieve the user_id from the request
-        $userId = $request->id;
-
-        // Fetch the owner name based on the user_id
-        $ownerName = UserApartmentOkgo::with('user')
-            ->where('id', $userId)
-            ->first()
-            ->user
-            ->fullname ?? null;
-
         $user = Auth::user();
         $role = $user->role;
         $apartemntId = $user->apartment_id;
 
-        $ownerApartId = UserApartmentOkgo::where('id', $userId)->value('apartmentId');
-        $towerQuery = ApartmentTower::query();
-        $apartmentType = ApartmentType::query();
+        // Retrieve the user_id from the request
+        $userId = $request->id;
 
-        $query = Billing::with([
-            'tower',                   // Relasi ke Tower
-            'residence.user',          // Relasi ke Residence & User
-             // Relasi ke ApartmentTypeData
+        // Fetch the owner name based on the user_id
+        $ownerRecord = UserApartmentOkgo::select('id','userId', 'apartmentId','apartmentTowerId','roomNo','active','apartmentType')
+        ->with('user:id,fullname')
+            ->find($userId);
+
+        $ownerName = $ownerRecord?->user?->fullname ?? null;
+        $ownerApartId = $ownerRecord?->apartmentId;
+
+        $query = Billing::select('id','billing_type','billing_fee',
+                                'billing_date','period','paid_date','fine',
+                                'total_amount','due_date','status','apartment_id',
+                                'residence_id','tower_id'
+            )->with([
+                'tower:id,tower_name', 
+                'residence:id,userId,apartmentId,apartmentTowerId,roomNo,apartmentType,active',                  // Relation to Tower
+                'residence.user:id,fullname',          // Relation to Residence & User
         ])->where('residence_id', $userId)
         ->orderBy('billing_date', 'desc');
-          
-        // $query = DB::table('billings')
-        //         ->where('residence_id', $userId)
-        //         ->orderBy('billing_date', 'desc');
-
-        // Parse from_date and until_date from request
-        // $fromDate = $request->from_date ? date('Y-m-d', strtotime($request->from_date)) : null;
-        // $untilDate = $request->until_date ? date('Y-m-d', strtotime($request->until_date)) : null;
-
-        // Apply date range filter if provided
-        // if ($fromDate && $untilDate) {
-        //     $query->whereBetween('billing_date', [$fromDate, $untilDate]);
-        // } elseif ($fromDate) {
-        //     $query->whereDate('billing_date', '>=', $fromDate);
-        // } elseif ($untilDate) {
-        //     $query->whereDate('billing_date', '<=', $untilDate);
-        // } else {
-        //     // If neither from_date nor until_date provided, use default range
-        //     $defaultFromDate = now()->subMonths(12)->toDateString();
-        //     $query->whereDate('billing_date', '>=', $defaultFromDate)
-        //         ->whereDate('billing_date', '<=', now()->endOfDay());
-        // }
-
+        
         // Apply status filter if provided
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -352,27 +454,34 @@ class ReportController extends Controller
             $query->where('billing_type', $request->billingType);
         }
 
-        if($request->filled('period')) {
+        if ($request->filled('period')) {
             $period = $request->period;
-            $query->where('period', 'like', "%$period%");
+            $query->where('period', $period);
         }
-
+        
         // Fetch data with pagination
         $data = $query->paginate(10);
 
-        $tower_data = $towerQuery->get()->map( function ($tower) {
-            return [
-                'label' => $tower->tower_name,
-                'value' => $tower->id
-            ];
-            })->values()->toArray();
-        
-        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
-            return [
-                'label' => $apartmentType->name,
-                'value' => $apartmentType->id
-            ];
-        })->values()->toArray();
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $tower_data = LookupCache::towerList($ownerApartId, $role);
+        $apartmentTypeData = LookupCache::apartmentTypeList();
+
+        // Inject apartmentTypeData to data
+        $data->getCollection()->transform(function ($billing) use ($apartmentTypeMap){
+
+            if ($billing->residence) {
+                $res = $billing->residence;
+
+                $aptTypeId = $res->apartmentType;
+                $res->apartmentTypeData = isset($apartmentTypeMap[$aptTypeId])
+                ?   [
+                        'id' => $aptTypeId,
+                        'name' => $apartmentTypeMap[$aptTypeId],
+                    ] 
+                : null;
+            }
+            return $billing;
+        });
 
 
         if ($role === 'SUPER ADMIN') {
@@ -380,7 +489,6 @@ class ReportController extends Controller
             return Inertia::render('Report/OwnerBillingHistory', [
                 "data" => $data,
                 'filters' => $request->only('search', 'period', 'status', 'billingType'),
-                // 'filters' => $request->only('status', 'from_date', 'until_date'),
                 'ownerId' => $userId,
                 'ownerName' => $ownerName,
                 'towerData' => $tower_data,
@@ -392,7 +500,6 @@ class ReportController extends Controller
                 return Inertia::render('Report/OwnerBillingHistory', [
                     "data" => $data,
                     'filters' => $request->only('search', 'period', 'status', 'billingType'),
-                    // 'filters' => $request->only('status', 'from_date', 'until_date'),
                     'ownerId' => $userId,
                     'ownerName' => $ownerName,
                     'towerData' => $tower_data,

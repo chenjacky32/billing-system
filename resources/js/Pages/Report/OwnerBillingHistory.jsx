@@ -208,12 +208,6 @@ export default function Billing({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                // handleSearch={(event) =>
-                                //     handleInputChange(
-                                //         event.target.value,
-                                //         "search"
-                                //     )
-                                // }
                                 showInput={false}
                                 title={`${Name}'s Billing History`}
                                 description={`Informasi Data Billing ${Name}`}
@@ -224,70 +218,6 @@ export default function Billing({
                                 showSearch={false}
                                 showAddButton={false}
                             />
-                            {/* <div className="mt-5">
-                                <div className="flex flex-wrap ">
-                                    <div className="w-[21rem] mr-4 tablet:w-full">
-                                        <InputLabel>
-                                            Status Pembyaran
-                                        </InputLabel>
-                                        <Select
-                                            id="status"
-                                            color="blue"
-                                            value={status}
-                                            onChange={(e) => setStatus(e)}
-                                        >
-                                            <Option value="">
-                                                Status Pembayaran
-                                            </Option>
-                                            <Option value="Pending">
-                                                Pending
-                                            </Option>
-                                            <Option value="Success">
-                                                Success
-                                            </Option>
-                                            <Option value="Cancel">
-                                                Cancel
-                                            </Option>
-                                        </Select>
-                                    </div>
-                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Dari Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="from_date"
-                                            onChange={(e) =>
-                                                setFromDate(e.target.value)
-                                            } // Directly set the value
-                                            className=""
-                                            type="date"
-                                        />
-                                    </div>
-                                    <div className="mr-4 w-52 tablet:w-full tablet:mt-5">
-                                        <InputLabel>Sampai Tanggal</InputLabel>
-                                        <CustomInput
-                                            id="until_date"
-                                            onChange={(e) =>
-                                                setUntilDate(e.target.value)
-                                            } // Directly set the value
-                                            className=""
-                                            type="date"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="tablet:mr-4">
-                                    <div className="mt-2 text-sm font-extrabold text-red-500 mobile:text-xs">
-                                        **Harap isi semua filter di atas untuk
-                                        melakukan filter data
-                                    </div>
-                                    <Button
-                                        className="w-[49rem] mt-4 tablet:w-full tablet:mr-96 bg-white border-primary text-primary"
-                                        variant="outlined"
-                                        onClick={applyFilters}
-                                    >
-                                        Filter
-                                    </Button>
-                                </div>
-                            </div>
-                             */}
                             <div className="mt-5">
                                 <div className="flex flex-row flex-wrap items-center justify-start w-full">
                                     <div className="w-full mr-4 tablet:w-full tablet:mt-5">
@@ -407,6 +337,7 @@ export default function Billing({
                                                             due_date,
                                                             fine,
                                                             paid_date,
+                                                            total_amount,
                                                         },
                                                         index
                                                     ) => {
@@ -454,11 +385,10 @@ export default function Billing({
                                                                             variant="small"
                                                                             className="font-normal capitalize"
                                                                         >
-                                                                            {
-                                                                                residence
-                                                                                    .user
-                                                                                    .fullname
-                                                                            }
+                                                                            {residence
+                                                                                .user
+                                                                                .fullname ??
+                                                                                "-"}
                                                                         </Typography>
                                                                     </div>
                                                                 </td>
@@ -494,11 +424,10 @@ export default function Billing({
                                                                             variant="small"
                                                                             className="font-normal capitalize"
                                                                         >
-                                                                            {
-                                                                                residence
-                                                                                    .apartmentTypeData
-                                                                                    .name
-                                                                            }
+                                                                            {residence
+                                                                                .apartmentTypeData
+                                                                                .name ??
+                                                                                "-"}
                                                                         </Typography>
                                                                     </div>
                                                                 </td>
@@ -641,8 +570,7 @@ export default function Billing({
                                                                                         "IDR",
                                                                                 }
                                                                             ).format(
-                                                                                billing_fee +
-                                                                                    fine
+                                                                                total_amount
                                                                             )}
                                                                         </Typography>
                                                                     </div>

@@ -106,11 +106,11 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Account Pending List
+                    Account Management
                 </h2>
             }
         >
-            <Head title=" Account Pending List" />
+            <Head title=" Account Managment" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -125,7 +125,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                             href={route("accountActivation.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Account List
+                            Account Management
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -136,10 +136,10 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                 handleSearch={(e) =>
                                     handleInputChange(e.target.value, "search")
                                 }
-                                title={"Account Pending List"}
-                                description={"Informasi Data Akun Pending List"}
+                                title={"Account Managment"}
+                                description={"Informasi Data Akun User"}
                                 showAddButton={false}
-                                label="Cari Account Pending List"
+                                label="Cari Nama Akun"
                                 hasFilter={true}
                             />
                             <div className="mt-5">
@@ -201,6 +201,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                     userId,
                                                     user,
                                                     apartmentTower,
+                                                    apartment,
                                                     identityImage,
                                                     roomNo,
                                                     apartType,
@@ -278,10 +279,8 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                     variant="small"
                                                                     className="font-normal capitalize"
                                                                 >
-                                                                    {apartmentTower
-                                                                        ? apartmentTower
-                                                                              .apartment
-                                                                              .name
+                                                                    {apartment
+                                                                        ? apartment.name
                                                                         : "No Apartment"}
                                                                 </Typography>
                                                             </div>

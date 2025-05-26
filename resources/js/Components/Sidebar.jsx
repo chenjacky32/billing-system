@@ -128,7 +128,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Account Pending
+                                    Account Management
                                 </ListItem>
                             </Link>
                             <Link href={route("unitOwnerApartment.index")}>

@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Helpers\LookupCache;
 
 class BillingController extends Controller
 {
@@ -33,71 +34,85 @@ class BillingController extends Controller
         $userApartId = $user->apartment_id;
         $ApartmentId = Apartment::find($userApartId);
 
-        $towerQuery = ApartmentTower::query();
-        $apartmentType =  ApartmentType::query();
+        $tower_data = LookupCache::towerList($userApartId, $role);
+        $apartmentTypeData = LookupCache::apartmentTypeList();
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
 
-        if($role !== 'SUPER ADMIN'){
-            $towerQuery->where('apartment_id', $user->apartment_id);
+        $query = Billing::select('id','billing_type','billing_fee','billing_date','period',
+            'paid_date','fine','total_amount','due_date','status','apartment_id','residence_id',
+            'tower_id','created_by')
+                ->with([
+                    'createdBy:id,name,role,apartment_id',      
+                    'tower:id,tower_name,apartment_id,total_room,created_by,created_at,updated_at',
+                    'residence:id,userId,apartmentTowerId,apartmentId,roomNo,apartmentType',
+                    'residence.user:id,fullname'
+                ]);
+
+        if ($role !== 'SUPER ADMIN') {
+            $query->where('apartment_id', $userApartId);
         }
 
-        $tower_data = $towerQuery->get()->map( function ($tower) {
-            return [
-                'label' => $tower->tower_name,
-                'value' => $tower->id
-            ];
-            })->values()->toArray();
-        
-        $apartmentTypeData = $apartmentType->get()->map(function ($apartmentType) {
-            return [
-                'label' => $apartmentType->name,
-                'value' => $apartmentType->id
-            ];
-        })->values()->toArray();
+        // Filters
+        $query->when($request->has('search'), function ($query) use ($request) {
+            $searchTerm = $request->input('search');
+            $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
+                    $q->where('fullname', 'like', "%$searchTerm%");
+                })
+                ->orWhere('roomNo', 'like', "%$searchTerm%")
+                ->pluck('id')
+                ->toArray();
+
+            $query->whereIn('residence_id', $matchingResidenceIds);
+        });
+
+        $query->when($request->filled('status'), fn ($q) =>
+            $q->where('status', $request->status)
+        );
+
+        $query->when($request->filled('period'), fn ($q) =>
+            $q->where('period', $request->period)    
+        );
+
+        $query->when($request->filled('billingType'), fn ($q) =>
+            $q->where('billing_type', $request->billingType)
+        );
+
+        $query->when($request->filled('towerId'), fn ($q) =>
+            $q->where('tower_id', $request->towerId)
+        );
+
+        $query->when($request->filled('unitType'), function ($q) use ($request) {
+            $unitType = $request->unitType;
+            $residenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
+                ->pluck('id')
+                ->toArray();
+            $q->whereIn('residence_id', $residenceIds);
+        });
+
+        $data = $query->orderByDesc('id')->paginate(10);
+
+        $data->getCollection()->transform(function ($billing) use ($apartmentTypeMap) {
+            if ($billing->residence) {
+                $res = $billing->residence;
+
+                $aptTypeId = $res->apartmentType;
+                $res->apartmentTypeData = isset($apartmentTypeMap[$aptTypeId])
+                    ? [
+                        'id' => $aptTypeId,
+                        'name' => $apartmentTypeMap[$aptTypeId]
+                    ]
+                    : null;
+            }
+
+            return $billing;
+        });
 
         return Inertia::render('Billing/Billing', [
-            'apartmentId'=> $ApartmentId,
-            'towerData'=> $tower_data,
-            'apartmentType'=> $apartmentTypeData,
-            'filters' => $request->only('search', 'status', 'period', 'billingType','towerId', 'unitType'),  // Include 'status' in the filters
-            'data' => Billing::with(['owner', 'createdBy','tower', 'residence.user'])
-                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
-                    return $query->where('apartment_id', $user->apartment_id);
-                })
-                ->when($request->has('search'), function ($query) use ($request) {
-                    $searchTerm = $request->input('search');
-                
-                    $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
-                            $q->where('fullname', 'like', "%$searchTerm%");
-                        })
-                        ->orWhere('roomNo', 'like', "%$searchTerm%")
-                        ->pluck('id') // Ambil hanya kolom `id`
-                        ->toArray();
-                
-                    $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->when($request->filled('status'), function ($query) use ($request) {  // Check if 'status' is not only present but also filled
-                    $status = $request->input('status');
-                    $query->where('status', $status);
-                })
-                ->when($request->filled('period'), function($query) use ($request){
-                    $period = $request->input('period');
-                    $query->where('period','like',"%$period%");
-                })
-                ->when($request->filled('billingType'), function($query) use ($request){
-                        $billingType = $request->input('billingType');
-                        $query->where('billing_type','like',"%$billingType%");
-                })->when($request->filled('towerId'), function($query) use ($request){
-                        $tower = $request->input('towerId');
-                        $query->where('tower_id','like',"%$tower%");
-                })->when($request->filled('unitType'), function($query) use ($request){
-                        $unitType = $request->input('unitType');
-                        $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
-                            ->pluck('id') // Ambil hanya kolom `id`
-                            ->toArray();
-                        $query->whereIn('residence_id', $matchingResidenceIds);
-                })
-                ->orderByDesc('id')
-                ->paginate(10),
+            'apartmentId' => $ApartmentId,
+            'towerData' => $tower_data,
+            'apartmentType' => $apartmentTypeData,
+            'filters' => $request->only('search', 'status', 'period', 'billingType', 'towerId', 'unitType'),
+            'data' => $data,
         ]);
     }
 
@@ -114,14 +129,14 @@ class BillingController extends Controller
         ->where('category_name','AIR')
         ->first();
 
-        if($WaterPrice){
+        if ($WaterPrice) {
             $WaterPriceData = $WaterPrice->unit_price ?? null;
             $waterPriceId = $WaterPrice->id ?? null;
             $WaterPriceMinimumCharge = $WaterPrice->minimum_charge ?? null;
-        } else{
+        } else {
             $WaterPriceData = 'Price Water not found';
             return back()->with('error', "Harga Air Tidak Ditemukan di Master Billing Category, Silahkan Input dulu di Master Billing Category, dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR' atau jika sebelumnya
-            sudah diinput dan sudah ada di Master Billing Category, silahkan lakukan perubahan di Master Billing Category dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR'.
+                sudah diinput dan sudah ada di Master Billing Category, silahkan lakukan perubahan di Master Billing Category dengan Tipe Billing 'Air' dan Nama Kategori Tagihan 'AIR'.
             ");
         }
 
@@ -144,24 +159,6 @@ class BillingController extends Controller
             $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
             $billingFineRules->where('apartment_id', $apartmentId);
         }
-
-        // $owner_data = $ownerQuery->pluck('owner_name', 'id')
-        //     ->map(function ($ownerName, $ownerId) {
-        //         return ['label' => $ownerName, 'value' => $ownerId];
-        //     })
-        //     ->prepend(['label' => 'Pilih Owner', 'value' => ''])
-        //     ->values()
-        //     ->toArray();
-
-        // $room_number = $ownerQuery->get()->map( function ($owner) {
-        //     return [
-        //         'label' => $owner->room_no,
-        //         'value' => $owner->id,
-        //     ];
-        // })->prepend([
-        //     'label' => 'Pilih Room Number',
-        //     'value' => '',
-        // ])->values()->toArray();
 
         $room_number = $userApartmentsQuery->get()->map(function ($userApartment) {
             return [
@@ -200,7 +197,7 @@ class BillingController extends Controller
         ->prepend(['billing_type' => 'Pilih Kategori', 'categories' => []]) // Elemen default
         ->toArray();
 
-       $tower_data = $towerQuery->get()->map( function ($tower) {
+        $tower_data = $towerQuery->get()->map( function ($tower) {
         return [
             'label' => $tower->tower_name,
             'value' => $tower->id
@@ -224,18 +221,7 @@ class BillingController extends Controller
         ->values()
         ->toArray();
 
-        // $userOkgo = $userApartmentsQuery->get()->map(function ($userApartment) {
-        //     return [
-        //         'label' => $userApartment->user->fullname,
-        //         'value' => $userApartment->id
-        //     ];
-        // })->prepend([
-        //     'label' => 'Pilih Residence',
-        //     'value' => '',
-        // ])->values()->toArray();
-        
-
-        if($role === "SUPER ADMIN") {
+        if ($role === "SUPER ADMIN") {
             return Inertia::render("Billing/AddBilling", [
                 // 'ownerData' => $owner_data,
                 // 'residenceData'=>$userOkgo,
@@ -256,8 +242,8 @@ class BillingController extends Controller
                 'waterPriceId' => $waterPriceId,
                 'apartmentId' => $apartmentId,
                 'billingDueDays'=>$getBillingTypeDueDays,
-        ]);
-            }
+            ]);
+        }
     }
 
     public function store(Request $request)

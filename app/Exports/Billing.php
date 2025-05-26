@@ -19,7 +19,7 @@ class Billing implements FromView, WithColumnFormatting
         $this->data = collect($data)->map(function ($item) {
             $item->fine = (float) $item->fine;
             $item->billing_fee = (float) $item->billing_fee;
-            $item->total_billing = (float) ($item->billing_fee + $item->fine);
+            $item->total_billing = (float) $item->total_amount;
             return $item;
         });
     }

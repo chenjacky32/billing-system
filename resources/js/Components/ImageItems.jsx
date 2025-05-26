@@ -61,9 +61,9 @@ const ImageItems = ({
                         className="object-cover h-[50px] rounded-md"
                     />
                 ) : (
-                    <span className="h-full text-sm font-normal text-gray-700">
+                    <div className="h-[50px] flex items-center justify-center rounded-md text-sm text-gray-700">
                         {errorMesssageImg}
-                    </span>
+                    </div>
                 )}
             </>
         ),

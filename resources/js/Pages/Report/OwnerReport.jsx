@@ -242,9 +242,8 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
-                                                                        {
-                                                                            apartmentTypeData.name
-                                                                        }
+                                                                        {apartmentTypeData?.name ??
+                                                                            "-"}
                                                                     </Typography>
                                                                 </div>
                                                             </td>

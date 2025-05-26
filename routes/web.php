@@ -120,9 +120,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing-fine-rules/{id}/update', [BillingFineRulesController::class, 'update'])->name('billingFineRules.update');
 
     // !Account Activation
-    Route::get('/account-pending', [AccountActivationController::class, 'index'])->name('accountActivation.index');
-    Route::get('/account-pending/{id}/edit', [AccountActivationController::class, 'edit'])->name('accountActivation.edit');
-    Route::post('/account-pending/{id}/update', [AccountActivationController::class, 'update'])->name('accountActivation.update');
+    Route::get('/account-management', [AccountActivationController::class, 'index'])->name('accountActivation.index');
+    Route::get('/account-management/{id}/edit', [AccountActivationController::class, 'edit'])->name('accountActivation.edit');
+    Route::post('/account-management/{id}/update', [AccountActivationController::class, 'update'])->name('accountActivation.update');
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');

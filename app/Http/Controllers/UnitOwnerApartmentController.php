@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use App\Helpers\LookupCache;
+
 
 class UnitOwnerApartmentController extends Controller
 {
@@ -16,27 +18,9 @@ class UnitOwnerApartmentController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
-
-        $userApartmentsQuery = UserApartmentOkgo::with(['user'])->where('active', 1);
-
         $apartId = $user->apartment_id;
+        
         $apar = Apartment::find($apartId);
-
-        $apartmentTower = ApartmentTower::Query();
-        if($role !== 'SUPER ADMIN'){
-            $apartmentTowerIds = ApartmentTower::where('apartment_id', $apartId)
-            ->pluck('id')
-            ->toArray();
-
-            $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
-        }
-
-        $apartmentTower = $apartmentTower->get()->map(function ($apartmentTower) {
-            return [
-                'label' => $apartmentTower->tower_name,
-                'value' => $apartmentTower->id
-            ];
-        })->prepend(['label' => 'Pilih Tower', 'value' => ''])->values()->toArray();
 
         if ($apar) {
             $apartName = $apar->name; 
@@ -44,32 +28,66 @@ class UnitOwnerApartmentController extends Controller
             $apartName = 'Apartment not found';
         }
 
-        $userApartments = $userApartmentsQuery
-        ->when($request->has('search'), function ($query) use ($request) {
+        $query = UserApartmentOkgo::select(
+                'id','userId','apartmentTowerId','apartmentId',
+                'roomNo','active','apartmentType',
+                'ownership'
+            )->with(['user:id,fullname,email,phone'])
+            ->where('active', 1);
+
+        if ($role !== 'SUPER ADMIN') {
+            $query->where('apartmentId', $apartId);
+        }
+
+        if ($request->has('search')) {
             $searchTerm = $request->input('search');
-            $query->whereHas('user', function ($subQuery) use ($searchTerm) {
-                $subQuery->where('fullname', 'like', "%$searchTerm%")
-                    ->orWhere('email', 'like', "%$searchTerm%")
-                    ->orWhere('roomNo', 'like', "%$searchTerm%");
+            $query->where(function ($query) use ($searchTerm) {
+                $query->whereHas('user', fn ($q) => $q->where('fullname', 'like', "%$searchTerm%")
+                                                    ->orWhere('email', 'like', "%$searchTerm%"));
             });
-        })
-        ->orderByDesc('id')
-        ->paginate(10);
+        }
 
-        $apartmentTowers = ApartmentTower::with('apartment')->get()->keyBy('id');
+        $userApartments = $query->orderByDesc('id')->paginate(10);
+        
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentList = LookupCache::apartmentMap($apartId, $role);
+        $apartmentTowerList = LookupCache::towerList($apartId, $role);
+        $apartmentTowerMap = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartmentMap = LookupCache::apartmentMap($apartId, $role);
 
-        $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTowers) {
-            if (isset($apartmentTowers[$userApartment->apartmentTowerId])) {
-                $userApartment->apartmentTower = $apartmentTowers[$userApartment->apartmentTowerId];
-            } else {
-                $userApartment->apartmentTower = null; 
-            }
-            return $userApartment;
-        });
+        $userApartments->getCollection()->transform(function ($item) use ($apartmentTypeMap, $apartmentTowerMap, $apartmentMap) {
+            $item->apartType = [
+                'id' => $item->apartmentType,
+                'name' => $apartmentTypeMap[$item->apartmentType] ?? 'Unknown'
+            ];
 
-        $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
-            return ['label' => $apartmentName, 'value' => $apartementId];
-        })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
+            $tower = $apartmentTowerMap[$item->apartmentTowerId] ?? null;
+            $apart = $apartmentMap[$item->apartmentId] ?? null;
+
+            $item->apartmentTower = $tower ? [
+                'id' => $tower->id,
+                'tower_name' => $tower->tower_name,
+                'apartment' => $apart ? [
+                    'id' => $apart->id,
+                    'name' => $apart->name
+                    ] : null,
+                ] : null;
+
+        return $item;
+    });
+
+        $apartment = collect($apartmentList)->map(fn($apart) => [
+            'label' => $apart->name,
+            'value' => $apart->id
+        ])
+            ->prepend(['label' => 'Pilih Apartemen', 'value' => ''])
+            ->values()
+            ->toArray();
+        
+        $apartmentTower = collect($apartmentTowerList)
+            ->prepend(['label' => 'Pilih Tower', 'value' => ''])
+            ->values()
+            ->toArray();
 
         return Inertia::render('UnitOwnerApartment/Index', [
             'userApartments' => $userApartments,
@@ -91,7 +109,7 @@ class UnitOwnerApartmentController extends Controller
 
         $userApartment = UserApartmentOkgo::find($id);
 
-        if(!$userApartment) {
+        if (!$userApartment) {
             return Redirect()->back()->with('error', 'User apartment not found.');
         }
 

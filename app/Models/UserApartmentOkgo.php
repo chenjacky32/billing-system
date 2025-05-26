@@ -22,18 +22,16 @@ class UserApartmentOkgo extends Model
         'apartmentType'
     ];
 
-    protected $appends = ['apartmentTypeData'];
+    // protected $appends = ['apartmentTypeData'];
 
     public function user()
     {
         return $this->belongsTo(UserOkgo::class, 'userId', 'id');
     }
 
-    public function getApartmentTypeDataAttribute()
+    public function apartmentType()
     {
-        return DB::table('apartment_types')
-            ->where('id', $this->apartmentType)
-            ->first();
+        return $this->belongsTo(ApartmentType::class, 'apartmentType', 'id');
     }
 
     public function apartment()

@@ -11,61 +11,58 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use App\Helpers\LookupCache;
 
 class AccountActivationController extends Controller
 {
-
     public function index(Request $request)
     {
         $user = Auth::user();
         $role = $user->role;
+        $apartId = $user->apartment_id;
 
-        $userApartmentsQuery = UserApartmentOkgo::with(['user']);
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentTowerMap = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartmentMap = LookupCache::apartmentMap($apartId, $role);
+
+        $query = UserApartmentOkgo::select(
+                    'id', 'userId', 'apartmentTowerId', 'apartmentId', 
+                    'roomNo', 'identityImage', 'userImage', 'active', 
+                    'apartmentType', 'ownership'
+                )->with(['user:id,fullname,email,phone']);
 
         if ($role !== 'SUPER ADMIN') {
-            $apartmentTowerIds = ApartmentTower::where('apartment_id', $user->apartment_id)
-                ->pluck('id')
-                ->toArray();
-
-            $userApartmentsQuery->whereIn('apartmentTowerId', $apartmentTowerIds);
+            $query->where('apartmentId', $apartId);
         }
 
-        $userApartments = $userApartmentsQuery
-            ->when($request->has('search'), function ($query) use ($request) {
-                $searchTerm = $request->input('search');
-                $query->whereHas('user', function ($subQuery) use ($searchTerm) {
-                    $subQuery->where('fullname', 'like', "%$searchTerm%")
-                        ->orWhere('email', 'like', "%$searchTerm%");
-                });
-            })
-            ->when($request->filled('status'), function ($query) use ($request) {
-                $status = $request->input('status');
-                $query->where('active', $status);
-            })
-            ->orderByDesc('id')
-            ->paginate(10);
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($query) use ($searchTerm) {
+                $query->whereHas('user', fn ($q) => $q->where('fullname', 'like', "%$searchTerm%")
+                                                    ->orWhere('email', 'like', "%$searchTerm%"));
+            });
+        }
 
+        if ($request->filled('status')) {
+            $query->where('active', $request->status);
+        }
 
-        $apartmentTypes = ApartmentType::pluck('name', 'id')->toArray();
+        $userApartments = $query->orderByDesc('id')->paginate(10);
 
-        $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTypes) {
-            $userApartment->apartType = [
-                'id' =>$userApartment->apartmentType,
-                'name' => $apartmentTypes[$userApartment->apartmentType] ?? 'Unknown',
+        $userApartments->getCollection()->transform(function ($item) use ($apartmentTypeMap, $apartmentTowerMap, $apartmentMap) {
+            // Inject apartType
+            $item->apartType = [
+                'id' => $item->apartmentType,
+                'name' => $apartmentTypeMap[$item->apartmentType] ?? 'Unknown'
             ];
-            return $userApartment;
-        });
 
+            // Inject apartmentTower (include apartment if already eager loaded)
+            $item->apartmentTower = $apartmentTowerMap[$item->apartmentTowerId] ?? null;
 
-        $apartmentTowers = ApartmentTower::with('apartment')->get()->keyBy('id');
-    
-        $userApartments->getCollection()->transform(function ($userApartment) use ($apartmentTowers) {
-            if (isset($apartmentTowers[$userApartment->apartmentTowerId])) {
-                $userApartment->apartmentTower = $apartmentTowers[$userApartment->apartmentTowerId];
-            } else {
-                $userApartment->apartmentTower = null; 
-            }
-            return $userApartment;
+            // Inject apartment
+            $item->apartment = $apartmentMap[$item->apartmentId] ?? null;
+
+            return $item;
         });
 
         return Inertia::render('PendingAccount/Index', [
@@ -80,32 +77,39 @@ class AccountActivationController extends Controller
         $role = $user->role;
         $apartId = $user->apartment_id;
 
-        $userApartment = UserApartmentOkgo::with(['user'])->find($request->id);
-        $apartTower = ApartmentTower::query();
+        $userApartment = UserApartmentOkgo::with(['user:id,fullname,email,phone'])->find($request->id);
 
         if (!$userApartment) {
             return Redirect::route('pending-account.index')->with('error', 'User apartment not found.');
         }
 
-        $apartmentTower = ApartmentTower::with('apartment')->find($userApartment->apartmentTowerId);
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentList = LookupCache::apartmentMap($apartId, $role);
+        $apartmentTowerList = LookupCache::towerList($apartId, $role);
+        $apartmentTowerMap = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartmentMap = LookupCache::apartmentMap($apartId, $role);
+
+        $userApartment->apartType = isset($apartmentTypeMap[$userApartment->apartmentType]) 
+            ? [
+                'id' => $userApartment->apartmentType,
+                'name' => $apartmentTypeMap[$userApartment->apartmentType],
+            ] : null;
         
-        $apartmentType = ApartmentType::find($userApartment->apartmentType);
-        $userApartment->apartType = $apartmentType ? [
-            'id' => $apartmentType->id,
-            'name' => $apartmentType->name,
-        ] : null;
+        $apartmentTower = $apartmentTowerMap[$userApartment->apartmentTowerId] ?? null;
+        
+        if ($apartmentTower && isset($apartmentMap[$userApartment->apartmentId])){
+            $apartmentTower->apartment = $apartmentMap[$userApartment->apartmentId];
+        }
 
-        $apartment = Apartment::pluck('name', 'id')->map(function ($apartmentName, $apartementId) {
-            return ['label' => $apartmentName, 'value' => $apartementId];
-        })->prepend(['label' => 'Pilih Apartemen', 'value' => ''])->values()->toArray();
+        $apartment = collect($apartmentList)->map(fn($apart) => ['label' => $apart->name, 'value' => $apart->id])
+            ->prepend(['label'=> 'Pilih Apartemen', 'value' => ''])
+            ->values()
+            ->toArray();
 
-        $apartTowerData = $apartTower->get()->map(function ($apartmentTower) {
-            return [
-                'label' => $apartmentTower->tower_name,
-                'value' => $apartmentTower->id
-            ];
-        })->prepend(['label' => 'Pilih Tower', 'value' => ''])->values()->toArray();
-
+        $apartTowerData = collect($apartmentTowerList)
+            ->prepend(['label' => 'Pilih Tower', 'value' => ''])
+            ->values()
+            ->toArray();
 
         return Inertia::render('PendingAccount/Edit', [
             'userApartment' => $userApartment,
@@ -129,6 +133,6 @@ class AccountActivationController extends Controller
         $userApartment->apartmentTowerId = $validatedData['apartmentTowerId'];
         $userApartment->save();
 
-        return redirect('/account-pending')->with('success', 'Account has been activated successfully.');
+        return redirect('/account-management')->with('success', 'Account status updated successfully.');
     }
 }

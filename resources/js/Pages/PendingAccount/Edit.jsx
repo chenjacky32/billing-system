@@ -82,7 +82,7 @@ const EditPendingAccount = ({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/account-pending/${dataID}/update`);
+        post(`/account-management/${dataID}/update`);
     };
 
     return (
@@ -109,7 +109,7 @@ const EditPendingAccount = ({
                             href={route("accountActivation.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Account List
+                            Account Management
                         </Link>
                         <Link
                             href={route("accountActivation.edit", {
