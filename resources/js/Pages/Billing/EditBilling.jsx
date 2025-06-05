@@ -1,25 +1,33 @@
-import CustomInput from "@/Components/CustomInput";
-import InputSelect from "@/Components/InputSelect";
 import PageHeader from "@/Components/PageHeader";
-import InputUpload from "@/Components/InputUpload";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { TrashIcon } from "@heroicons/react/24/solid";
-import { Head, Link, useForm, usePage } from "@inertiajs/react";
-import { TypeBilling } from "@/utils/constant";
+import { Head, Link } from "@inertiajs/react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-    Breadcrumbs,
-    Button,
-    Card,
-    CardBody,
-    Option,
-    Select,
-    Typography,
-} from "@material-tailwind/react";
-import { useEffect, useState } from "react";
-import CustomDatePicker from "@/Components/CustomDatePicker";
+import { Breadcrumbs, Button, Card, CardBody } from "@material-tailwind/react";
+import { useState } from "react";
+import { getOptionsForType, formattedDate } from "@/utils/helper";
 import dayjs from "dayjs";
+import useBillingForm from "@/Hooks/Billing/useBillingForm";
+import useBillingState from "@/Hooks/Billing/useBillingState";
+import PeriodSection from "@/Components/Billing/PeriodSection";
+import BillingTypeSection from "@/Components/Billing/BillingTypeSection";
+import TowerSection from "@/Components/Billing/TowerSection";
+import RoomNumberSection from "@/Components/Billing/RoomNumberSection";
+import WaterCategorySection from "@/Components/Billing/WaterCategorySection";
+import ElectricCategorySection from "@/Components/Billing/ElectricCategorySection";
+import MeterReadingSection from "@/Components/Billing/MeterReadingSection";
+import PriceSection from "@/Components/Billing/PriceSection";
+import ImageUploadSection from "@/Components/Billing/ImageUploadSection";
+import MaintenanceTypeSection from "@/Components/Billing/MaintenanceTypeSection";
+import VehicleTypeSection from "@/Components/Billing/VehicleTypeSection";
+import BillingAmountSection from "@/Components/Billing/BillingAmountSection";
+import TotalAmountSection from "@/Components/Billing/TotalAmountSection";
+import DateSection from "@/Components/Billing/DateSection";
+import ActionButton from "@/Components/Billing/ActionButton";
+import StatusSection from "@/Components/Billing/StatusSection";
+import useBillingEffect from "@/Hooks/Billing/useBillingEffect";
+import { ApiService } from "@/service/ApiService";
+import { NetworkEndpoint } from "@/service/ApiEndpoint";
 
 export default function Edit({
     auth,
@@ -32,6 +40,7 @@ export default function Edit({
     WaterPriceMinimumCharge,
     waterPriceId,
     apartmentId,
+    billingDueDays,
 }) {
     const mappedRoomNumber = roomNumber.map((number) => ({
         ...number,
@@ -52,148 +61,120 @@ export default function Edit({
         (item) => item.value == billingData?.residence_id
     );
 
-    const [tower, setTower] = useState(findTower || { value: "" });
-    const [roomOptions, setRoomOptions] = useState(initialRoomOptions);
-    const [room, setRoom] = useState(findRoomNumber || null);
+    const foundItem = roomNumber.find(
+        (items) => items.value === billingData.residence_id
+    );
 
-    // const [owner, setOwner] = useState(
-    //     ownerData.find((item) => item.value === billingData.owner_id)
-    // );
-    const [billingType, setBillingType] = useState(billingData.billing_type);
+    const {
+        room,
+        setRoom,
+        roomOptions,
+        setRoomOptions,
+        tower,
+        setTower,
+        billingType,
+        setBillingType,
+        waterTypeSelected,
+        setWaterTypeSelected,
+        electricTypeSelected,
+        setElectricTypeSelected,
+        maintenanceTypeSelected,
+        setMaintenanceTypeSelected,
+        vehicleTypeSelected,
+        setVehicleTypeSelected,
+        isLoading,
+        setIsLoading,
+        residence,
+        setResidence,
+    } = useBillingState(
+        towerData,
+        WaterPriceData,
+        WaterPriceMinimumCharge,
+        waterPriceId,
+        {
+            room: findRoomNumber || null,
+            roomOptions: initialRoomOptions,
+            tower: findTower || { value: "" },
+            billingType: billingData.billing_type,
+            waterTypeSelected:
+                billingData.billing_category_id?.toString() || "",
+            electricTypeSelected:
+                billingData.billing_category_id?.toString() || "",
+            maintenanceTypeSelected:
+                billingData.billing_category_id?.toString() || "",
+            vehicleTypeSelected:
+                billingData.billing_category_id?.toString() || "",
+            residence: {
+                name: foundItem.ownerName ?? "",
+                apartTypeName: foundItem.apartType?.name ?? "",
+                apartTypeId:
+                    foundItem.apartType?.id ?? foundItem.apartmentTypeId,
+            },
+        }
+    );
+
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        setError,
+        clearErrors,
+        flash,
+    } = useBillingForm(
+        {
+            maintenanceTypeSelected: maintenanceTypeSelected,
+            vehicleTypeSelected: vehicleTypeSelected,
+            waterTypeSelected: waterTypeSelected,
+            electricTypeSelected: electricTypeSelected,
+            roomNo: room,
+        },
+        apartmentId,
+        true,
+        billingData
+    );
+
     const [status, setStatus] = useState(billingData.status);
-    const [waterTypeSelected, setWaterTypeSelected] = useState(
-        billingData.billing_category_id?.toString() || ""
-    );
-    const [electricTypeSelected, setElectricTypeSelected] = useState(
-        billingData.billing_category_id?.toString() || ""
-    );
-    const [maintenanceTypeSelected, setMaintenanceTypeSelected] = useState(
-        billingData.billing_category_id?.toString() || ""
-    );
-    const [vehicleTypeSelected, setVehicleTypeSelected] = useState(
-        billingData.billing_category_id?.toString() || ""
-    );
-    const [residence, setResidence] = useState(() => {
-        const foundItem = roomNumber.find(
-            (items) => items.value === billingData.residence_id
-        );
-        return {
-            name: foundItem.ownerName ?? "",
-            apartTypeName: foundItem.apartType?.name ?? "",
-            apartTypeId: foundItem.apartType?.id ?? foundItem.apartmentTypeId,
-        };
-    });
-
-    const { flash } = usePage().props;
-    const [isLoading, setIsLoading] = useState(null);
-    const { data, setData, post, processing, errors } = useForm({
-        start_meter: billingData.start_meter || flash?.start_meter,
-        end_meter: billingData.end_meter,
-        unit_price: billingData.unit_price,
-        minimum_charge: billingData.minimum_charge,
-        billing_fee: billingData.billing_fee || flash?.billing_fee,
-        maintenance_type: maintenanceTypeSelected,
-        vehicle_type_parking: vehicleTypeSelected,
-        meter_reading: billingData.meter_reading || flash?.meter_reading,
-        billing_date: billingData.billing_date,
-        due_days: 10,
-        billing_type: billingData.billing_type,
-        water_type: waterTypeSelected,
-        electric_type: electricTypeSelected,
-        room_no: room ? room.value : "",
-        status: billingData.status,
-        period: billingData.period,
-        end_meter_image_path: billingData.end_meter_image_path || null,
-        apartment_id: apartmentId,
-        tower_id: billingData.tower_id,
-        paid_date: billingData.paid_date,
-        owner_id: billingData.residence_id,
-        fine: billingData.fine ?? 0,
-        total_amount:
-            billingData.fine + billingData.billing_fee || flash?.total_amount,
-        due_date: billingData.due_date,
-    });
-
     const role = auth.user.role;
 
-    //LOGGING INPUT REQUEST
-    // console.log("SUB PERIODE", data.period);
-    // console.log("NAMA TOWER", data.tower_id);
-    // console.log("State Tower", tower);
-    // console.log("TIPE BILLING", billingType);
-    // console.log("State Billing", data.billing_type);
-    // console.log("METERAN AWAL", data.start_meter);
-    // console.log("METERAN AKHIR", data.end_meter);
-    // console.log("TOTAL METERAN", data.meter_reading);
-    // console.log("HARGA", data.unit_price);
-    // console.log("MINIMUM CHARGE", data.minimum_charge);
-    // console.log("UPLOAD FOTO", data.end_meter_image_path);
-    // console.log("DENDA PERIODE SEBELUMNYA", data.fine);
-    // console.log("TOTAL TAGIHAN", data.total_amount);
-    // console.log("TANGGAL TAGIHAN", data.billing_date);
-    // console.log("TANGGAL JATUH TEMPO", data.due_date);
-    // console.log("STATUS", data.status);
+    // LOGGING INPUT REQUEST
+    console.log("SUB PERIODE", data.period);
+    console.log("NAMA TOWER", data.tower_id);
+    console.log("State Tower", tower);
+    console.log("TIPE BILLING", billingType);
+    console.log("State Billing", data.billing_type);
+    console.log("METERAN AWAL", data.start_meter);
+    console.log("METERAN AKHIR", data.end_meter);
+    console.log("TOTAL METERAN", data.meter_reading);
+    console.log("HARGA", data.unit_price);
+    console.log("MINIMUM CHARGE", data.minimum_charge);
+    console.log("UPLOAD FOTO", data.end_meter_image_path);
+    console.log("DENDA PERIODE SEBELUMNYA", data.fine);
+    console.log("TOTAL TAGIHAN", data.total_amount);
+    console.log("TANGGAL TAGIHAN", data.billing_date);
+    console.log("TANGGAL JATUH TEMPO", data.due_date);
+    console.log("TANGGAL PEMBAYARAN", data.paid_date);
+    console.log("LAMA JATUH TEMPO", data.due_days);
+    console.log("STATUS", data.status);
 
-    const getOptionsForType = (type) => {
-        const filteredCategory = billingCategory.find(
-            (category) => category.billing_type === type
-        );
-        return filteredCategory ? filteredCategory.categories : [];
-    };
+    const maintenanceOptions = getOptionsForType(
+        "Maintenance",
+        billingCategory
+    );
+    const vehicleOptions = getOptionsForType("Parkir", billingCategory);
+    const electricOptions = getOptionsForType("Listrik", billingCategory);
+    const waterOptions = getOptionsForType("Air", billingCategory);
 
-    const maintenanceOptions = getOptionsForType("Maintenance");
-    const vehicleOptions = getOptionsForType("Parkir");
-    const electricOptions = getOptionsForType("Listrik");
-    const waterOptions = getOptionsForType("Air");
-
-    function formattedDate(date) {
-        if (!date) return null;
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    }
-
-    useEffect(() => {
-        if (
-            flash?.billing_fee ||
-            flash?.meter_reading ||
-            flash?.fine ||
-            flash?.new_start_meter
-        ) {
-            setData((prevValues) => ({
-                ...prevValues,
-                billing_fee: flash.billing_fee,
-                meter_reading: flash.meter_reading,
-                fine: flash.fine,
-                total_amount: flash.total_amount,
-                start_meter: flash.new_start_meter || prevValues.start_meter,
-            }));
-        }
-    }, [
-        flash?.billing_fee,
-        flash?.meter_reading,
-        flash?.fine,
-        flash?.total_amount,
-        flash?.new_start_meter,
-    ]);
-
-    useEffect(() => {
-        if (flash.error) {
-            toast.error(flash.error);
-        }
-    }, [flash.error]);
-
-    useEffect(() => {
-        if (billingType === "Air" && WaterPriceData) {
-            setData((prevValues) => ({
-                ...prevValues,
-                unit_price: WaterPriceData ?? 0,
-                minimum_charge: WaterPriceMinimumCharge ?? 0,
-                water_type: waterPriceId ?? 0,
-            }));
-        }
-    }, [billingType, WaterPriceData, WaterPriceMinimumCharge]);
+    useBillingEffect({
+        billingType,
+        billingDueDays,
+        setData,
+        flash,
+        WaterPriceData,
+        WaterPriceMinimumCharge,
+        waterPriceId,
+    });
 
     const handleChangeBillingDate = (value) => {
         setData((prevValues) => {
@@ -279,20 +260,9 @@ export default function Edit({
             status: value,
         }));
     };
-    // const handleOwnerChangeChange = (value) => {
-    //     setOwner(value);
-    //     setData((prevValues) => ({
-    //         ...prevValues,
-    //         owner_id: value.value,
-    //     }));
-    // };
 
     const handleRoomChange = (value) => {
         setRoom(value);
-        // const findOwnerTower = towerData.find(
-        //     (item) => item.value == value.apartmentTowerId
-        // );
-        // setTower(findOwnerTower);
         setResidence((prevState) => ({
             ...prevState,
             name: value.ownerName,
@@ -323,7 +293,7 @@ export default function Edit({
             const matchedElectricOption = electricOptions.find(
                 (item) => item.label === value.apartType?.name
             );
-            // console.log("dd", matchedElectricOption);
+
             if (matchedElectricOption) {
                 setElectricTypeSelected(matchedElectricOption.value.toString());
 
@@ -402,41 +372,111 @@ export default function Edit({
     function handleSubmit(e) {
         e.preventDefault();
         setIsLoading("edit-billing");
-        // console.warn(data);
         post(`/billing/${dataID}/update`, {
             onFinish: () => setIsLoading(null),
         });
     }
 
-    // ! Handle get Previous Meter
-    function handleGetPreviousMeter(e) {
+    async function handleGetPreviousMeter(e) {
         e.preventDefault();
+        [
+            "billing_type",
+            "period",
+            "owner_id",
+            "room_no",
+            "tower_id",
+            "water_type",
+            "electric_type",
+        ].forEach((field) => setError(field, ""));
         setData((prevValues) => ({
             ...prevValues,
             start_meter: "",
         }));
+
         setIsLoading("get-previous-meter");
-        post(route("billing.previousMeter"), {
-            preserveScroll: true,
-            onFinish: () => setIsLoading(null),
-        });
+        try {
+            const response = await ApiService.post(
+                "",
+                route(NetworkEndpoint.BILLING_PREVIOUS_METER),
+                {
+                    billing_type: billingType,
+                    period: data.period,
+                    owner_id: data.owner_id,
+                    room_no: data.room_no,
+                    tower_id: data.tower_id,
+                    water_type: data.water_type,
+                    electric_type: data.electric_type,
+                }
+            );
+
+            setData((prevValues) => ({
+                ...prevValues,
+                start_meter: response.new_start_meter,
+            }));
+            toast.success(response.message);
+        } catch (error) {
+            if (error.response.status == 404) {
+                toast.error(
+                    error.response.data.message ||
+                        "Meteran periode sebelumnya tidak ditemukan. Silahkan Input Meteran Awal."
+                );
+            } else if (error.response.status == 422) {
+                if (error.response.data?.errors) {
+                    Object.entries(error.response.data.errors).forEach(
+                        ([field, messages]) => {
+                            setError(field, messages[0]);
+                        }
+                    );
+                }
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Ada kesalahan, silahkan coba lagi.");
+            }
+        } finally {
+            setIsLoading(null);
+        }
     }
 
     // ! Handle Count Billing
-    function handleCountBilling(e) {
+    async function handleCountBilling(e) {
         e.preventDefault();
-        const currentStartMeter = data.start_meter;
+        clearErrors();
         setIsLoading("count-billing");
-        post(route("billing.count"), {
-            preserveScroll: true,
-            onFinish: () => setIsLoading(null),
-            onSuccess: () => {
+        try {
+            const response = await ApiService.post(
+                "",
+                route(NetworkEndpoint.BILLING_COUNT_FEE_AND_FINE),
+                data
+            );
+
+            if (response.statusCode == 200) {
                 setData((prevValues) => ({
                     ...prevValues,
-                    start_meter: currentStartMeter,
+                    billing_fee: response.billing_fee,
+                    meter_reading: response.meter_reading,
+                    fine: response.fine,
+                    total_amount: response.total_amount,
                 }));
-            },
-        });
+                toast.success(response.message);
+            }
+        } catch (error) {
+            if (error.response.status == 404) {
+                toast.error(error.response.data.message);
+            } else if (error.response.status == 422) {
+                if (error.response.data?.errors) {
+                    Object.entries(error.response.data.errors).forEach(
+                        ([field, messages]) => {
+                            setError(field, messages[0]);
+                        }
+                    );
+                }
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Ada kesalahan, silahkan coba lagi.");
+            }
+        } finally {
+            setIsLoading(null);
+        }
     }
 
     // ! Handle Clear Count Billing
@@ -501,16 +541,6 @@ export default function Edit({
         }
     }
 
-    const isAirOrListrik = () => {
-        if (billingType === "Air") {
-            return "Harga / m3";
-        } else if (billingType === "Listrik") {
-            return "Harga / kWh";
-        } else {
-            return "Harga / Unit";
-        }
-    };
-
     return (
         <AuthenticatedLayout
             auth={auth}
@@ -561,454 +591,85 @@ export default function Edit({
                             </div>
                             <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
-                                    <div className="flex flex-row justify-start tablet:flex-col ">
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Sub Periode Bulan
-                                            </Typography>
-                                            <CustomDatePicker
-                                                value={
-                                                    data.period
-                                                        ? dayjs(data.period)
-                                                        : null
+                                    <PeriodSection
+                                        title="Sub Periode Tagihan"
+                                        data={data}
+                                        handleChangePeriod={handleChangePeriod}
+                                        errors={errors}
+                                    />
+                                    <BillingTypeSection
+                                        billingType={billingType}
+                                        handleBillingTypeChange={
+                                            handleBillingTypeChange
+                                        }
+                                    />
+                                    <TowerSection
+                                        title="Nama Tower"
+                                        data={data}
+                                        residence={residence}
+                                        handleTowerChange={handleTowerChange}
+                                        tower={tower}
+                                        billingType={billingType}
+                                        towerData={towerData}
+                                        errors={errors}
+                                    />
+                                    <RoomNumberSection
+                                        room={room}
+                                        handleRoomChange={handleRoomChange}
+                                        roomOptions={roomOptions}
+                                        errors={errors}
+                                        tower={tower}
+                                        residence={residence}
+                                    />
+                                    <WaterCategorySection
+                                        role={role}
+                                        value={waterTypeSelected}
+                                        billingType={billingType}
+                                        waterOptions={waterOptions}
+                                        handleChangeWater={handleChangeWater}
+                                        errors={errors}
+                                    />
+
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
+                                        <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
+                                            <ElectricCategorySection
+                                                billingType={billingType}
+                                                electricTypeSelected={
+                                                    electricTypeSelected
                                                 }
-                                                placeholderText={
-                                                    "Pilih Periode Bulan"
+                                                handleElectricChange={
+                                                    handleElectricChange
                                                 }
-                                                onChange={handleChangePeriod}
+                                                electricOptions={
+                                                    electricOptions
+                                                }
+                                                errors={errors}
                                             />
-                                            {errors.period && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.period}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
-                                        <div className="flex flex-col w-full mr-4 ">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Nama Tower
-                                            </Typography>
-
-                                            <InputSelect
-                                                value={tower}
-                                                onChange={handleTowerChange}
-                                                options={towerData}
-                                                // disabled={true}
-                                            />
-                                            {errors.tower_id && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.tower_id}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {billingType !== "Maintenance" ? (
-                                            <div className="w-full mr-4 tablet:mt-8">
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Tipe Unit Apartment
-                                                </Typography>
-
-                                                <CustomInput
-                                                    value={
-                                                        residence.apartTypeName
-                                                    }
-                                                    disabled={true}
-                                                />
-                                            </div>
-                                        ) : null}
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Nama Owner
-                                            </Typography>
-
-                                            <CustomInput
-                                                value={residence?.name ?? ""}
-                                                disabled={true}
+                                            <MeterReadingSection
+                                                billingType={billingType}
+                                                data={data}
+                                                setData={setData}
+                                                errors={errors}
+                                                handleGetPreviousMeter={
+                                                    handleGetPreviousMeter
+                                                }
+                                                isLoading={isLoading}
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col ">
-                                        <div className="flex flex-col w-full mr-4">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Nomor Unit
-                                            </Typography>
-
-                                            <InputSelect
-                                                value={room}
-                                                onChange={handleRoomChange}
-                                                options={roomOptions}
-                                                disabled={
-                                                    !tower.value ||
-                                                    tower.value === ""
-                                                        ? true
-                                                        : false
-                                                }
-                                            />
-                                            {errors.room_no && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.room_no}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Tipe Billing
-                                            </Typography>
-                                            <Select
-                                                id="billing_type"
-                                                color="blue"
-                                                value={billingType}
-                                                onChange={
-                                                    handleBillingTypeChange
-                                                }
-                                            >
-                                                {TypeBilling.map(
-                                                    (item, index) => (
-                                                        <Option
-                                                            key={index}
-                                                            value={item}
-                                                        >
-                                                            {item}
-                                                        </Option>
-                                                    )
-                                                )}
-                                            </Select>
-                                        </div>
+                                    <div>
+                                        <PriceSection
+                                            billingType={billingType}
+                                            data={data}
+                                            errors={errors}
+                                        />
+                                        <ImageUploadSection
+                                            billingType={billingType}
+                                            setData={setData}
+                                            errors={errors}
+                                            data={data}
+                                        />
                                     </div>
-                                    {role === "SUPER ADMIN" &&
-                                        billingType === "Air" && (
-                                            <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                                <div className="flex flex-col justify-start w-full tablet:flex-col tablet:mt-8">
-                                                    <Typography
-                                                        variant="paragraph"
-                                                        className="mb-2 text-base font-semibold"
-                                                    >
-                                                        Kategori / Jenis Tagihan
-                                                    </Typography>
-                                                    <Select
-                                                        value={
-                                                            waterTypeSelected
-                                                        }
-                                                        label="Kategori / Jenis Tagihan"
-                                                        id="water_type" // ID untuk water_type
-                                                        onChange={
-                                                            handleChangeWater
-                                                        }
-                                                    >
-                                                        {waterOptions.map(
-                                                            (items, index) => (
-                                                                <Option
-                                                                    key={index}
-                                                                    value={items.value.toString()}
-                                                                >
-                                                                    {
-                                                                        items.label
-                                                                    }
-                                                                </Option>
-                                                            )
-                                                        )}
-                                                    </Select>
-                                                    {errors.water_type && (
-                                                        <p className="mt-3 ml-0 text-sm text-red-500">
-                                                            {errors.water_type}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    <>
-                                        <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                            <div className="flex flex-row justify-start w-full tablet:flex-col tablet:mt-8">
-                                                {billingType === "Listrik" && (
-                                                    <div className="w-full mr-4">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Kategori / Jenis
-                                                            Tagihan
-                                                        </Typography>
-                                                        <Select
-                                                            label="Kategori / Jenis Tagihan"
-                                                            id="electric_type"
-                                                            value={
-                                                                electricTypeSelected
-                                                            }
-                                                            disabled={
-                                                                billingType ===
-                                                                "Listrik"
-                                                                    ? true
-                                                                    : false
-                                                            }
-                                                            onChange={
-                                                                handleElectricChange
-                                                            }
-                                                        >
-                                                            {electricOptions.map(
-                                                                (
-                                                                    items,
-                                                                    index
-                                                                ) => {
-                                                                    return (
-                                                                        <Option
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            value={items.value.toString()}
-                                                                        >
-                                                                            {
-                                                                                items.label
-                                                                            }
-                                                                        </Option>
-                                                                    );
-                                                                }
-                                                            )}
-                                                        </Select>
-                                                        {errors.electric_type && (
-                                                            <p className="mt-3 ml-0 text-sm text-red-500">
-                                                                {
-                                                                    errors.electric_type
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {billingType === "Listrik" ||
-                                                billingType === "Air" ? (
-                                                    <>
-                                                        <div
-                                                            className={`w-full mr-4 ${
-                                                                billingType ===
-                                                                "Air"
-                                                                    ? "tablet:mt-0"
-                                                                    : "tablet:mt-8"
-                                                            }`}
-                                                        >
-                                                            <Typography
-                                                                variant="paragraph"
-                                                                className="mb-2 text-base font-semibold "
-                                                            >
-                                                                Meteran Awal
-                                                            </Typography>
-
-                                                            <CustomInput
-                                                                label="Meteran Awal"
-                                                                id="start_meter"
-                                                                value={
-                                                                    data.start_meter
-                                                                        ? data.start_meter
-                                                                              .toString()
-                                                                              .replace(
-                                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                                  "."
-                                                                              )
-                                                                        : ""
-                                                                }
-                                                                onChange={(
-                                                                    e
-                                                                ) => {
-                                                                    const unformattedValue =
-                                                                        e.target.value.replace(
-                                                                            /\./g,
-                                                                            ""
-                                                                        );
-                                                                    setData(
-                                                                        "start_meter",
-                                                                        unformattedValue
-                                                                    );
-                                                                }}
-                                                                errors={
-                                                                    errors.start_meter
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div className="w-full mr-4 tablet:mt-8">
-                                                            <div className="mt-8 tablet:mt-0">
-                                                                <Button
-                                                                    variant="filled"
-                                                                    size="md"
-                                                                    onClick={
-                                                                        handleGetPreviousMeter
-                                                                    }
-                                                                    className="bg-blue-500 w-fit tablet:w-full"
-                                                                    loading={
-                                                                        isLoading ===
-                                                                        "get-previous-meter"
-                                                                    }
-                                                                >
-                                                                    Ambil
-                                                                    Meteran Awal
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                        <div className="w-full mr-4 tablet:mt-8">
-                                                            <Typography
-                                                                variant="paragraph"
-                                                                className="mb-2 text-base font-semibold "
-                                                            >
-                                                                Meteran Akhir
-                                                            </Typography>
-                                                            <CustomInput
-                                                                label="Meteran Akhir"
-                                                                id="end_meter"
-                                                                value={
-                                                                    data.end_meter
-                                                                        ? data.end_meter
-                                                                              .toString()
-                                                                              .replace(
-                                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                                  "."
-                                                                              )
-                                                                        : ""
-                                                                }
-                                                                onChange={(
-                                                                    e
-                                                                ) => {
-                                                                    const unformattedValue =
-                                                                        e.target.value.replace(
-                                                                            /\./g,
-                                                                            ""
-                                                                        );
-                                                                    setData(
-                                                                        "end_meter",
-                                                                        unformattedValue
-                                                                    );
-                                                                }}
-                                                                errors={
-                                                                    errors.end_meter
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div className="w-full mr-4 tablet:mt-8">
-                                                            <Typography
-                                                                variant="paragraph"
-                                                                className="mb-2 text-base font-semibold "
-                                                            >
-                                                                Total Meteran
-                                                            </Typography>
-                                                            <CustomInput
-                                                                disabled={true}
-                                                                label="Total Meteran"
-                                                                id="meter_reading"
-                                                                value={
-                                                                    data.meter_reading
-                                                                        ? data.meter_reading
-                                                                              .toString()
-                                                                              .replace(
-                                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                                  "."
-                                                                              )
-                                                                        : ""
-                                                                }
-                                                                errors={
-                                                                    errors.meter_reading
-                                                                }
-                                                            />
-                                                        </div>
-                                                    </>
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                        {billingType === "Air" ||
-                                        billingType === "Listrik" ? (
-                                            <div>
-                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            {isAirOrListrik()}
-                                                        </Typography>
-                                                        <CustomInput
-                                                            label={isAirOrListrik()}
-                                                            id="unit_price"
-                                                            value={
-                                                                data.unit_price
-                                                                    ? data.unit_price
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : ""
-                                                            }
-                                                            disabled={true}
-                                                            errors={
-                                                                errors.unit_price
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="w-full mr-4 tablet:mt-8">
-                                                        <Typography
-                                                            variant="paragraph"
-                                                            className="mb-2 text-base font-semibold "
-                                                        >
-                                                            Minimum Charge
-                                                        </Typography>
-                                                        <CustomInput
-                                                            label="Minimum Charge"
-                                                            id="minimum_charge"
-                                                            value={
-                                                                data.minimum_charge
-                                                                    ? data.minimum_charge
-                                                                          .toString()
-                                                                          .replace(
-                                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                                              "."
-                                                                          )
-                                                                    : 0
-                                                            }
-                                                            disabled={true}
-                                                            errors={
-                                                                errors.minimum_charge
-                                                            }
-                                                        ></CustomInput>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                                    <div className="w-full mr-4 tablet:mt-0">
-                                                        <InputUpload
-                                                            label="Upload Foto Meteran Akhir"
-                                                            className="tablet:mt-8"
-                                                            onChange={(file) =>
-                                                                setData(
-                                                                    "end_meter_image_path",
-                                                                    file
-                                                                )
-                                                            }
-                                                            error={
-                                                                errors.end_meter_image_path
-                                                            }
-                                                            currentImage={
-                                                                data.end_meter_image_path
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ) : null}
-                                    </>
-
                                     <div
                                         className={`flex flex-row justify-start tablet:flex-col 
                                             ${
@@ -1018,307 +679,64 @@ export default function Edit({
                                                     : "mt-0 tablet:mt-8"
                                             } `}
                                     >
-                                        {billingType === "Maintenance" && (
-                                            <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8">
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Tipe Unit
-                                                </Typography>
-
-                                                <Select
-                                                    label="Jenis Maintenance"
-                                                    id="maintenance_type"
-                                                    value={
-                                                        maintenanceTypeSelected
-                                                    }
-                                                    onChange={
-                                                        handleChangeMaintenanceType
-                                                    }
-                                                    disabled
-                                                    errors={
-                                                        errors.maintenance_type
-                                                    }
-                                                >
-                                                    {maintenanceOptions.map(
-                                                        (items, index) => {
-                                                            return (
-                                                                <Option
-                                                                    key={index}
-                                                                    value={items.value.toString()}
-                                                                >
-                                                                    {`${items.label}`}
-                                                                </Option>
-                                                            );
-                                                        }
-                                                    )}
-                                                </Select>
-                                                {errors.maintenance_type && (
-                                                    <p className="mt-3 ml-0 text-sm text-red-500">
-                                                        {
-                                                            errors.maintenance_type
-                                                        }
-                                                    </p>
-                                                )}
-                                            </div>
-                                        )}
-                                        {billingType === "Parkir" && (
-                                            <div className="w-full mt-8 mr-4 tablet:mt-0 tablet:mb-8 ">
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Jenis Kendaraan
-                                                </Typography>
-
-                                                <Select
-                                                    label="Jenis Kendaraan"
-                                                    id="vehicle_type"
-                                                    value={vehicleTypeSelected}
-                                                    onChange={
-                                                        handleChangeVehicleType
-                                                    }
-                                                >
-                                                    {vehicleOptions.map(
-                                                        (items, index) => {
-                                                            return (
-                                                                <Option
-                                                                    key={index}
-                                                                    value={items.value.toString()}
-                                                                >
-                                                                    {
-                                                                        items.label
-                                                                    }
-                                                                </Option>
-                                                            );
-                                                        }
-                                                    )}
-                                                </Select>
-                                                {errors.vehicle_type_parking && (
-                                                    <p className="mt-3 ml-0 text-sm text-red-500">
-                                                        {
-                                                            errors.vehicle_type_parking
-                                                        }
-                                                    </p>
-                                                )}
-                                            </div>
-                                        )}
-                                        <div
-                                            className={`${
-                                                billingType === "Maintenance" ||
-                                                billingType === "Parkir"
-                                                    ? "mt-8 tablet:mt-0"
-                                                    : "mt-0"
-                                            } w-full mr-4`}
-                                        >
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Nominal Tagihan
-                                            </Typography>
-                                            <CustomInput
-                                                label="Nominal Tagihan"
-                                                id="billing_fee"
-                                                value={
-                                                    data.billing_fee
-                                                        ? data.billing_fee
-                                                              .toString()
-                                                              .replace(
-                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                  "."
-                                                              )
-                                                        : ""
-                                                }
-                                                disabled={true}
-                                                errors={errors.billing_fee}
-                                            />
-                                        </div>
+                                        <MaintenanceTypeSection
+                                            billingType={billingType}
+                                            maintenanceTypeSelected={
+                                                maintenanceTypeSelected
+                                            }
+                                            handleChangeMaintenanceType={
+                                                handleChangeMaintenanceType
+                                            }
+                                            maintenanceOptions={
+                                                maintenanceOptions
+                                            }
+                                            errors={errors}
+                                        />
+                                        <VehicleTypeSection
+                                            billingType={billingType}
+                                            vehicleTypeSelected={
+                                                vehicleTypeSelected
+                                            }
+                                            handleChangeVehicleType={
+                                                handleChangeVehicleType
+                                            }
+                                            vehicleOptions={vehicleOptions}
+                                            errors={errors}
+                                        />
+                                        <BillingAmountSection
+                                            billingType={billingType}
+                                            data={data}
+                                            errors={errors}
+                                        />
                                     </div>
-                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Denda Tagihan Periode Sebelumnya
-                                            </Typography>
-                                            <CustomInput
-                                                label="Denda Tagihan Periode Sebelumnya"
-                                                id="fine"
-                                                value={
-                                                    data.fine
-                                                        ? data.fine
-                                                              .toString()
-                                                              .replace(
-                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                  "."
-                                                              )
-                                                        : 0
-                                                }
-                                                onChange={(e) => {
-                                                    const unformattedValue =
-                                                        e.target.value.replace(
-                                                            /\./g,
-                                                            ""
-                                                        );
-                                                    setData(
-                                                        "fine",
-                                                        unformattedValue
-                                                    );
-                                                }}
-                                                disabled={
-                                                    billingType !== "Parkir"
-                                                }
-                                                errors={errors.fine}
-                                                className="tablet:mt-0"
-                                            />
-                                        </div>
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Total Tagihan
-                                            </Typography>
-                                            <CustomInput
-                                                label="Total Tagihan"
-                                                id="total"
-                                                disabled={true}
-                                                value={
-                                                    data.total_amount
-                                                        ? data.total_amount
-                                                              .toString()
-                                                              .replace(
-                                                                  /\B(?=(\d{3})+(?!\d))/g,
-                                                                  "."
-                                                              )
-                                                        : ""
-                                                }
-                                                errors={errors.total_amount}
-                                                className="tablet:mt-0"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Tanggal Tagihan
-                                            </Typography>
-                                            <CustomInput
-                                                id="billing_date"
-                                                value={data.billing_date}
-                                                onChange={(e) =>
-                                                    handleChangeBillingDate(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                errors={errors.billing_date}
-                                                type="date"
-                                            />
-                                        </div>
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Tanggal Batas Pembayaran
-                                            </Typography>
-                                            <CustomInput
-                                                label="Tanggal Batas Pembayaran"
-                                                id="due_date"
-                                                value={data.due_date}
-                                                disabled={true}
-                                                errors={errors.due_date}
-                                                type="date"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start w-full mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="mr-4 w-fit tablet:mt-8 tablet:w-full">
-                                            <Button
-                                                variant="filled"
-                                                onClick={handleCountBilling}
-                                                className="bg-orange-500 tablet:w-full"
-                                                loading={
-                                                    isLoading ===
-                                                    "count-billing"
-                                                }
-                                            >
-                                                Hitung Tagihan
-                                            </Button>
-                                        </div>
-                                        <div className="mr-4 w-fit tablet:mt-8 tablet:w-full">
-                                            <Button
-                                                variant="filled"
-                                                onClick={
-                                                    handleClearCountBilling
-                                                }
-                                                className="flex items-center justify-center gap-2 bg-red-600 tablet:w-full"
-                                            >
-                                                <TrashIcon className="w-4 h-4" />{" "}
-                                                <span>Clear</span>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
-                                        <div className="w-full mr-4 tablet:mt-8">
-                                            <Typography
-                                                variant="paragraph"
-                                                className="mb-2 text-base font-semibold "
-                                            >
-                                                Status Pembayaran
-                                            </Typography>
-                                            <Select
-                                                id="status"
-                                                color="blue"
-                                                value={status}
-                                                onChange={handleStatusChange}
-                                            >
-                                                <Option value="Pending">
-                                                    Pending
-                                                </Option>
-                                                <Option value="Success">
-                                                    Success
-                                                </Option>
-                                                <Option value="Cancel">
-                                                    Cancel
-                                                </Option>
-                                            </Select>
-                                            {errors.status && (
-                                                <p className="mt-3 ml-0 text-sm text-red-500">
-                                                    {errors.status}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {status === "Success" && (
-                                            <div className="flex flex-col w-full mr-4 tablet:mt-8">
-                                                <Typography
-                                                    variant="paragraph"
-                                                    className="mb-2 text-base font-semibold "
-                                                >
-                                                    Tanggal Pembayaran
-                                                </Typography>
-                                                <CustomInput
-                                                    id="paid_date"
-                                                    value={data.paid_date}
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            "paid_date",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    errors={errors.paid_date}
-                                                    className="tablet:mt-0"
-                                                    type="date"
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
+                                    <TotalAmountSection
+                                        data={data}
+                                        setData={setData}
+                                        billingType={billingType}
+                                        errors={errors}
+                                    />
+                                    <DateSection
+                                        data={data}
+                                        handleChangeBillingDate={
+                                            handleChangeBillingDate
+                                        }
+                                        errors={errors}
+                                    />
+                                    <ActionButton
+                                        handleCountBilling={handleCountBilling}
+                                        handleClearCountBilling={
+                                            handleClearCountBilling
+                                        }
+                                        isLoading={isLoading}
+                                        isEditPage={true}
+                                    />
+                                    <StatusSection
+                                        data={data}
+                                        setData={setData}
+                                        errors={errors}
+                                        status={status}
+                                        handleStatusChange={handleStatusChange}
+                                    />
                                     <div className="flex flex-row mt-8">
                                         <div className="flex gap-4 ml-0 w-max tablet:w-full tablet:mt-0">
                                             <Button

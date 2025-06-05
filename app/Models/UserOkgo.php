@@ -20,6 +20,11 @@ class UserOkgo extends Model
         'updatedAt','browserId'
     ];
 
+    public function getConnectionName()
+    {
+        return app()->environment('testing') ? 'okgo_testing' : 'okgo';
+    }
+
     public function userApartments()
     {
         return $this->hasMany(UserApartmentOkgo::class, 'userId', 'id');

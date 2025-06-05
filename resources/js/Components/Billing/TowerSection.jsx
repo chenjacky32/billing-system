@@ -1,0 +1,58 @@
+import { Typography } from "@material-tailwind/react";
+import InputSelect from "@/Components/InputSelect";
+import CustomInput from "@/Components/CustomInput";
+
+const TowerSection = ({
+    title = "Nama Tower",
+    tower,
+    handleTowerChange,
+    towerData,
+    errors,
+    billingType,
+    residence,
+}) => (
+    <div className="flex flex-row justify-start mt-8 tablet:flex-col">
+        <div className="flex flex-col w-full mr-4">
+            <Typography
+                variant="paragraph"
+                className="mb-2 text-base font-semibold"
+            >
+                {title}
+            </Typography>
+            <InputSelect
+                value={tower}
+                onChange={handleTowerChange}
+                options={towerData}
+            />
+            {errors.tower_id && (
+                <p className="mt-3 ml-0 text-sm text-red-500">
+                    {errors.tower_id}
+                </p>
+            )}
+        </div>
+
+        {billingType !== "Maintenance" ? (
+            <div className="w-full mr-4 tablet:mt-8">
+                <Typography
+                    variant="paragraph"
+                    className="mb-2 text-base font-semibold"
+                >
+                    Tipe Unit Apartment
+                </Typography>
+                <CustomInput value={residence.apartTypeName} disabled={true} />
+            </div>
+        ) : null}
+
+        {/* <div className="w-full mr-4 tablet:mt-8">
+            <Typography
+                variant="paragraph"
+                className="mb-2 text-base font-semibold"
+            >
+                Nama Owner
+            </Typography>
+            <CustomInput value={residence?.name ?? ""} disabled={true} />
+        </div> */}
+    </div>
+);
+
+export default TowerSection;

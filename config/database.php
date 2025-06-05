@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('APP_ENV') === 'testing' ? 'testing' : env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -63,19 +63,52 @@ return [
             ]) : [],
         ],
 
-      'okgo' => [
-        'driver' => 'mysql',
-        'host' => env('OKGO_DB_HOST'),
-        'port' => env('OKGO_DB_PORT'),
-        'database' => env('OKGO_DB_DATABASE'),
-        'username' => env('OKGO_DB_USERNAME'),
-        'password' => env('OKGO_DB_PASSWORD'),
-        'charset' => 'utf8mb4',
-        'collation' => 'utf8mb4_unicode_ci',
-        'prefix' => '',
-        'strict' => true,
-        'engine' => null,
-    ],
+        'okgo' => [
+            'driver' => 'mysql',
+            'host' => env('OKGO_DB_HOST'),
+            'port' => env('OKGO_DB_PORT'),
+            'database' => env('OKGO_DB_DATABASE'),
+            'username' => env('OKGO_DB_USERNAME'),
+            'password' => env('OKGO_DB_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        'okgo_testing' => [
+            'driver' => 'mysql',
+            'host' => env('OKGO_TEST_DB_HOST', default: '127.0.0.1'),
+            'port' => env('OKGO_TEST_DB_PORT', '3306'),
+            'database' => env('OKGO_TEST_DB_DATABASE', 'okgo_testing'),
+            'username' => env('OKGO_TEST_DB_USERNAME', 'root'),
+            'password' => env('OKGO_TEST_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        'testing' =>[
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', default: '3306'),
+            'database' => env('DB_DATABASE_TESTING', 'billing_system_testing'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
 
         'pgsql' => [
             'driver' => 'pgsql',

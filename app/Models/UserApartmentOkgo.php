@@ -24,6 +24,11 @@ class UserApartmentOkgo extends Model
 
     // protected $appends = ['apartmentTypeData'];
 
+    public function getConnectionName()
+    {
+        return app()->environment('testing') ? 'okgo_testing' : 'okgo';
+    }
+
     public function user()
     {
         return $this->belongsTo(UserOkgo::class, 'userId', 'id');

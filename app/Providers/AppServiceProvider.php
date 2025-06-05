@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
+use App\Models\Apartment;
+use App\Models\ApartmentType;
+use App\Models\ApartmentTower;
+use App\Models\BillingFineRules;
+use App\Models\BillingsCategory;
+
+use App\Observers\ApartmentObserver;
+use App\Observers\ApartmentTypeObserver;
+use App\Observers\ApartmentTowerObserver;
+use App\Observers\BillingFineRulesObserver;
+use App\Observers\BillingCategoryObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -37,5 +49,12 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
         });
+
+        // Observers for Clear Cache Master Data if have any changes
+        Apartment::observe(ApartmentObserver::class);
+        ApartmentType::observe(ApartmentTypeObserver::class);
+        ApartmentTower::observe(ApartmentTowerObserver::class);
+        BillingFineRules::observe(BillingFineRulesObserver::class);
+        BillingsCategory::observe(BillingCategoryObserver::class);
     }
 }
