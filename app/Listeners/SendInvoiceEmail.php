@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\BillingCreated;
 use App\Jobs\SendEmailJob;
+use App\Helpers\LookupCache;
 use Illuminate\Support\Facades\Log;
 
 class SendInvoiceEmail  
@@ -12,7 +13,7 @@ class SendInvoiceEmail
     {
         $billing = $event->billing;
         $pdfPath = $event->pdfPath;
-        // $email = $billing->owner->email;
+        
         $email = $billing->residence->user->email;
         Log::info('sendInvoiceEmail', ['email' => $email, 'billing' => $billing, 'pdfPath' => $pdfPath]);
 
@@ -20,6 +21,6 @@ class SendInvoiceEmail
             'email' => $email,
             'billing' => $billing,
             'pdfPath' => $pdfPath
-    ])->onQueue(queue: 'billing_emails');
+        ])->onQueue(queue: 'billing_emails');
     }
 }

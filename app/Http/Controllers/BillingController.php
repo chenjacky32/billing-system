@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\BillingCreated;
+use App\Events\GenerateInvoiceRequested;
 use App\Events\BillingPaid;
 use App\Exports\Billing as ExportsBilling;
 use App\Models\Apartment;
@@ -280,8 +281,8 @@ class BillingController extends Controller
             default => null
         };
 
-        if(in_array($billingType, ['Air', 'Listrik'])) {
-            if($request->hasFile('end_meter_image_path')){
+        if (in_array($billingType, ['Air', 'Listrik'])) {
+            if ($request->hasFile('end_meter_image_path')) {
                 // generate file img name
                 $fileName = 'end-meter-image/' . time() . '.' . $request->file('end_meter_image_path')->extension();
                 
@@ -309,11 +310,7 @@ class BillingController extends Controller
         // Store the validated data in the billing table
         $billing = Billing::create($validatedData);
 
-        $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
-        $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
-        $pdf->save($pdfPath);
-        
-        event(new BillingCreated($billing,$pdfPath));
+        event(new GenerateInvoiceRequested($billing));
         return redirect('/billing')->with('success', 'New Billing has been created!');
     }
 
@@ -837,52 +834,84 @@ class BillingController extends Controller
     {       
             $user = Auth::user();
             $role = $user->role;
-        
+
+            $apartmentTypeMap = LookupCache::apartmentTypeMap();
+
             // Query dasar dengan kondisi apartment_id
-            $query = Billing::with(['owner', 'createdBy', 'tower', 'residence.user'])
-                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
-                    return $query->where('apartment_id', $user->apartment_id);
-                });
-        
+            $query = Billing::select('id','billing_type','billing_fee','billing_date',
+                                    'period','paid_date','fine','total_amount','due_date','status',
+                                    'apartment_id','residence_id','tower_id','created_by'
+                                    )->with([
+                                        'createdBy:id,name,role,apartment_id', 
+                                        'tower:id,tower_name,apartment_id', 
+                                        'residence:id,userId,apartmentTowerId,apartmentId,roomNo,apartmentType',
+                                        'residence.user:id,fullname'
+                                    ])->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
+                                            return $query->where('apartment_id', $user->apartment_id);
+                                        });
+            
+            
+            
             // Terapkan filter yang sama seperti di method index
-            if ($request->has('search')) {
+            $query->when($request->has('search'), function ($query) use ($request){
                 $searchTerm = $request->input('search');
                 $matchingResidenceIds = UserApartmentOkgo::whereHas('user', function ($q) use ($searchTerm) {
                         $q->where('fullname', 'like', "%$searchTerm%");
-                    })
-                    ->orWhere('roomNo', 'like', "%$searchTerm%")
+                })
+                ->orWhere('roomNo', 'like', "%$searchTerm%")
+                ->pluck('id')
+                ->toArray();
+                
+                $query->whereIn('residence_id', $matchingResidenceIds);
+            });
+
+            $query->when($request->filled('status'), fn ($q) =>
+                $q->where('status', $request->status)
+            );
+
+            $query->when($request->filled('period'), fn ($q) =>
+                $q->where('period', $request->period)    
+            );
+
+            $query->when($request->filled('billingType'), fn ($q) =>
+                $q->where('billing_type', $request->billingType)
+            );
+
+            $query->when($request->filled('towerId'), fn ($q) =>
+                $q->where('tower_id', $request->towerId)
+            );
+
+            $query->when($request->filled('unitType'), function ($q) use ($request) {
+                $unitType = $request->unitType;
+                $residenceIds = UserApartmentOkgo::where('apartmentType', $unitType)
                     ->pluck('id')
                     ->toArray();
-                $query->whereIn('residence_id', $matchingResidenceIds);
-            }
-        
-            if ($request->filled('status')) {
-                $query->where('status', $request->input('status'));
-            }
-        
-            if ($request->filled('period')) {
-                $query->where('period', 'like', "%{$request->input('period')}%");
-            }
-        
-            if ($request->filled('billingType')) {
-                $query->where('billing_type', 'like', "%{$request->input('billingType')}%");
-            }
-        
-            if ($request->filled('towerId')) {
-                $query->where('tower_id', $request->input('towerId'));
-            }
-        
-            if ($request->filled('unitType')) {
-                $matchingResidenceIds = UserApartmentOkgo::where('apartmentType', $request->input('unitType'))
-                    ->pluck('id')
-                    ->toArray();
-                $query->whereIn('residence_id', $matchingResidenceIds);
-            }
+                $q->whereIn('residence_id', $residenceIds);
+            });
         
             // Ambil semua data tanpa pagination
             $data = $query->orderByDesc('id')->get();
+
+            // Inject Apartment Types
+            $data->transform(function ($billing) use ($apartmentTypeMap) {
+                if ($billing->residence) {
+                    $res = $billing->residence;
+
+                    $aptTypeId = $res->apartmentType;
+                    $res->apartmentTypeData = isset($apartmentTypeMap[$aptTypeId])
+                        ? (object)[
+                            'id' => $aptTypeId,
+                            'name' => $apartmentTypeMap[$aptTypeId]
+                        ]
+                        : (object)[
+                            'id' => '',
+                            'name' => '',
+                        ];
+                }
+
+                return $billing;
+            });
             
-            // Ekspor data
             return Excel::download(new ExportsBilling(data: $data), 'billing.xlsx');
     }
 }

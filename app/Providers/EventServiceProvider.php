@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\GenerateInvoiceRequested;
 use App\Events\BillingCreated;
 use App\Events\BillingPaid;
+use App\Listeners\GenerateInvoicePDF;
 use App\Listeners\SendInvoiceEmail;
 use App\Listeners\SendPaymentSuccessEmail;
 use Illuminate\Auth\Events\Registered;
@@ -22,7 +24,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        //register for send Invoice to Email when billing created and Updated billing to success
+        GenerateInvoiceRequested::class => [
+            GenerateInvoicePDF::class
+        ],
         BillingCreated::class => [
             SendInvoiceEmail::class,
         ],
