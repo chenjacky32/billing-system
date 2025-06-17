@@ -116,3 +116,15 @@ export const formattedDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
 };
+
+export const formatNumberWithDots = (value) => {
+    if (value === null || value === undefined || value === "") return "";
+
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+export const unformatNumberFromDots = (value) => {
+    if (typeof value !== "string") return value.toString();
+
+    return value.replace(/\./g, "");
+};

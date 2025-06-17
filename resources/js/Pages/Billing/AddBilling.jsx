@@ -266,20 +266,6 @@ export default function AddBilling({
         });
     }
 
-    // ! Handle get Previous Meter
-    // function handleGetPreviousMeter(e) {
-    //     e.preventDefault();
-    //     setData((prevValues) => ({
-    //         ...prevValues,
-    //         start_meter: "",
-    //     }));
-    //     setIsLoading("get-previous-meter");
-    //     post(route("billing.previousMeter"), {
-    //         preserveScroll: true,
-    //         onFinish: () => setIsLoading(null),
-    //     });
-    // }
-
     async function handleGetPreviousMeter(e) {
         e.preventDefault();
         [

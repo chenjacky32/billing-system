@@ -13,6 +13,7 @@ import {
     Select,
 } from "@material-tailwind/react";
 import { useState } from "react";
+import { formatNumberWithDots, unformatNumberFromDots } from "@/utils/helper";
 import { TypeBilling } from "@/utils/constant";
 
 const AddBillingFineRules = ({
@@ -98,9 +99,9 @@ const AddBillingFineRules = ({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Billing Fine Rules List"}
+                                title={"Add Billing Fine Rules"}
                                 description={
-                                    "Tambah Informasi Data Ketentuan Denda yang Baru"
+                                    "Tambah Informasi Ketentuan Denda yang Baru"
                                 }
                                 showSearch={false}
                             />
@@ -153,26 +154,32 @@ const AddBillingFineRules = ({
                                         <CustomInput
                                             label="Denda /hari"
                                             id="fine_rate_per_day"
-                                            value={data.fine_rate_per_day}
+                                            value={formatNumberWithDots(
+                                                data.fine_rate_per_day
+                                            )}
                                             onChange={(e) =>
                                                 setData(
                                                     "fine_rate_per_day",
-                                                    e.target.value
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 )
                                             }
-                                            type="number"
                                             errors={errors.fine_rate_per_day}
                                             className="tablet:mt-8"
                                         />
                                         <CustomInput
-                                            type="number"
                                             label="Maksimal Denda"
                                             id="max_fine"
-                                            value={data.max_fine}
+                                            value={formatNumberWithDots(
+                                                data.max_fine
+                                            )}
                                             onChange={(e) =>
                                                 setData(
                                                     "max_fine",
-                                                    e.target.value
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 )
                                             }
                                             errors={errors.max_fine}

@@ -13,6 +13,7 @@ import {
     Select,
 } from "@material-tailwind/react";
 import { useState } from "react";
+import { formatNumberWithDots, unformatNumberFromDots } from "@/utils/helper";
 
 export default function AddBillingCategory({
     auth,
@@ -211,25 +212,15 @@ export default function AddBillingCategory({
                                         <CustomInput
                                             label="Tarif / Harga"
                                             id="unit_price"
-                                            value={
+                                            value={formatNumberWithDots(
                                                 data.unit_price
-                                                    ? data.unit_price
-                                                          .toString()
-                                                          .replace(
-                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                              "."
-                                                          )
-                                                    : ""
-                                            }
+                                            )}
                                             onChange={(e) => {
-                                                const unformattedValue =
-                                                    e.target.value.replace(
-                                                        /\./g,
-                                                        ""
-                                                    );
                                                 setData(
                                                     "unit_price",
-                                                    unformattedValue
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 );
                                             }}
                                             errors={errors.unit_price}
@@ -238,25 +229,15 @@ export default function AddBillingCategory({
                                         <CustomInput
                                             label="Minimum Charge"
                                             id="minimum_charge"
-                                            value={
+                                            value={formatNumberWithDots(
                                                 data.minimum_charge
-                                                    ? data.minimum_charge
-                                                          .toString()
-                                                          .replace(
-                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                              "."
-                                                          )
-                                                    : ""
-                                            }
+                                            )}
                                             onChange={(e) => {
-                                                const unformattedValue =
-                                                    e.target.value.replace(
-                                                        /\./g,
-                                                        ""
-                                                    );
                                                 setData(
                                                     "minimum_charge",
-                                                    unformattedValue
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 );
                                             }}
                                             errors={errors.minimum_charge}

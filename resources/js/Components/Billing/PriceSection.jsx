@@ -1,5 +1,6 @@
 import { Typography } from "@material-tailwind/react";
 import CustomInput from "@/Components/CustomInput";
+import { formatNumberWithDots } from "@/utils/helper";
 
 const PriceSection = ({ billingType, data, errors }) => {
     if (billingType !== "Air" && billingType !== "Listrik") return null;
@@ -8,12 +9,6 @@ const PriceSection = ({ billingType, data, errors }) => {
         if (billingType === "Air") return "Harga / m3";
         if (billingType === "Listrik") return "Harga / kWh";
         return "Harga / Unit";
-    };
-
-    const formatNumber = (value) => {
-        return value
-            ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-            : "";
     };
 
     return (
@@ -28,7 +23,7 @@ const PriceSection = ({ billingType, data, errors }) => {
                 <CustomInput
                     label={getPriceLabel()}
                     id="unit_price"
-                    value={formatNumber(data.unit_price)}
+                    value={formatNumberWithDots(data.unit_price)}
                     disabled={true}
                     errors={errors.unit_price}
                 />
@@ -44,7 +39,7 @@ const PriceSection = ({ billingType, data, errors }) => {
                 <CustomInput
                     label="Minimum Charge"
                     id="minimum_charge"
-                    value={formatNumber(data.minimum_charge) || 0}
+                    value={formatNumberWithDots(data.minimum_charge) || 0}
                     disabled={true}
                     errors={errors.minimum_charge}
                 />

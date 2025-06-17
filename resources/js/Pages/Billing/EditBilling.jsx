@@ -138,26 +138,6 @@ export default function Edit({
     const [status, setStatus] = useState(billingData.status);
     const role = auth.user.role;
 
-    // LOGGING INPUT REQUEST
-    console.log("SUB PERIODE", data.period);
-    console.log("NAMA TOWER", data.tower_id);
-    console.log("State Tower", tower);
-    console.log("TIPE BILLING", billingType);
-    console.log("State Billing", data.billing_type);
-    console.log("METERAN AWAL", data.start_meter);
-    console.log("METERAN AKHIR", data.end_meter);
-    console.log("TOTAL METERAN", data.meter_reading);
-    console.log("HARGA", data.unit_price);
-    console.log("MINIMUM CHARGE", data.minimum_charge);
-    console.log("UPLOAD FOTO", data.end_meter_image_path);
-    console.log("DENDA PERIODE SEBELUMNYA", data.fine);
-    console.log("TOTAL TAGIHAN", data.total_amount);
-    console.log("TANGGAL TAGIHAN", data.billing_date);
-    console.log("TANGGAL JATUH TEMPO", data.due_date);
-    console.log("TANGGAL PEMBAYARAN", data.paid_date);
-    console.log("LAMA JATUH TEMPO", data.due_days);
-    console.log("STATUS", data.status);
-
     const maintenanceOptions = getOptionsForType(
         "Maintenance",
         billingCategory

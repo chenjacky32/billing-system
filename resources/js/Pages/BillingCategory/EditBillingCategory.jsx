@@ -13,6 +13,7 @@ import {
     Select,
 } from "@material-tailwind/react";
 import { useState } from "react";
+import { formatNumberWithDots, unformatNumberFromDots } from "@/utils/helper";
 
 export default function EditBillingCategory({
     auth,
@@ -112,10 +113,8 @@ export default function EditBillingCategory({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"New Category Billing"}
-                                description={
-                                    "Tambah Informasi Kategori Tagihan yang Baru"
-                                }
+                                title={"Edit Category Billing"}
+                                description={"Edit Informasi Kategori Tagihan"}
                                 label="Cari Nama Kategori Tagihan yang Baru"
                                 showSearch={false}
                             />
@@ -211,29 +210,18 @@ export default function EditBillingCategory({
                                                 className="tablet:mt-8"
                                             />
                                         )}
-
                                         <CustomInput
                                             label="Tarif / Harga"
                                             id="unit_price"
-                                            value={
+                                            value={formatNumberWithDots(
                                                 data.unit_price
-                                                    ? data.unit_price
-                                                          .toString()
-                                                          .replace(
-                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                              "."
-                                                          )
-                                                    : ""
-                                            }
+                                            )}
                                             onChange={(e) => {
-                                                const unformattedValue =
-                                                    e.target.value.replace(
-                                                        /\./g,
-                                                        ""
-                                                    );
                                                 setData(
                                                     "unit_price",
-                                                    unformattedValue
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 );
                                             }}
                                             errors={errors.unit_price}
@@ -242,25 +230,15 @@ export default function EditBillingCategory({
                                         <CustomInput
                                             label="Minimum Charge"
                                             id="minimum_charge"
-                                            value={
+                                            value={formatNumberWithDots(
                                                 data.minimum_charge
-                                                    ? data.minimum_charge
-                                                          .toString()
-                                                          .replace(
-                                                              /\B(?=(\d{3})+(?!\d))/g,
-                                                              "."
-                                                          )
-                                                    : ""
-                                            }
+                                            )}
                                             onChange={(e) => {
-                                                const unformattedValue =
-                                                    e.target.value.replace(
-                                                        /\./g,
-                                                        ""
-                                                    );
                                                 setData(
                                                     "minimum_charge",
-                                                    unformattedValue
+                                                    unformatNumberFromDots(
+                                                        e.target.value
+                                                    )
                                                 );
                                             }}
                                             errors={errors.minimum_charge}
