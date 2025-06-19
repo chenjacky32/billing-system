@@ -239,19 +239,19 @@ export default function Billing({
     const handleDelete = (id) => {
         toast.info(
             <div className="p-4">
-                <p>Are you sure you want to delete this data?</p>
+                <p>Apakah Anda yakin ingin menghapus data Billing ini?</p>
                 <div className="flex justify-end mt-4">
                     <button
                         className="px-4 py-2 mr-2 text-white bg-red-500 rounded hover:bg-red-700"
                         onClick={() => deleteData(id)}
                     >
-                        Yes
+                        Ya
                     </button>
                     <button
                         className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-700"
                         onClick={() => toast.dismiss()}
                     >
-                        No
+                        Tidak
                     </button>
                 </div>
             </div>,
@@ -268,11 +268,15 @@ export default function Billing({
     };
 
     const deleteData = (id) => {
-        // Send the delete request here
-        // ...
-
-        route("billing.delete"), { id };
-        toast.dismiss();
+        router.post(
+            "/billing/delete",
+            { id },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onFinish: () => toast.dismiss(),
+            }
+        );
     };
 
     const handleClickEdit = ({ id, apartId }) => {
@@ -927,7 +931,19 @@ export default function Billing({
                                                                     }}
                                                                     className="bg-red-600"
                                                                 >
-                                                                    <Link
+                                                                    <Button
+                                                                        size="md"
+                                                                        variant="gradient"
+                                                                        color="red"
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                id
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <TrashIcon className="w-4 h-4" />
+                                                                    </Button>
+                                                                    {/* <Link
                                                                         href={route(
                                                                             "billing.delete",
                                                                             {
@@ -943,7 +959,7 @@ export default function Billing({
                                                                         <IconButton color="red">
                                                                             <TrashIcon className="w-4 h-4" />
                                                                         </IconButton>
-                                                                    </Link>
+                                                                    </Link> */}
                                                                 </Tooltip>
                                                             </td>
                                                         </tr>

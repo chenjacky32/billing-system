@@ -8,6 +8,7 @@ import {
     IconButton,
     Tooltip,
     Breadcrumbs,
+    Button,
 } from "@material-tailwind/react";
 import {
     FolderPlusIcon,
@@ -67,6 +68,52 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
             toast.success(flash.message);
         }
     }, [flash.message]);
+
+    const handleDelete = (id) => {
+        toast.info(
+            <div className="p-4">
+                <p>
+                    Apakah Anda yakin ingin menghapus data Billing Fine Rules
+                    ini?
+                </p>
+                <div className="flex justify-end mt-4">
+                    <button
+                        className="px-4 py-2 mr-2 text-white bg-red-500 rounded hover:bg-red-700"
+                        onClick={() => deleteData(id)}
+                    >
+                        Ya
+                    </button>
+                    <button
+                        className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-700"
+                        onClick={() => toast.dismiss()}
+                    >
+                        Tidak
+                    </button>
+                </div>
+            </div>,
+            {
+                icon: false,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false,
+                autoClose: false,
+                hideProgressBar: true,
+                position: "top-center",
+            }
+        );
+    };
+
+    const deleteData = (id) => {
+        router.post(
+            "/billing-fine-rules/delete",
+            { id },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onFinish: () => toast.dismiss(),
+            }
+        );
+    };
 
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
@@ -310,7 +357,33 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
                                                             </Tooltip>
                                                         </td>
                                                         <td className={classes}>
-                                                            <Link
+                                                            <Tooltip
+                                                                content="Delete Billing Fine Rules"
+                                                                animate={{
+                                                                    mount: {
+                                                                        scale: 1,
+                                                                        y: 0,
+                                                                    },
+                                                                    unmount: {
+                                                                        scale: 0,
+                                                                        y: 25,
+                                                                    },
+                                                                }}
+                                                                className="bg-red-600"
+                                                            >
+                                                                <Button
+                                                                    size="md"
+                                                                    color="red"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            id
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <TrashIcon className="w-4 h-4" />
+                                                                </Button>
+                                                            </Tooltip>
+                                                            {/* <Link
                                                                 href={route(
                                                                     "billingFineRules.delete",
                                                                     {
@@ -345,7 +418,7 @@ const BillingFineRules = ({ auth, errors, data, filters }) => {
                                                                         <TrashIcon className="w-4 h-4" />
                                                                     </IconButton>
                                                                 </Tooltip>
-                                                            </Link>
+                                                            </Link> */}
                                                         </td>
                                                     </tr>
                                                 );
