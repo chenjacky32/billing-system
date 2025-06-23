@@ -5,4 +5,5 @@ export const NetworkEndpoint = {
     GET_APARTMENT_IMAGE_USER: "/apartment-user",
     BILLING_PREVIOUS_METER: "billing.previousMeter",
     BILLING_COUNT_FEE_AND_FINE: "billing.count",
+    GET_HISTORY_VA_TRANSACTION: "VAMonitoring.historyTransaction",
 };

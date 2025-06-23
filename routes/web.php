@@ -139,6 +139,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/va-monitoring/{id}/update', [VAMonitoringController::class, 'patchExpiredVA'])->name('VAMonitoring.update');
     Route::post('/va-monitoring/{id}/delete',[VAMonitoringController::class, 'deleteExpiredVA'])->name('VAMonitoring.delete');
     Route::get('/va-monitoring/report', [VAMonitoringController::class, 'reportVaReport'])->name('VAMonitoring.report');
+    Route::post('/va-monitoring/history', [VAMonitoringController::class, 'getHistoryVATransaction'])->name('VAMonitoring.historyTransaction');
 
     // !Export Billing List
     Route::get('/billing/export', [BillingController::class, 'export'])->name('billing.export');

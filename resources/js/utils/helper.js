@@ -128,3 +128,8 @@ export const unformatNumberFromDots = (value) => {
 
     return value.replace(/\./g, "");
 };
+
+export const formattedWithTimeZone = (time, timezone = "+07:00") => {
+    if (!time) return "";
+    return `${time}:00${timezone}`;
+};

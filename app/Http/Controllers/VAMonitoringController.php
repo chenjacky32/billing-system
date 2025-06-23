@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Apartment;
 use App\Models\BillingTransaction;
 use App\Models\DeleteVaLog;
+use App\Models\ApartmentCorpCode;
 use App\Services\BRIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class VAMonitoringController extends Controller
 {
@@ -238,8 +240,106 @@ class VAMonitoringController extends Controller
     public function reportVaReport(Request $request)
     {   
         $user = Auth::user();
-        $role = $user->role;
+        $role = $user->role;    
+        $apartId = $user->apartment_id;
+
+        $corpCodeOption = [];
+
+        if ($role !== 'SUPER ADMIN') {
+            $corpCode = ApartmentCorpCode::where('apartmentId', $apartId)
+                ->where('isActive', true)
+                ->get();
+        } else {
+            $corpCode = ApartmentCorpCode::where('isActive', true)
+                ->get();
+        }
         
-        return Inertia::render('VAMonitoring/VaReport');
+        $corpCodeOption = $corpCode->map(function ($item) {
+            return [
+                'label' => $item->partnerServiceId . ' - ' . $item->apartment->name,
+                'value' => (string) $item->partnerServiceId,
+            ];
+        });
+
+        return Inertia::render('VAMonitoring/VaReport',[
+            'corpCode' => $corpCodeOption,
+        ]);
+    }
+
+    public function getHistoryVATransaction(Request $request){
+    
+        $rules = [
+            'corp_code' => 'required|string|digits:5',
+            'start_date' => 'required|date|date_format:Y-m-d',
+            'start_time' => 'required|string',
+            'end_time' => 'required|string',
+            'timezone' => 'required|string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 422,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        $timestamp = $this->bri->formatTimestamp();
+        $getAccessToken = $this->bri->getAccessToken($timestamp);
+
+        if (!$getAccessToken) {
+            return response()->json(['statusCode' => 500,'message' => 'Gagal mendapatkan akses token BRI'],500);
+        }
+
+        $accesTokenBRI = $getAccessToken['accessToken'];
+
+        $body = [
+            'partnerServiceId'=> str_pad(trim($validatedData['corp_code']), 8, " ", STR_PAD_LEFT),
+            'startDate' => $validatedData['start_date'],
+            'startTime' => $validatedData['start_time'],
+            'endTime' => $validatedData['end_time'],
+        ];
+
+        $getSignature = $this->bri->createSignatureTxn('POST',
+                                                        '/snap/v1.0/transfer-va/report', 
+                                                        $accesTokenBRI, 
+                                                        $body, 
+                                                        $timestamp
+                                                    );
+
+        try {
+            $responseBRI = Http::withHeaders([
+                'Authorization' =>  'Bearer ' . $accesTokenBRI,
+                'X-Timestamp'   =>  $timestamp,
+                'X-Signature'   =>  $getSignature,
+                'Content-Type'  =>  'application/json',
+                'X-PARTNER-ID'  =>  'mansyur',
+                'CHANNEL-ID'    =>  'MANSYUR-API',
+                'X-EXTERNAL-ID' =>  303001,
+            ])->post('https://sandbox.partner.api.bri.co.id/snap/v1.0/transfer-va/report', $body);
+        } catch (\Exception $e){
+            return response()->json([
+                'statusCode' => 500 ,
+                'message' => $e->getMessage()
+            ],500);
+        }
+
+        if ($responseBRI->successful()) {
+            return response()->json([
+                'statusCode' => $responseBRI->status(),
+                'message' => 'Success',
+                'data' => $responseBRI->json(),
+            ], $responseBRI->status());
+        } else {
+            return response()->json([
+                'statusCode' => $responseBRI->status(),
+                'message' => $responseBRI->json()['responseMessage'],
+                'errors' => $responseBRI->json(),
+            ], $responseBRI->status());
+        }
     }
 }

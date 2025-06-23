@@ -9,6 +9,11 @@ class Apartment extends Model
 {   
     protected $fillable = ['name', 'address', 'created_by', 'total_room', 'logo_company'];
 
+    public function apartmentCorpCodes()
+    {
+        return $this->hasMany(ApartmentCorpCode::class, 'apartmentId', 'id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
