@@ -39,16 +39,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //Logging database queries
-            DB::listen(function (QueryExecuted $query) {
-            Log::info(
-                $query->sql,
-                [
-                    'bindings' => $query->bindings,
-                    'time' => $query->time . 'ms',
-                    'connection' => $query->connectionName
-                ]
-            );
-        });
+            if (env('DB_QUERY_LOGGING',false)) {
+                DB::listen(function (QueryExecuted $query) {
+                Log::channel('query')->info(
+                    $query->sql,
+                    [
+                        'bindings' => $query->bindings,
+                        'time' => $query->time . 'ms',
+                        'connection' => $query->connectionName
+                        ]
+                    );
+                });
+            }
 
         // Observers for Clear Cache Master Data if have any changes
         Apartment::observe(ApartmentObserver::class);
