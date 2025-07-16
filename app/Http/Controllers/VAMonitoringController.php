@@ -180,10 +180,10 @@ class VAMonitoringController extends Controller
                     'X-Timestamp'=> $timestamp,
                     'X-Signature'=> $getSignature,
                     'content-type'=>'application/json',
-                    'X-PARTNER-ID'=>'mansyur',
-                    'CHANNEL-ID'=>'MANSYUR-API',
-                    'X-EXTERNAL-ID'=> $customerNo,
-                ])->delete('https://sandbox.partner.api.bri.co.id/snap/v1.0/transfer-va/delete-va', $body);
+                    'X-PARTNER-ID'=>'MANSYUR',
+                    'CHANNEL-ID'=>'00008',
+                    'X-EXTERNAL-ID'=> $this->bri->generateExternalId(),
+                ])->delete('https://partner.api.bri.co.id/snap/v1.0/transfer-va/delete-va', $body);
 
                 Log::info('BRI API Response', [
                     'status' => $responseBRI->status(),
@@ -317,10 +317,10 @@ class VAMonitoringController extends Controller
                 'X-Timestamp'   =>  $timestamp,
                 'X-Signature'   =>  $getSignature,
                 'Content-Type'  =>  'application/json',
-                'X-PARTNER-ID'  =>  'mansyur',
-                'CHANNEL-ID'    =>  'MANSYUR-API',
-                'X-EXTERNAL-ID' =>  303001,
-            ])->post('https://sandbox.partner.api.bri.co.id/snap/v1.0/transfer-va/report', $body);
+                'X-PARTNER-ID'  =>  'MANSYUR',
+                'CHANNEL-ID'    =>  '00008',
+                'X-EXTERNAL-ID' =>  $this->bri->generateExternalId(),
+            ])->post('https://partner.api.bri.co.id/snap/v1.0/transfer-va/report', $body);
         } catch (\Exception $e){
             return response()->json([
                 'statusCode' => 500 ,

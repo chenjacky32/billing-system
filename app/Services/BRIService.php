@@ -23,7 +23,7 @@ class BRIService {
             'X-SIGNATURE' => $signature,
             'X-TIMESTAMP' => $timestamp,
             'X-CLIENT-KEY' => config('services.bri.client_key'),
-        ])->post('https://sandbox.partner.api.bri.co.id/snap/v1.0/access-token/b2b', $payload);
+        ])->post('https://partner.api.bri.co.id/snap/v1.0/access-token/b2b', $payload);
 
         if ($response->successful()) {
             return $response->json();
@@ -68,5 +68,17 @@ class BRIService {
         $stringToSign = "$method:$endpoint:$token:$hashedBody:$timestamp";
 
         return hash_hmac('sha512', $stringToSign, config('services.bri.client_secret'));
+    }
+
+    public function generateExternalId(){
+        $now = Carbon::now();
+
+        $yy = $now->format('y');
+        $mm = $now->format('m');
+        $dd = $now->format('d');
+        $sec = $now->format('s'); 
+        $ms  = str_pad($now->format('v'), 3, '0', STR_PAD_LEFT); 
+        
+        return substr("{$yy}{$mm}{$dd}{$sec}{$ms}", 0, 9);
     }
 }
