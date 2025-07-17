@@ -101,7 +101,7 @@ const VaReport = ({ auth, corpCode }) => {
 
             if (res.statusCode == 200) {
                 toast.success(res.message);
-                setHistoryVA(res.data);
+                setHistoryVA(res.data.virtualAccountData);
             }
 
             if (res.statusCode == 422 && res.errors) {
@@ -115,11 +115,9 @@ const VaReport = ({ auth, corpCode }) => {
                 toast.error("Validasi gagal. Periksa isian form.");
                 return res;
             }
-
-            toast.error(res.message || "Terjadi kesalahan.");
             return res;
         } catch (error) {
-            toast.error("Kesalahan tak terduga. Coba lagi.");
+            toast.error("Terjadi Kesalahan Sistem. Silahkan Coba lagi.");
         }
     };
 
@@ -403,7 +401,7 @@ const VaReport = ({ auth, corpCode }) => {
                                                         <div className="flex flex-col">
                                                             <Typography
                                                                 variant="small"
-                                                                className="font-normal capitalize"
+                                                                className="font-medium underline capitalize"
                                                             >
                                                                 {
                                                                     items.virtualAccountNo
@@ -427,7 +425,7 @@ const VaReport = ({ auth, corpCode }) => {
                                                         <div className="flex flex-col">
                                                             <Typography
                                                                 variant="small"
-                                                                className="font-normal capitalize"
+                                                                className="font-bold capitalize"
                                                             >
                                                                 {new Intl.NumberFormat(
                                                                     "id-ID",
