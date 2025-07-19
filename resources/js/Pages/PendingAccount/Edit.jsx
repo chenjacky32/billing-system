@@ -22,6 +22,7 @@ const EditPendingAccount = ({
     apartmenetData,
     apartTowerData,
     apartId,
+    unitCapacitiesOptions,
 }) => {
     const role = auth.user.role;
 
@@ -30,6 +31,7 @@ const EditPendingAccount = ({
         apartmentId:
             role === "SUPER ADMIN" ? userApartment.apartmentId : apartId,
         apartmentTowerId: userApartment.apartmentTowerId || "",
+        powerCapacityId: userApartment.powerCapacityId || "",
     });
 
     const dataID = userApartment.id;
@@ -43,9 +45,9 @@ const EditPendingAccount = ({
         roomNo: userApartment.roomNo,
         apartType: userApartment?.apartType,
         apartmentTower: apartmentTower?.tower_name,
+        powerCapacityId: userApartment?.powerCapacityId,
     });
 
-    // console.log(userApartment);
     const [apartment, setApartment] = React.useState(
         apartmenetData.find((item) => item.value === userApartment.apartmentId)
     );
@@ -55,6 +57,22 @@ const EditPendingAccount = ({
         )
     );
     const [status, setStatus] = React.useState(userApartment.active);
+
+    const findPowerCapacity = unitCapacitiesOptions.find(
+        (item) => item.value === userApartment?.powerCapacityId || ""
+    );
+
+    const [powerCapacity, setPowerCapacity] = React.useState(
+        findPowerCapacity?.value
+    );
+
+    const handlePowerCapacityChange = (value) => {
+        setPowerCapacity(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            powerCapacityId: value,
+        }));
+    };
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -179,6 +197,34 @@ const EditPendingAccount = ({
                                                 value={userApartmentData.phone}
                                                 disabled={true}
                                             />
+                                        </div>
+                                        <div className="w-full mr-4 tablet:mt-5">
+                                            <Typography
+                                                variant="paragraph"
+                                                className="mb-2 text-base font-semibold "
+                                            >
+                                                Daya Unit
+                                            </Typography>
+                                            <Select
+                                                label="Pilih Daya Listrik"
+                                                id="power_capacity"
+                                                color="blue"
+                                                value={powerCapacity}
+                                                onChange={
+                                                    handlePowerCapacityChange
+                                                }
+                                            >
+                                                {unitCapacitiesOptions.map(
+                                                    (item, index) => (
+                                                        <Option
+                                                            key={index}
+                                                            value={item.value}
+                                                        >
+                                                            {item.label}
+                                                        </Option>
+                                                    )
+                                                )}
+                                            </Select>
                                         </div>
                                     </div>
                                     <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">

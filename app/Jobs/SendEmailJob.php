@@ -9,8 +9,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use App\Helpers\LookupCache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SendEmailJob implements ShouldQueue
 {
@@ -48,7 +49,21 @@ class SendEmailJob implements ShouldQueue
         $email = $this->details['email'];
         
         try {
-            // Send email with invoice
+            $apartmentTypeMap = LookupCache::apartmentTypeMap();
+            $unitPowerCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
+
+            if ($billing->residence) {
+                $id = $billing->residence->apartmentType;
+                $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$id])
+                    ? (object)['id' => $id, 'name' => $apartmentTypeMap[$id]]
+                    : (object)['id' => '', 'name' => ''];
+
+                $idCapacity = $billing->residence->powerCapacityId;
+                $billing->residence->unitPowerCapacity = isset($unitPowerCapacitiesMap[$idCapacity])
+                    ? (object)['id' => $idCapacity, 'capacity' => $unitPowerCapacitiesMap[$idCapacity]]
+                    : (object)['id' => '-', 'capacity' => '-'];
+            }
+                // Send email with invoice
             Mail::to($email)->send(new InvoiceMail($billing, $pdfPath));
         
             // clean up pdf file in temp folder

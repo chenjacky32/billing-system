@@ -33,6 +33,7 @@ const useBillingState = (
             name: "",
             apartTypeName: "",
             apartTypeId: "",
+            unitPowerCapacity: "",
         }
     );
 

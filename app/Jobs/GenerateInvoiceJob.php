@@ -38,15 +38,33 @@ class GenerateInvoiceJob implements ShouldQueue
 
         // Inject Apartment Types
         $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $unitPowerCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
 
         if ($billing->residence) {
             $id = $billing->residence->apartmentType;
             $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$id])
                 ? (object)['id' => $id, 'name' => $apartmentTypeMap[$id]]
                 : (object)['id' => '', 'name' => ''];
+
+            $idCapacity = $billing->residence->powerCapacityId;
+            $billing->residence->unitPowerCapacity = isset($unitPowerCapacitiesMap[$idCapacity])
+                ? (object)['id' => $idCapacity, 'capacity' => $unitPowerCapacitiesMap[$idCapacity]]
+                : (object)['id' => '-', 'capacity' => '-'];
         }
 
-        $pdf = Pdf::loadView('pdf.invoice', compact('billing'));
+        $pdf = Pdf::loadView('pdf.invoice', compact('billing'))
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'dpi' => 90,
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true,
+                'margin_top' => 8,
+                'margin_bottom' => 8,
+                'margin_left' => 8,
+                'margin_right' => 8,
+            ]);
+
         $pdfPath = storage_path("app/temp/invoice_{$billing->id}.pdf");
         $pdf->save($pdfPath);
 

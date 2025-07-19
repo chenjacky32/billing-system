@@ -124,6 +124,7 @@ class BillingController extends Controller
         $role = $user->role;
         $apartmentId = $user->apartment_id;
 
+        $unitCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
         $apartmentTypeMap = LookupCache::apartmentTypeMap();
         $towerData = LookupCache::towerList($apartmentId, $role);
         $fineRules = LookupCache::billingFineRules($apartmentId, $role);
@@ -138,6 +139,7 @@ class BillingController extends Controller
         $userApartmentsQuery = UserApartmentOkgo::select(
                                 'id','userId','apartmentTowerId',
                                 'roomNo','apartmentType','apartmentId',
+                                'powerCapacityId',
                                 'active'
                                 )
                             ->with(['user:id,fullname,phone,email'])
@@ -148,12 +150,19 @@ class BillingController extends Controller
             $userApartmentsQuery->whereIn("apartmentTowerId", $towerIds);
         }
 
-        $roomsNumber = $userApartmentsQuery->get()->map(function ( $unit) use ($apartmentTypeMap) {
+        $roomsNumber = $userApartmentsQuery->get()->map(function ($unit) use ($apartmentTypeMap, $unitCapacitiesMap) {
+            $capacity = $unitCapacitiesMap[$unit->powerCapacityId] ?? null;
+
             return [
                 'ownerName' => $unit->user->fullname,
+                'apartmentId'=> $unit->apartmentId,
                 'apartmentTowerId'=> $unit->apartmentTowerId,
                 'label' => $unit->roomNo,
                 'value' => $unit->id,
+                'unitPowerCapacity' => [
+                    'id' => $unit->powerCapacityId ?? '-',
+                    'capacity' => $capacity ?? '-',
+                    ],
                 'apartmentTypeId' => $unit->apartmentType,
                 'apartType' => [
                     'id' => $unit->apartmentType,
@@ -175,6 +184,9 @@ class BillingController extends Controller
                             'label' => $item->category_name,
                             'value' => $item->id,
                             'price' => $item->unit_price,
+                            'apartment_id' => $item->apartment_id ?? "",
+                            'tower_id' => $item->tower_id ?? "",
+                            'power_capacity'=> $item->power_capacity_value ?? "",
                             'minimum_charge' => $item->minimum_charge,
                         ];
                     })->values(),
@@ -323,6 +335,7 @@ class BillingController extends Controller
         $billingData = $billing->find($request->id);
         $billingApartmentId = $billingData->apartment_id;
 
+        $unitCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
         $apartmentTypeMap = LookupCache::apartmentTypeMap();
         $towerData = LookupCache::towerList($apartment_id, $role);
         $fineRules = LookupCache::billingFineRules($apartment_id, $role);
@@ -337,6 +350,7 @@ class BillingController extends Controller
         $userApartmentsQuery = UserApartmentOkgo::select(
                                 'id','userId','apartmentTowerId',
                                 'roomNo','apartmentType','apartmentId',
+                                'powerCapacityId',
                                 'active'
                                 )
                             ->with(['user:id,fullname,phone,email'])
@@ -348,16 +362,23 @@ class BillingController extends Controller
             $userApartmentsQuery->whereIn('apartmentTowerId', $towerIds);
         }
 
-        $roomsNumber = $userApartmentsQuery->get()->map(function ($unit) use ($apartmentTypeMap) {
+        $roomsNumber = $userApartmentsQuery->get()->map(function ($unit) use ($apartmentTypeMap, $unitCapacitiesMap) {
+            $capacity = $unitCapacitiesMap[$unit->powerCapacityId] ?? null;
+            
             return [
                 'ownerName'=> $unit->user->fullname,
+                'apartmentId'=> $unit->apartmentId,
                 'apartmentTowerId'=> $unit->apartmentTowerId,
                 'label' => $unit->roomNo,
                 'value' => $unit->id,
+                'unitPowerCapacity' => [
+                    'id' => $unit->powerCapacityId ?? '-',
+                    'capacity' => $capacity ?? '-',
+                    ],
                 'apartmentTypeId' => $unit->apartmentType,
                     'apartType' => [
                         'id'=> $unit->apartmentType,
-                        'name'=> $apartmentTypeMap[$unit->apartmentType],
+                        'name'=> $apartmentTypeMap[$unit->apartmentType] ?? null,
                     ],
                 ];                                      
             })->prepend([
@@ -375,6 +396,9 @@ class BillingController extends Controller
                             'label' => $item->category_name,
                             'value' => $item->id,
                             'price' => $item->unit_price,
+                            'apartment_id' => $item->apartment_id ?? "",
+                            'tower_id' => $item->tower_id ?? "",
+                            'power_capacity'=> $item->power_capacity_value ?? "",
                             'minimum_charge' => $item->minimum_charge
                         ];
                     })->values(),

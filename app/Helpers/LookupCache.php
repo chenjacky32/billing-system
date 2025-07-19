@@ -5,12 +5,20 @@ namespace App\Helpers;
 use App\Models\Apartment;
 use App\Models\BillingFineRules;
 use App\Models\BillingsCategory;
+use App\Models\UnitPowerCapacities;
 use Illuminate\Support\Facades\Cache;
 use App\Models\ApartmentType;
 use App\Models\ApartmentTower;
 
 class LookupCache
-{
+{   
+    public static function unitPowerCapacitiesMap()
+    {
+        return CacheManager::remember('unit_power_capacities', 3600, function () {
+            return UnitPowerCapacities::pluck('capacity_value', 'id')->toArray();
+        }, ['unit_power_capacities']);
+    }
+
     public static function apartmentTypeMap()
     {
         return CacheManager::remember('apartment_type_map', 3600, function () {
@@ -83,7 +91,7 @@ class LookupCache
         return CacheManager::remember($cacheKey, 3600, function () use ($apartmentId, $isSuperAdmin) {
             return BillingsCategory::when(!$isSuperAdmin && $apartmentId, fn ($q) =>
                         $q->where('apartment_id', $apartmentId)
-                    )->get(['id','billing_type','category_name','unit_price','minimum_charge']);
+                    )->get(['id','billing_type','category_name','apartment_id','tower_id','power_capacity_value','unit_price','minimum_charge']);
         }, ['billing_category', "apartment_{$apartmentId}"]);
     }
 

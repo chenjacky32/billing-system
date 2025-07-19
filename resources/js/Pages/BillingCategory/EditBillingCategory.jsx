@@ -22,6 +22,8 @@ export default function EditBillingCategory({
     apartmentId,
     apartmentName,
     apartmentType,
+    towerData,
+    powerCapacityData,
 }) {
     const role = auth.user.role;
 
@@ -34,14 +36,25 @@ export default function EditBillingCategory({
             role === "SUPER ADMIN"
                 ? billingCategoryData.apartment_id
                 : apartmentId,
+        tower_id: billingCategoryData.tower_id,
+        power_capacity_value: billingCategoryData.power_capacity_value,
     });
 
     const initialApartment = apartmentData.find(
         (apartment) => apartment.value === billingCategoryData.apartment_id
     );
+
     const dataID = billingCategoryData.id;
+
     const [apartment, setApartment] = useState(initialApartment);
+    const [billingType, setBillingType] = useState(data.billing_type);
     const [apartType, setApartType] = useState(data.category_name);
+    const [tower, setTower] = useState(
+        towerData.find((tower) => tower.value === billingCategoryData.tower_id)
+    );
+    const [powerCapacity, setPowerCapacity] = useState(
+        billingCategoryData?.power_capacity_value?.toString()
+    );
 
     const handleApartmentChange = (value) => {
         setApartment(value);
@@ -59,8 +72,25 @@ export default function EditBillingCategory({
         }));
     };
 
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            tower_id: value.value,
+        }));
+    };
+
+    const handlePowerCapacityChange = (value) => {
+        setPowerCapacity(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            power_capacity_value: value,
+        }));
+    };
+
     const handleBillingTypeChange = (value) => {
         setApartType("");
+        setBillingType(value);
         setData((prevValues) => ({
             ...prevValues,
             billing_type: value,
@@ -110,14 +140,18 @@ export default function EditBillingCategory({
                         <a href="#"></a>
                     </Breadcrumbs>
 
-                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
+                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-fit">
                         <Card className="w-full h-full p-12 ">
-                            <PageHeader
-                                title={"Edit Category Billing"}
-                                description={"Edit Informasi Kategori Tagihan"}
-                                label="Cari Nama Kategori Tagihan yang Baru"
-                                showSearch={false}
-                            />
+                            <div className="w-full h-fit">
+                                <PageHeader
+                                    title={"Edit Category Billing"}
+                                    description={
+                                        "Edit Informasi Kategori Tagihan"
+                                    }
+                                    label="Cari Nama Kategori Tagihan yang Baru"
+                                    showSearch={false}
+                                />
+                            </div>
                             <CardBody className="h-full px-0 ">
                                 <form>
                                     <div className="flex flex-row justify-start tablet:flex-col">
@@ -210,6 +244,56 @@ export default function EditBillingCategory({
                                                 className="tablet:mt-8"
                                             />
                                         )}
+
+                                        {data.billing_type === "Listrik" ? (
+                                            <>
+                                                <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                    <InputSelect
+                                                        value={tower}
+                                                        onChange={
+                                                            handleTowerChange
+                                                        }
+                                                        options={towerData}
+                                                    />
+                                                    {errors.tower_id && (
+                                                        <p className="mt-3 ml-0 text-sm text-red-500">
+                                                            {errors.tower_id}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                    <Select
+                                                        label="Pilih Daya Listrik"
+                                                        id="power_capacity"
+                                                        color="blue"
+                                                        value={powerCapacity}
+                                                        onChange={
+                                                            handlePowerCapacityChange
+                                                        }
+                                                    >
+                                                        {powerCapacityData.map(
+                                                            (item, index) => (
+                                                                <Option
+                                                                    key={index}
+                                                                    value={item.label.toString()}
+                                                                >
+                                                                    {item.label.toString()}
+                                                                </Option>
+                                                            )
+                                                        )}
+                                                    </Select>
+                                                    {errors.power_capacity_value && (
+                                                        <p className="mt-3 ml-0 text-sm text-red-500">
+                                                            {
+                                                                errors.power_capacity_value
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tarif / Harga"
                                             id="unit_price"

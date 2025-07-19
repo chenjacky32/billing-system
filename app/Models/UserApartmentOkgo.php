@@ -19,7 +19,8 @@ class UserApartmentOkgo extends Model
         'apartmentId',
         'roomNo',
         'active',
-        'apartmentType'
+        'apartmentType',
+        'powerCapacityId',
     ];
 
     // protected $appends = ['apartmentTypeData'];

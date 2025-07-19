@@ -21,17 +21,24 @@ export default function AddBillingCategory({
     apartmentName,
     apartmentId,
     apartmentType,
+    towerData,
+    powerCapacityData,
 }) {
     const role = auth.user.role;
+
     const [apartment, setApartment] = useState(apartmentData[0]);
     const [billingType, setBillingType] = useState("Air");
     const [apartType, setApartType] = useState("");
+    const [tower, setTower] = useState(towerData[0]);
+    const [powerCapacity, setPowerCapacity] = useState("");
 
     const { data, setData, post, processing, errors } = useForm({
         billing_type: billingType,
         category_name: "",
         unit_price: "",
         minimum_charge: "",
+        tower_id: "",
+        power_capacity_value: "",
         apartment_id: role === "SUPER ADMIN" ? "" : apartmentId,
     });
 
@@ -58,6 +65,22 @@ export default function AddBillingCategory({
         setData((prevValues) => ({
             ...prevValues,
             category_name: value,
+        }));
+    };
+
+    const handleTowerChange = (value) => {
+        setTower(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            tower_id: value.value,
+        }));
+    };
+
+    const handlePowerCapacityChange = (value) => {
+        setPowerCapacity(value);
+        setData((prevValues) => ({
+            ...prevValues,
+            power_capacity_value: value,
         }));
     };
 
@@ -102,16 +125,18 @@ export default function AddBillingCategory({
                         <a href="#"></a>
                     </Breadcrumbs>
 
-                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className="w-full h-full p-12 ">
-                            <PageHeader
-                                title={"New Category Billing"}
-                                description={
-                                    "Tambah Informasi Kategori Tagihan yang Baru"
-                                }
-                                label="Cari Nama Kategori Tagihan yang Baru"
-                                showSearch={false}
-                            />
+                    <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-fit">
+                        <Card className="w-full h-full p-12">
+                            <div className="w-full h-fit">
+                                <PageHeader
+                                    title={"New Category Billing"}
+                                    description={
+                                        "Tambah Informasi Kategori Tagihan yang Baru"
+                                    }
+                                    label="Cari Nama Kategori Tagihan yang Baru"
+                                    showSearch={false}
+                                />
+                            </div>
                             <CardBody className="h-full px-0 ">
                                 <form>
                                     <div className="flex flex-row justify-start tablet:flex-col">
@@ -209,6 +234,55 @@ export default function AddBillingCategory({
                                             </div>
                                         )}
 
+                                        {billingType === "Listrik" ? (
+                                            <>
+                                                <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                    <InputSelect
+                                                        value={tower}
+                                                        onChange={
+                                                            handleTowerChange
+                                                        }
+                                                        options={towerData}
+                                                    />
+                                                    {errors.tower_id && (
+                                                        <p className="mt-3 ml-0 text-sm text-red-500">
+                                                            {errors.tower_id}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col w-full mr-4 tablet:mt-8">
+                                                    <Select
+                                                        label="Pilih Daya Listrik"
+                                                        id="power_capacity"
+                                                        color="blue"
+                                                        value={powerCapacity}
+                                                        onChange={
+                                                            handlePowerCapacityChange
+                                                        }
+                                                    >
+                                                        {powerCapacityData.map(
+                                                            (item, index) => (
+                                                                <Option
+                                                                    key={index}
+                                                                    value={item.label.toString()}
+                                                                >
+                                                                    {item.label.toString()}
+                                                                </Option>
+                                                            )
+                                                        )}
+                                                    </Select>
+                                                    {errors.power_capacity_value && (
+                                                        <p className="mt-3 ml-0 text-sm text-red-500">
+                                                            {
+                                                                errors.power_capacity_value
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                    <div className="flex flex-row justify-start mt-8 tablet:flex-col tablet:mt-0">
                                         <CustomInput
                                             label="Tarif / Harga"
                                             id="unit_price"

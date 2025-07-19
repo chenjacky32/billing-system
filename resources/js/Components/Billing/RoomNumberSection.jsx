@@ -2,6 +2,7 @@ import React from "react";
 import InputSelect from "@/Components/InputSelect";
 import CustomInput from "@/Components/CustomInput";
 import { Select, Option, Typography } from "@material-tailwind/react";
+import { formatNumberWithDots } from "@/utils/helper";
 
 const RoomNumberSection = ({
     room,
@@ -10,7 +11,9 @@ const RoomNumberSection = ({
     errors,
     tower,
     residence,
-    // billingType,
+    unitPowerlabel,
+    unitPowerValue,
+    billingType,
     // handleBillingTypeChange,
 }) => {
     return (
@@ -35,6 +38,21 @@ const RoomNumberSection = ({
                     </p>
                 )}
             </div>
+            {billingType === "Listrik" ? (
+                <div className="w-full mr-4 tablet:mt-8">
+                    <Typography
+                        variant="paragraph"
+                        className="mb-2 text-base font-semibold"
+                    >
+                        {unitPowerlabel}
+                    </Typography>
+                    <CustomInput
+                        value={formatNumberWithDots(unitPowerValue)}
+                        disabled={true}
+                    />
+                </div>
+            ) : null}
+
             <div className="w-full mr-4 tablet:mt-8">
                 <Typography
                     variant="paragraph"

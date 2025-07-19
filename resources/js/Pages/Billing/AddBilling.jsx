@@ -175,11 +175,13 @@ export default function AddBilling({
     };
 
     const handleRoomChange = (value) => {
+        setError("electric_type", "");
         setRoom(value);
         setResidence((prevState) => ({
             ...prevState,
             name: value.ownerName,
             apartTypeName: value.apartType?.name ?? "",
+            unitPowerCapacity: value.unitPowerCapacity?.capacity ?? "",
         }));
         setData((prevValue) => ({
             ...prevValue,
@@ -205,7 +207,11 @@ export default function AddBilling({
             }
         } else if (billingType === "Listrik") {
             const matchedElectricOption = electricOptions.find(
-                (item) => item.label === value.apartType?.name
+                (item) =>
+                    item.apartment_id === value.apartmentId &&
+                    item.label === value.apartType?.name &&
+                    item.tower_id === value.apartmentTowerId &&
+                    item.power_capacity === value.unitPowerCapacity.capacity
             );
 
             if (matchedElectricOption) {
@@ -217,6 +223,21 @@ export default function AddBilling({
                     unit_price: matchedElectricOption?.price,
                     minimum_charge: matchedElectricOption?.minimum_charge,
                 }));
+            } else {
+                setElectricTypeSelected("");
+                setData((prevValue) => ({
+                    ...prevValue,
+                    electric_type: "",
+                    unit_price: "",
+                    minimum_charge: 0,
+                }));
+                setError(
+                    "electric_type",
+                    `Kesalahan Konfigurasi Data Unit: Daya Unit Tidak Sesuai Aturan Billing Category.
+                    Mohon periksa kembali Daya Unit penghuni/Owner ${value.ownerName} agar sesuai 
+                    dengan aturan yang berlaku di Modul Billing Category.
+                    `
+                );
             }
         } else {
             setMaintenanceTypeSelected("");
@@ -367,22 +388,6 @@ export default function AddBilling({
             setIsLoading(null);
         }
     }
-
-    // function handleCountBilling(e) {
-    //     e.preventDefault();
-    //     const currentStartMeter = data.start_meter;
-    //     setIsLoading("count-billing");
-    //     post(route("billing.count"), {
-    //         preserveScroll: true,
-    //         onFinish: () => setIsLoading(null),
-    //         onSuccess: () => {
-    //             setData((prevValues) => ({
-    //                 ...prevValues,
-    //                 start_meter: currentStartMeter,
-    //             }));
-    //         },
-    //     });
-    // }
 
     // ! Handle Clear Count Billing
     function handleClearCountBilling() {
@@ -535,6 +540,11 @@ export default function AddBilling({
                                         errors={errors}
                                         tower={tower}
                                         residence={residence}
+                                        billingType={billingType}
+                                        unitPowerValue={
+                                            residence.unitPowerCapacity ?? "-"
+                                        }
+                                        unitPowerlabel="Daya Listrik"
                                     />
                                     <WaterCategorySection
                                         role={role}

@@ -24,6 +24,8 @@ const TABLE_HEAD = [
     "No",
     "Nama Kategori",
     "Jenis Tagihan",
+    "Tower",
+    "Keterangan",
     "Harga",
     "Minimum Charge",
     "Apartement",
@@ -152,6 +154,8 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                     billing_type,
                                                     unit_price,
                                                     minimum_charge,
+                                                    power_capacity_value,
+                                                    tower,
                                                     apartment,
                                                     created_by,
                                                     id,
@@ -200,6 +204,31 @@ export default function BillingCategory({ auth, errors, data, filters }) {
                                                                     {
                                                                         billing_type
                                                                     }
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {tower?.tower_name
+                                                                        ? tower?.tower_name
+                                                                        : "-"}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-semibold capitalize"
+                                                                >
+                                                                    {power_capacity_value
+                                                                        ? power_capacity_value +
+                                                                          " VA"
+                                                                        : "-"}
                                                                 </Typography>
                                                             </div>
                                                         </td>

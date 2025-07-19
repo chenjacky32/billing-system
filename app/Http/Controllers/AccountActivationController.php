@@ -83,6 +83,7 @@ class AccountActivationController extends Controller
             return Redirect::route('pending-account.index')->with('error', 'User apartment not found.');
         }
 
+        $unitCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
         $apartmentTypeMap = LookupCache::apartmentTypeMap();
         $apartmentList = LookupCache::apartmentMap($apartId, $role);
         $apartmentTowerList = LookupCache::towerList($apartId, $role);
@@ -110,13 +111,25 @@ class AccountActivationController extends Controller
             ->prepend(['label' => 'Pilih Tower', 'value' => ''])
             ->values()
             ->toArray();
+        
+        $unitCapacitiesOptions = collect($unitCapacitiesMap)
+            ->map(function($value, $id){
+                return [
+                    'label' => $value, 
+                    'value' => $id
+                ];
+            })
+            ->values()
+            ->toArray()
+            ;
 
         return Inertia::render('PendingAccount/Edit', [
             'userApartment' => $userApartment,
             'apartmentTower' => $apartmentTower,
             'apartId' => $apartId,
             'apartmenetData' => $apartment,
-            'apartTowerData' => $apartTowerData
+            'apartTowerData' => $apartTowerData,
+            'unitCapacitiesOptions' => $unitCapacitiesOptions
         ]);
     }
 
@@ -125,12 +138,14 @@ class AccountActivationController extends Controller
             'active' => 'required|integer|min:0|max:1',
             'apartmentId' => 'required|integer|min:1|max:999999999999999',
             'apartmentTowerId' => 'required|integer|min:1|max:999999999999999',
+            'powerCapacityId' => 'required|integer|min:1|max:999999999999999',
         ]);
 
         $userApartment = UserApartmentOkgo::find($id);
         $userApartment->active = $validatedData['active'];
         $userApartment->apartmentId = $validatedData['apartmentId'];
         $userApartment->apartmentTowerId = $validatedData['apartmentTowerId'];
+        $userApartment->powerCapacityId = $validatedData['powerCapacityId'];
         $userApartment->save();
 
         return redirect('/account-management')->with('success', 'Account status updated successfully.');

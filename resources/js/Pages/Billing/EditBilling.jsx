@@ -109,6 +109,7 @@ export default function Edit({
                 apartTypeName: foundItem.apartType?.name ?? "",
                 apartTypeId:
                     foundItem.apartType?.id ?? foundItem.apartmentTypeId,
+                unitPowerCapacity: foundItem.unitPowerCapacity?.capacity ?? "",
             },
         }
     );
@@ -242,11 +243,13 @@ export default function Edit({
     };
 
     const handleRoomChange = (value) => {
+        setError("electric_type", "");
         setRoom(value);
         setResidence((prevState) => ({
             ...prevState,
             name: value.ownerName,
             apartTypeName: value.apartType?.name ?? "",
+            unitPowerCapacity: value.unitPowerCapacity?.capacity ?? "",
         }));
         setData((prevValue) => ({
             ...prevValue,
@@ -271,7 +274,11 @@ export default function Edit({
             }
         } else if (billingType === "Listrik") {
             const matchedElectricOption = electricOptions.find(
-                (item) => item.label === value.apartType?.name
+                (item) =>
+                    item.apartment_id === value.apartmentId &&
+                    item.label === value.apartType?.name &&
+                    item.tower_id === value.apartmentTowerId &&
+                    item.power_capacity === value.unitPowerCapacity.capacity
             );
 
             if (matchedElectricOption) {
@@ -283,6 +290,21 @@ export default function Edit({
                     unit_price: matchedElectricOption?.price,
                     minimum_charge: matchedElectricOption?.minimum_charge,
                 }));
+            } else {
+                setElectricTypeSelected("");
+                setData((prevValue) => ({
+                    ...prevValue,
+                    electric_type: "",
+                    unit_price: "",
+                    minimum_charge: "",
+                }));
+                setError(
+                    "electric_type",
+                    `Kesalahan Konfigurasi Data Unit: Daya Unit Tidak Sesuai Aturan Billing Category.
+                    Mohon periksa kembali Daya Unit penghuni/Owner ${value.ownerName} agar sesuai 
+                    dengan aturan yang berlaku di Modul Billing Category.
+                    `
+                );
             }
         } else {
             setMaintenanceTypeSelected("");
@@ -600,6 +622,11 @@ export default function Edit({
                                         errors={errors}
                                         tower={tower}
                                         residence={residence}
+                                        billingType={billingType}
+                                        unitPowerValue={
+                                            residence.unitPowerCapacity ?? "-"
+                                        }
+                                        unitPowerlabel="Daya Listrik"
                                     />
                                     <WaterCategorySection
                                         role={role}
