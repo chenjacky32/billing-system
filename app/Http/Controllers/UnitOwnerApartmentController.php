@@ -73,8 +73,8 @@ class UnitOwnerApartmentController extends Controller
                     ] : null,
                 ] : null;
 
-        return $item;
-    });
+            return $item;
+        });
 
         $apartment = collect($apartmentList)->map(fn($apart) => [
             'label' => $apart->name,

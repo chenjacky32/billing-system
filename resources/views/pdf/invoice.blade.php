@@ -138,9 +138,9 @@
 
         /* Style untuk catatan - optimized for landscape */
         .notes-container {
-          margin-top: 8px;
-          margin-bottom: 6px;
-          padding: 8px;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          padding: 10px;
           background-color: #e0f2fe;
           border-left: 4px solid #60a5fa;
           border-radius: 3px;
@@ -226,59 +226,90 @@
           </tr>
         </table>
 
-        <!-- Product Table -->
         <table class="product-table">
           <thead>
-            <tr>
-              <th style="width: 8%;">No.</th>
-              <th style="width: 15%;">Jenis Tagihan</th>
-              <th style="width: 15%;">Keterangan</th>
-              <th style="width: 12%;">Pemakaian</th>
-              <th style="width: 12%;">Meteran Awal</th>
-              <th style="width: 12%;">Meteran Akhir</th>
-              <th style="width: 13%; text-align: right;">Harga/Tarif</th>
-              <th style="width: 13%; text-align: right;">Jumlah</th>
-            </tr>
+            @if($billing->billing_type === "Air" || $billing->billing_type === "Listrik")
+              <tr>
+                <th style="width: 8%;">No.</th>
+                <th style="width: 15%;">Jenis Tagihan</th>
+                <th style="width: 15%;">Tipe Unit</th>
+                <th style="width: 12%;">Meteran Awal</th>
+                <th style="width: 12%;">Meteran Akhir</th>
+                <th style="width: 12%;">Pemakaian</th>
+                <th style="width: 13%; text-align: right;">Tarif</th>
+                <th style="width: 13%; text-align: right;">Jumlah</th>
+              </tr>
+            @else
+              <tr>
+                <th style="width: 10%; text-align: center;">No.</th>
+                <th style="width: 30%; text-align: left;">Jenis Tagihan</th>
+                <th style="width: 25%; text-align: left;">Tipe Unit</th>
+                <th style="width: 35%; text-align: right;">Jumlah</th>
+              </tr>
+            @endif
           </thead>
           <tbody>
-            <tr>
-              <td style="text-align: center;">1</td>
-              <td>{{ $billing->billing_type }}</td>
-              @if ($billing->billing_category_id)
-              <td>{{ $billing->billingCategory->category_name }}</td>
-              @else
-              <td>-</td>
-              @endif
-              <td style="text-align: center;">{{ $billing->meter_reading ? number_format($billing->meter_reading, 0) : '-' }}</td>
-              <td style="text-align: center;">{{ $billing->start_meter ? number_format($billing->start_meter, 0) : '-' }}</td>
-              <td style="text-align: center;">{{ $billing->end_meter ? number_format($billing->end_meter, 0) : '-' }}</td>
-              <td style="text-align: right;">Rp. {{ number_format($billing->unit_price ?? 0, 2) }}</td>
-              <td style="text-align: right;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
-            </tr>
+            @if($billing->billing_type === "Air" || $billing->billing_type === "Listrik")
+              <tr>
+                <td style="text-align: center;">1</td>
+                <td>{{ $billing->billing_type }}</td>
+                @if ($billing->residence->apartmentTypeData->name )
+                <td>{{ $billing->residence->apartmentTypeData->name }}</td>
+                @else
+                <td>-</td>
+                @endif
+                <td style="text-align: center;">{{ $billing->start_meter ? number_format($billing->start_meter, 0) : '-' }}</td>
+                <td style="text-align: center;">{{ $billing->end_meter ? number_format($billing->end_meter, 0) : '-' }}</td>
+                <td style="text-align: center;">{{ $billing->meter_reading ? number_format($billing->meter_reading, 0) : '-' }}</td>
+                <td style="text-align: right;">Rp. {{ number_format($billing->unit_price ?? 0, 2) }}</td>
+                <td style="text-align: right;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+              </tr>
+            @else
+              <tr>
+                <td style="text-align: center;">1</td>
+                <td>{{ $billing->billing_type }}</td>
+                @if ($billing->residence->apartmentTypeData->name )
+                <td>{{ $billing->residence->apartmentTypeData->name }}</td>
+                @else
+                <td>-</td>
+                @endif
+                <td style="text-align: right;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+              </tr>
+            @endif
           </tbody>
           <tfoot>
-            <tr>
-              <td colspan="7" style="text-align: right; font-weight: 600;">Sub Total:</td>
-              <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
-            </tr>
-            <tr>
-              <td colspan="7" style="text-align: right; font-weight: 600;">Denda Periode Sebelumnya:</td>
-              <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->fine, 2) }}</td>
-            </tr>
-            <tr>
-              <td colspan="7" style="text-align: right; font-weight: 600;">Tax:</td>
-              <td style="text-align: right; font-weight: 600;">Rp. 0.00</td>
-            </tr>
-            <tr>
-              <td colspan="7" style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Tagihan:</td>
-              <td style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->total_amount, 2) }}</td>
-            </tr>
+            @if($billing->billing_type === "Air" || $billing->billing_type === "Listrik")
+              <tr>
+                <td colspan="7" style="text-align: right; font-weight: 600;">Sub Total:</td>
+                <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+              </tr>
+              <tr>
+                <td colspan="7" style="text-align: right; font-weight: 600;">Denda Periode Sebelumnya:</td>
+                <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->fine, 2) }}</td>
+              </tr>
+              <tr>
+                <td colspan="7" style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Tagihan:</td>
+                <td style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->total_amount, 2) }}</td>
+              </tr>
+            @else
+              <tr>
+                <td colspan="3" style="text-align: right; font-weight: 600;">Sub Total:</td>
+                <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="text-align: right; font-weight: 600;">Denda Periode Sebelumnya:</td>
+                <td style="text-align: right; font-weight: 600;">Rp. {{ number_format($billing->fine, 2) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Total Tagihan:</td>
+                <td style="text-align: right; font-weight: 600; background-color: #f1f5f9;">Rp. {{ number_format($billing->total_amount, 2) }}</td>
+              </tr>
+            @endif
           </tfoot>
         </table>
 
         <!-- Notes Section -->
         <div class="notes-container">
-          <div class="notes-title">N.B :</div>
           <div class="notes-content">
             Apabila terjadi keterlambatan pembayaran tagihan dari batas waktu yang telah ditentukan, maka akan dikenakan denda beserta sanksi-sanksinya berdasarkan ketentuan dalam Peraturan Penghuni Satuan Rumah Susun Mansyur Residences
           </div>
