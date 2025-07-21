@@ -277,13 +277,14 @@ class BillingController extends Controller
             $rules['vehicle_type_parking'] = 'required|integer|min:1|max:999999999999999';
         }
 
-
         // Validate the incoming data with the dynamically adjusted rules
         $validatedData = $request->validate($rules);
 
-        // Add user_id to the validated data from the authenticated user
-        $validatedData['created_by'] = Auth::id();
-        
+        // Retrieve the owner_id
+        $ownerId = $request->input('owner_id');  
+        $ownerApartment =  UserApartmentOkgo::findOrFail($ownerId);
+        $apartmentId = $ownerApartment->apartmentId;
+
         // Retrieve the billing category ID based on billing_type
         $billingCategory = match ($billingType) {
             'Air' => BillingsCategory::where('billing_type', 'Air')->find($validatedData['water_type']),
@@ -292,6 +293,34 @@ class BillingController extends Controller
             'Parkir' => BillingsCategory::where('billing_type', 'Parkir')->find($validatedData['vehicle_type_parking']),
             default => null
         };
+
+        // Check if billing category exists
+        if (in_array($billingType, ['Maintenance', 'Parkir']) && !$billingCategory) {
+            return back()->with('error', 'Billing Category tidak ditemukan.');
+        }
+
+        $billingCategoryId = $billingCategory ? $billingCategory->id : null;
+
+        // Check for duplicate billing
+        $existingBilling = Billing::where([
+                'billing_type' => $billingType,
+                'billing_category_id' => $billingCategoryId,
+                'period' => $validatedData['period'],
+                'apartment_id' => $apartmentId,
+                'residence_id' => $ownerId,
+                'tower_id' => $validatedData['tower_id']
+            ])->first();
+
+        if ($existingBilling) {
+            return back()->with('error', 'Data billing untuk periode ini sudah pernah diinput sebelumnya. Silakan periksa kembali data yang akan diinput.');
+        }
+
+        $validatedData['created_by'] = Auth::id();
+        $validatedData['billing_category_id'] = $billingCategoryId;
+        $validatedData['apartment_id'] = $apartmentId;
+        $validatedData['residence_id'] = $ownerId;
+        $validatedData['total_amount'] = $validatedData['billing_fee'] + $validatedData['fine'];
+        $validatedData['owner_id'] = NULL;
 
         if (in_array($billingType, ['Air', 'Listrik'])) {
             if ($request->hasFile('end_meter_image_path')) {
@@ -303,21 +332,6 @@ class BillingController extends Controller
                 $validatedData['end_meter_image_path'] = $fileName;
             }
         }
-
-         // Check if billing category exists
-        if (in_array($billingType, ['Maintenance', 'Parkir']) && !$billingCategory) {
-            return back()->with('error', 'Billing Category not found.');
-        }
-
-        $validatedData['billing_category_id'] = $billingCategory ? $billingCategory->id : null;
-
-        $ownerId = $request->input('owner_id');  
-        $ownerApartment =  UserApartmentOkgo::findOrFail($ownerId);
-        $apartmentId = $ownerApartment->apartmentId;
-        $validatedData['apartment_id'] = $apartmentId;
-        $validatedData['residence_id'] = $ownerId;
-        $validatedData['total_amount'] = $validatedData['billing_fee'] + $validatedData['fine'];
-        $validatedData['owner_id'] = NULL;
         
         // Store the validated data in the billing table
         $billing = Billing::create($validatedData);
@@ -471,7 +485,7 @@ class BillingController extends Controller
         ];
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
-        if(in_array($billingType, ['Listrik','Air'])){
+        if (in_array($billingType, ['Listrik','Air'])){
             $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
             $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
             $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
@@ -483,19 +497,19 @@ class BillingController extends Controller
             }
         }
 
-        if(in_array($request->input('billing_type'), ['Listrik'])) {
+        if (in_array($request->input('billing_type'), ['Listrik'])) {
             $rules['electric_type']= 'required|integer|min:1|max:999999999999999';
         }
 
-        if(in_array($request->input('billing_type'), ['Air'])) {
+        if (in_array($request->input('billing_type'), ['Air'])) {
             $rules['water_type'] = 'required|integer|min:1|max:999999999999999';
         }
 
-        if(in_array($request->input('billing_type'), ['Maintenance'])) {
+        if (in_array($request->input('billing_type'), ['Maintenance'])) {
             $rules['maintenance_type'] = 'required|integer|min:1|max:999999999999999';
         }
 
-        if(in_array($request->input('billing_type'), ['Parkir'])) {
+        if (in_array($request->input('billing_type'), ['Parkir'])) {
             $rules['vehicle_type_parking'] = 'required|integer|min:1|max:999999999999999';
         }
 
@@ -506,6 +520,41 @@ class BillingController extends Controller
 
         // Validate the incoming data with the dynamically adjusted rules
         $validatedData = $request->validate($rules);
+
+        $ownerId = $request->input('owner_id');
+        $ownerApartment = UserApartmentOkgo::findOrFail($ownerId);
+        $apartmentId = $ownerApartment->apartmentId;
+        
+        // Retrieve the billing category ID based on billing_type
+        $billingCategory = match ($billingType) {
+            'Air' => BillingsCategory::where('billing_type', 'Air')->find($validatedData['water_type']),
+            'Listrik' => BillingsCategory::where('billing_type', 'Listrik')->find($validatedData['electric_type']),
+            'Maintenance' => BillingsCategory::where('billing_type', 'Maintenance')->find($validatedData['maintenance_type']),
+            'Parkir' => BillingsCategory::where('billing_type', 'Parkir')->find($validatedData['vehicle_type_parking']),
+            default => null
+        };
+
+        // Check if billing category exists
+        if (in_array($request->input('billing_type'), ['Maintenance', 'Parkir']) && !$billingCategory) {
+            return back()->with('error', 'Billing Category tidak ditemukan.');
+        }
+
+        $billingCategoryId = $billingCategory ? $billingCategory->id : null;
+
+        $existingBilling = Billing::where([
+                'billing_type' => $billingType,
+                'billing_category_id' => $billingCategoryId,
+                'period' => $validatedData['period'],
+                'apartment_id' => $apartmentId,
+                'residence_id' => $ownerId,
+                'tower_id' => $validatedData['tower_id']
+            ])
+            ->where('id', '!=', $id) // Exclude current record being updated
+            ->first();
+
+        if ($existingBilling) {
+            return back()->with('error', 'Data billing untuk periode ini sudah pernah diinput sebelumnya. Silakan periksa kembali data yang akan diupdate.');
+        }
 
         // Set meter_reading to null if billing_type is Parkir or Maintenance
         if (in_array($request->input('billing_type'), ['Parkir', 'Maintenance'])) {
@@ -527,23 +576,9 @@ class BillingController extends Controller
             $validatedData['is_paid'] = 1;
         }
 
-        // Retrieve the billing category ID based on billing_type
-        $billingCategory = match ($billingType) {
-            'Air' => BillingsCategory::where('billing_type', 'Air')->find($validatedData['water_type']),
-            'Listrik' => BillingsCategory::where('billing_type', 'Listrik')->find($validatedData['electric_type']),
-            'Maintenance' => BillingsCategory::where('billing_type', 'Maintenance')->find($validatedData['maintenance_type']),
-            'Parkir' => BillingsCategory::where('billing_type', 'Parkir')->find($validatedData['vehicle_type_parking']),
-            default => null
-        };
-
-         // Check if billing category exists
-        if (in_array($request->input('billing_type'), ['Maintenance', 'Parkir']) && !$billingCategory) {
-            return back()->with('error', 'Billing Category not found.');
-        }
-
-        if(in_array($request->input('billing_type'),['Air', 'Listrik'])) {
-            if($request->hasFile('end_meter_image_path')){
-                if($billing->end_meter_image_path){
+        if (in_array($request->input('billing_type'),['Air', 'Listrik'])) {
+            if ($request->hasFile('end_meter_image_path')) {
+                if ($billing->end_meter_image_path){
                     Storage::delete('public/'.$billing->end_meter_image_path);
                 }
 
@@ -560,9 +595,6 @@ class BillingController extends Controller
 
         $validatedData['billing_category_id'] = $billingCategory ? $billingCategory->id : null;
 
-        $ownerId = $request->input('owner_id');
-        $ownerApartment = UserApartmentOkgo::findOrFail($ownerId);
-        $apartmentId = $ownerApartment->apartmentId;
         $validatedData['apartment_id'] = $apartmentId;
         $validatedData['residence_id'] = $ownerId;
         $validatedData['owner_id'] = NULL;
