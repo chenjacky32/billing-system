@@ -14,6 +14,8 @@ class BillingFineRulesController extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+        $userApartId = $user->apartment_id;
+        $ApartmentId = Apartment::find($userApartId);
 
         $query = BillingFineRules::with(['apartment','createdBy'])
         ->when($role !== 'SUPER ADMIN',function($query) use ($user){
@@ -27,8 +29,9 @@ class BillingFineRulesController extends Controller
         ;
         
         return Inertia::render('BillingFineRules/Index',[
-        'filters'=> $request->only('search'),
-        'data' => $query
+            'filters'=> $request->only('search'),
+            'data' => $query,
+            'apartmentId' => $ApartmentId,
         ]);
     
     }

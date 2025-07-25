@@ -20,6 +20,8 @@ class BillingCategoryController extends Controller
         
         $user = Auth::user();
         $role = $user->role;
+        $userApartId = $user->apartment_id;
+        $ApartmentId = Apartment::find($userApartId);
 
         $query = BillingsCategory::with(['apartment','createdBy','tower'])
             ->when($role !== 'SUPER ADMIN',function($query) use ($user){
@@ -34,7 +36,8 @@ class BillingCategoryController extends Controller
         
         return Inertia::render('BillingCategory/BillingCategory',[
             'filters'=> $request->only('search'),
-            'data' => $query
+            'data' => $query,
+            'apartmentId' => $ApartmentId,
         ]);
     }
 

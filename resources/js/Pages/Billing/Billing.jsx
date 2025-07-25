@@ -36,6 +36,7 @@ import dayjs from "dayjs";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
 
 const TABLE_HEAD = [
+    "Id-Billing",
     "No Unit",
     "Nama Pemilik",
     "Tower",
@@ -586,6 +587,23 @@ export default function Billing({
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
+                                                                        {id}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} 
+                                                                `}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[1],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
                                                                         {
                                                                             residence?.roomNo
                                                                         }
@@ -597,7 +615,7 @@ export default function Billing({
                                                                 className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background}`}
                                                                 style={{
                                                                     left: stickyColumnStyles
-                                                                        .positions[1],
+                                                                        .positions[2],
                                                                 }}
                                                             >
                                                                 <div className="flex flex-col">
@@ -617,7 +635,7 @@ export default function Billing({
                                                                 className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
                                                                 style={{
                                                                     left: stickyColumnStyles
-                                                                        .positions[2],
+                                                                        .positions[3],
                                                                 }}
                                                             >
                                                                 <div className="flex flex-col">
@@ -633,11 +651,9 @@ export default function Billing({
                                                             </td>
 
                                                             <td
-                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
-                                                                style={{
-                                                                    left: stickyColumnStyles
-                                                                        .positions[3],
-                                                                }}
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
                                                                 <div className="flex flex-col">
                                                                     <Typography

@@ -15,6 +15,8 @@ class ApartementTower extends Controller
     {
         $user = Auth::user();
         $role = $user->role;
+        $userApartId = $user->apartment_id;
+        $ApartmentId = Apartment::find($userApartId);
         
         $query = ApartmentTower::with(['apartment','createdBy'])
         ->when($role !== 'SUPER ADMIN',function($query) use ($user){
@@ -28,8 +30,9 @@ class ApartementTower extends Controller
         ;
         
         return Inertia::render('ApartmentTower/ApartmentTower',[
-        'filters'=> $request->only('search'),
-        'data' => $query
+            'filters'=> $request->only('search'),
+            'data' => $query,
+            'apartmentId' => $ApartmentId,
         ]);
     }
 
