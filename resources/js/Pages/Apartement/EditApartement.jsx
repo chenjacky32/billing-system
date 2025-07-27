@@ -45,11 +45,11 @@ export default function EditApartement({ auth, apartementData }) {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Edit Apartment
+                    Edit Apartemen
                 </h2>
             }
         >
-            <Head title="Edit Apartment" />
+            <Head title="Edit Apartemen" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -66,7 +66,7 @@ export default function EditApartement({ auth, apartementData }) {
                                     href={route("apartement.index")}
                                     className="opacity-60 text-primaryHover"
                                 >
-                                    Apartment
+                                    Apartemen
                                 </Link>
                             </>
                         )}
@@ -75,14 +75,14 @@ export default function EditApartement({ auth, apartementData }) {
                             href={route("apartement.edit", { id: dataID })}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Edit Apartment
+                            Edit Apartemen
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Edit Apartement Data"}
+                                title={"Edit Data Apartemen"}
                                 description={"Edit Informasi Apartemen"}
                                 label="Cari Nama Apartemen"
                                 showSearch={false}
@@ -115,7 +115,7 @@ export default function EditApartement({ auth, apartementData }) {
                                         />
                                         <CustomInput
                                             type="number"
-                                            label="Total Kamar"
+                                            label="Total Unit"
                                             id="total_room"
                                             value={data.total_room}
                                             onChange={(e) =>
@@ -130,7 +130,7 @@ export default function EditApartement({ auth, apartementData }) {
                                     </div>
                                     <div className="mt-8 mr-4 tablet:mr-0">
                                         <InputUpload
-                                            label="Upload Your Logo"
+                                            label="Upload Logo Apartemen"
                                             className="tablet:mt-8"
                                             onChange={(file) =>
                                                 setData("logo_company", file)

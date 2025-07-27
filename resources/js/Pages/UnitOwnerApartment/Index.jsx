@@ -252,11 +252,11 @@ const UserApartment = ({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    User/Owner Apartment List
+                    Daftar Pemilik/Penghuni
                 </h2>
             }
         >
-            <Head title="Billing Fine Rules" />
+            <Head title="Daftar Pemilik/Penghuni" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -271,7 +271,7 @@ const UserApartment = ({
                             href={route("unitOwnerApartment.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Unit Owner List
+                            Daftar Pemilik/Penghuni
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -282,13 +282,13 @@ const UserApartment = ({
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Unit Owner Apartment List"}
+                                title={"Daftar Pemilik/Penghuni"}
                                 description={
-                                    "Informasi Data Unit Owner Pada Apartemen"
+                                    "Informasi Data Pemilik/Penghuni Pada Apartemen"
                                 }
                                 buttonLabel={"Tambah Unit Owner"}
                                 icon={buttonIcon}
-                                label="Cari Nama Unit Owner"
+                                label="Cari Nama Pemilik/Penghuni"
                                 showAddButton={false}
                             />
                             <CardBody className="px-0 overflow-scroll">
@@ -429,7 +429,7 @@ const UserApartment = ({
                                                         </td>
                                                         <td className={classes}>
                                                             <Tooltip
-                                                                content="Edit Unit Owner"
+                                                                content="Edit Data Pemilik/Penghuni"
                                                                 animate={{
                                                                     mount: {
                                                                         scale: 1,
@@ -474,7 +474,7 @@ const UserApartment = ({
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Unit Owner."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Data Pemilik/Penghuni."
                                                 }
                                                 showSearch={false}
                                             />
@@ -537,9 +537,9 @@ const UserApartment = ({
                                     >
                                         <DialogHeader className="relative block m-0">
                                             <PageHeader
-                                                title={"Edit Unit Owner Data"}
+                                                title={"Edit Data"}
                                                 description={
-                                                    "Edit Informasi Unit Owner"
+                                                    "Edit Informasi Pemilik/Penghuni Unit"
                                                 }
                                                 showSearch={false}
                                             />

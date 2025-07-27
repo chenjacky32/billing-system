@@ -162,7 +162,7 @@ export default function Dashboard({
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <div className="py-6 text-2xl font-extrabold text-center text-primary tablet:text-xl">
-                            Welcome to Dashboard, {auth.user.name}
+                            Selamat datang di Dashboard, {auth.user.name}
                         </div>
                         <div className="flex flex-col flex-wrap p-5 ">
                             {role === "SUPER ADMIN" ? (
@@ -318,7 +318,7 @@ export default function Dashboard({
                                                         colSpan="3"
                                                         className="py-2 pl-4 text-center"
                                                     >
-                                                        No data available
+                                                        Tidak ada data
                                                     </h1>
                                                 )}
                                             </BillingPieContainer>

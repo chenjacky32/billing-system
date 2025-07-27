@@ -128,11 +128,11 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    VA Monitoring
+                    Pengelolaan Virtual Akun
                 </h2>
             }
         >
-            <Head title="VA - Monitoring" />
+            <Head title="Pengelolaan Virtual Akun" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -147,7 +147,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                             href={route("VAMonitoring.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            VA Monitoring
+                            Pengelolaan Virtual Akun
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -155,9 +155,9 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                         <Card className="w-full h-full p-12">
                             <PageHeader
                                 showAddButton={false}
-                                title={"VA Monitoring List"}
+                                title={"Daftar Virtual Akun"}
                                 description={
-                                    "Informasi VA Pembayaran yang sudah dibuat oleh User"
+                                    "Informasi Data Virtual Akun Pembayaran yang sudah dibuat oleh User"
                                 }
                                 showInput={true}
                                 searchValue={search}
@@ -168,7 +168,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                     )
                                 }
                                 icon={buttonIcon}
-                                label="Cari Nomor VA"
+                                label="Cari Nomor Virtual Akun"
                             />
                             <CardBody className="px-0 overflow-scroll">
                                 <table
@@ -470,7 +470,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                                     }
                                                                 >
                                                                     <Tooltip
-                                                                        content="Expired VA"
+                                                                        content="Expiredkan VA"
                                                                         animate={{
                                                                             mount: {
                                                                                 scale: 1,
@@ -507,7 +507,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                                     }
                                                                 >
                                                                     <Tooltip
-                                                                        content="Delete VA"
+                                                                        content="Hapus VA"
                                                                         animate={{
                                                                             mount: {
                                                                                 scale: 1,

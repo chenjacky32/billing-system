@@ -114,13 +114,13 @@ export default function AddBillingCategory({
                             href={route("billingCategory.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Category
+                            Tarif Kategori Tagihan
                         </Link>
                         <Link
                             href={route("billingCategory.add")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add
+                            Tambah
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -129,7 +129,7 @@ export default function AddBillingCategory({
                         <Card className="w-full h-full p-12">
                             <div className="w-full h-fit">
                                 <PageHeader
-                                    title={"New Category Billing"}
+                                    title={"Tarif Kategori Tagihan Baru"}
                                     description={
                                         "Tambah Informasi Kategori Tagihan yang Baru"
                                     }

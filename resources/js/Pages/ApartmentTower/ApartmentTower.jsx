@@ -32,7 +32,7 @@ const TABLE_HEAD = [
     "No",
     "Nama Tower",
     "Apartement",
-    "Total Room",
+    "Total Unit",
     "Dibuat Oleh",
     "Edit",
 ];
@@ -158,7 +158,7 @@ const ApartmentTower = ({ auth, errors, data, filters, apartmentId }) => {
                             href={route("apartementTower.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Apartment Tower
+                            Tower Apartemen
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -172,7 +172,7 @@ const ApartmentTower = ({ auth, errors, data, filters, apartmentId }) => {
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Apartment Tower List"}
+                                title={"Daftar Tower Apartemen"}
                                 description={"Informasi Data Tower Apartemen"}
                                 buttonLabel={"Tambah Data Tower"}
                                 icon={buttonIcon}
@@ -392,7 +392,7 @@ const ApartmentTower = ({ auth, errors, data, filters, apartmentId }) => {
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Tower."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Data Tower."
                                                 }
                                                 showSearch={false}
                                             />

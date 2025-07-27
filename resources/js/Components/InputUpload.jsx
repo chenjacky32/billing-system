@@ -148,10 +148,10 @@ const InputUpload = ({
                         >
                             {fileName
                                 ? fileName
-                                : "Drop files here or click to upload"}
+                                : "Seret berkas ke sini atau klik untuk mengunggah."}
                         </span>
                         <span className="mt-1 text-sm text-gray-500">
-                            PNG or JPG (MAX. 2MB)
+                            Format PNG atau JPG (MAX. 2MB)
                         </span>
                     </div>
                 </div>

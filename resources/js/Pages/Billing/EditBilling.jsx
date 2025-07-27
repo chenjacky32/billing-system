@@ -576,7 +576,7 @@ export default function Edit({
                             })}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Edit Billing
+                            Edit
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -585,9 +585,7 @@ export default function Edit({
                             <div className="w-full h-fit">
                                 <PageHeader
                                     title={"Edit Billing Data"}
-                                    description={
-                                        "Edit Tagihan Billing Unit Owner"
-                                    }
+                                    description={"Edit Data Billing/Tagihan"}
                                     showSearch={false}
                                 />
                             </div>

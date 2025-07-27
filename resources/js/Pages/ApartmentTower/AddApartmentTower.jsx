@@ -65,20 +65,20 @@ const AddApartmentTower = ({
                             href={route("apartementTower.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Apartment Tower
+                            Tower Apartemen
                         </Link>
                         <Link
                             href={route("apartementTower.add")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add
+                            Tambah
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"New Apartment Tower"}
+                                title={"Data Tower Apartemen Baru"}
                                 description={
                                     "Tambah Informasi Data Tower Apartemen yang Baru"
                                 }
@@ -107,7 +107,7 @@ const AddApartmentTower = ({
                                             </p>
                                         )}
                                         <CustomInput
-                                            label="Nama Tower Apartment"
+                                            label="Nama Tower Apartemen"
                                             id="tower_name"
                                             value={data.tower_name}
                                             onChange={(e) =>
@@ -121,7 +121,7 @@ const AddApartmentTower = ({
                                         />
                                         <CustomInput
                                             type="number"
-                                            label="Total Room"
+                                            label="Total Unit"
                                             id="total_room"
                                             value={data.total_room}
                                             onChange={(e) =>

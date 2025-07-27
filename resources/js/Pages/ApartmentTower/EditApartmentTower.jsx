@@ -87,7 +87,7 @@ const EditApartmentTower = ({
                             href={route("apartementTower.index")}
                             className="opacity-60 text-primaryHover"
                         >
-                            Apartment Tower
+                            Tower Apartemen
                         </Link>
                         <Link
                             href={route("apartementTower.edit", { id: dataID })}
@@ -100,9 +100,9 @@ const EditApartmentTower = ({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Edit Apartement Data"}
-                                description={"Edit Informasi Apartemen"}
-                                label="Cari Nama Apartemen"
+                                title={"Edit Data Tower Apartemen"}
+                                description={"Edit Informasi Tower Apartemen"}
+                                label="Cari Nama Tower Apartemen"
                                 showSearch={false}
                             />
                             <CardBody className="h-full px-0 ">
@@ -142,7 +142,7 @@ const EditApartmentTower = ({
                                         />
                                         <CustomInput
                                             type="number"
-                                            label="Total Kamar"
+                                            label="Total Unit"
                                             id="total_room"
                                             value={data.total_room}
                                             onChange={(e) =>

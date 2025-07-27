@@ -147,11 +147,11 @@ const VaReport = ({ auth, corpCode }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Get VA Report
+                    Ambil Laporan Virtual Akun
                 </h2>
             }
         >
-            <Head title="Get VA Report" />
+            <Head title="Ambil Laporan Virtual Akun" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -166,7 +166,7 @@ const VaReport = ({ auth, corpCode }) => {
                             href={route("VAMonitoring.report")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            VA Report
+                            Ambil Laporan Virtual Akun
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -175,9 +175,9 @@ const VaReport = ({ auth, corpCode }) => {
                             <PageHeader
                                 showAddButton={false}
                                 showSearch={false}
-                                title={"VA Report"}
+                                title={"Ambil Laporan Virtual Akun"}
                                 description={
-                                    "Informasi Report Transaksi Virtual Account dari Sistem BRI"
+                                    "Mengambil Laporan Transaksi Virtual Account dari Sistem BRI"
                                 }
                                 icon={buttonIcon}
                                 label="Cari Nomor VA"

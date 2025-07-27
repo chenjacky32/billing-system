@@ -151,11 +151,11 @@ export default function BillingCategory({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unit Owner
+                    Tarif Kategori Tagihan
                 </h2>
             }
         >
-            <Head title="Billing Category" />
+            <Head title="Tarif Kategori Tagihan" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -170,7 +170,7 @@ export default function BillingCategory({
                             href={route("billingCategory.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Category
+                            Tarif Kategori Tagihan
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -184,7 +184,7 @@ export default function BillingCategory({
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Billing Category List"}
+                                title={"Daftar Tarif Kategori Tagihan"}
                                 description={
                                     "Informasi Data Kategori Tagihan pada Apartemen"
                                 }
@@ -411,7 +411,7 @@ export default function BillingCategory({
                                                                 }
                                                             >
                                                                 <Tooltip
-                                                                    content="Edit Billing Category"
+                                                                    content="Edit Tarif Kategori Tagihan"
                                                                     animate={{
                                                                         mount: {
                                                                             scale: 1,
@@ -489,7 +489,7 @@ export default function BillingCategory({
                                                                         as="button"
                                                                     >
                                                                         <Tooltip
-                                                                            content="Delete Billing Category"
+                                                                            content="Hapus Tarif Kategori Tagihan"
                                                                             animate={{
                                                                                 mount: {
                                                                                     scale: 1,
@@ -541,7 +541,7 @@ export default function BillingCategory({
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Billing Category."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Data Tarif Kategori Tagihan."
                                                 }
                                                 showSearch={false}
                                             />

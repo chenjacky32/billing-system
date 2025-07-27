@@ -73,7 +73,7 @@ const EditBillingFineRules = ({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Billing Fine Rules
+                    Aturan Denda
                 </h2>
             }
         >
@@ -97,7 +97,7 @@ const EditBillingFineRules = ({
                             href={route("billingFineRules.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Fine Rules
+                            Aturan Denda
                         </Link>
                         <Link
                             href={route("billingFineRules.add")}
@@ -110,7 +110,7 @@ const EditBillingFineRules = ({
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Edit Billing Fine Rules"}
+                                title={"Edit Aturan Denda Baru"}
                                 description={"Edit Informasi Ketentuan Denda"}
                                 showSearch={false}
                             />

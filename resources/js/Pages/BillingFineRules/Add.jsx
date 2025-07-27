@@ -62,7 +62,7 @@ const AddBillingFineRules = ({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Billing Fine Rules
+                    Aturan Denda
                 </h2>
             }
         >
@@ -86,20 +86,20 @@ const AddBillingFineRules = ({
                             href={route("billingFineRules.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Fine Rules
+                            Aturan Denda
                         </Link>
                         <Link
                             href={route("billingFineRules.add")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add
+                            Tambah
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Add Billing Fine Rules"}
+                                title={"Tambah Aturan Denda Baru"}
                                 description={
                                     "Tambah Informasi Ketentuan Denda yang Baru"
                                 }

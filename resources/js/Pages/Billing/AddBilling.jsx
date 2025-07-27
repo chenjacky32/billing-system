@@ -468,11 +468,11 @@ export default function AddBilling({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Add Billing Data
+                    Tambah Billing Data
                 </h2>
             }
         >
-            <Head title="Add Billing Data" />
+            <Head title="Tambah Billing Data" />
 
             <div className="py-12">
                 <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-[35rem] tablet:h-[55rem]">
@@ -493,7 +493,7 @@ export default function AddBilling({
                             href={route("billing.add")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Add Billing
+                            Tambah
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -501,9 +501,9 @@ export default function AddBilling({
                         <Card className="w-full h-full p-12">
                             <div className="w-full h-fit">
                                 <PageHeader
-                                    title={"New Billing Data"}
+                                    title={"Tambah Billing Data"}
                                     description={
-                                        "Tambah Tagihan Billing yang Baru"
+                                        "Tambah Billing/Tagihan yang Baru"
                                     }
                                     showSearch={false}
                                     className

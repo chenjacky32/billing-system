@@ -20,7 +20,7 @@ import "react-toastify/dist/ReactToastify.css";
 const TABLE_HEAD = [
     "Nama Apartemen",
     "Alamat",
-    "Total Kamar",
+    "Total Unit",
     "Dibuat Pada Tanggal",
     "Dibuat Oleh",
     "Edit",
@@ -71,7 +71,7 @@ export default function Apartement({ auth, errors, data, filters }) {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Apartment
+                    Apartemen
                 </h2>
             }
         >
@@ -90,7 +90,7 @@ export default function Apartement({ auth, errors, data, filters }) {
                             href={route("apartement.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Apartment
+                            Apartemen
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -101,8 +101,8 @@ export default function Apartement({ auth, errors, data, filters }) {
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Apartment List"}
-                                description={"Informasi Data Apartememen"}
+                                title={"Daftar Apartemen"}
+                                description={"Informasi Data Apartemen"}
                                 buttonLabel={"Tambah Apartemen"}
                                 icon={buttonIcon}
                                 addRoute={"apartement.add"}

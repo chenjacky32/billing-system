@@ -186,11 +186,11 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Billing Fine Rules
+                    Aturan Denda
                 </h2>
             }
         >
-            <Head title="Billing Fine Rules" />
+            <Head title="Aturan Denda Tagihan" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -205,7 +205,7 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                             href={route("billingFineRules.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Fine Rules
+                            Aturan Denda
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -219,11 +219,13 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Billing Fine Rules List"}
-                                description={"Informasi Data Ketentuan Denda"}
-                                buttonLabel={"Tambah Data Ketentuan"}
+                                title={"Daftar Aturan Denda Tagihan"}
+                                description={
+                                    "Informasi Data Aturan Denda Tagihan"
+                                }
+                                buttonLabel={"Tambah Data Aturan Denda"}
                                 icon={buttonIcon}
-                                label="Cari Data Ketentuan Denda"
+                                label="Cari Data Aturan Denda"
                                 addRoute={"billingFineRules.add"}
                             />
                             <CardBody className="px-0 overflow-scroll">
@@ -428,7 +430,7 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                                                 }
                                                             >
                                                                 <Tooltip
-                                                                    content="Edit Billing Fine Rules"
+                                                                    content="Edit Aturan Denda Tagihan"
                                                                     animate={{
                                                                         mount: {
                                                                             scale: 1,
@@ -496,7 +498,7 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                                                 {role ===
                                                                 "SUPER ADMIN" ? (
                                                                     <Tooltip
-                                                                        content="Delete Billing Fine Rules"
+                                                                        content="Hapus Aturan Denda Tagihan"
                                                                         animate={{
                                                                             mount: {
                                                                                 scale: 1,
@@ -588,7 +590,7 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Tower."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Data Aturan Denda Tagihan."
                                                 }
                                                 showSearch={false}
                                             />

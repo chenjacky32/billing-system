@@ -41,12 +41,12 @@ export default function AddAdmin({ auth, apartmenetData }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Add New Admin
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    Tambah Admin Baru
                 </h2>
             }
         >
-            <Head title="Add New Admin" />
+            <Head title="Tambah Admin Baru" />
 
             <div className="py-12">
                 <div className="max-w-1xl mx-auto sm:px-6 lg:px-8 w-full h-[35rem] tablet:h-[55rem]">
@@ -65,14 +65,14 @@ export default function AddAdmin({ auth, apartmenetData }) {
                         </Link>
                         <Link
                             href={route("admin.add")}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Add Admin
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 title={"New Admin Data"}
                                 description={
@@ -80,7 +80,7 @@ export default function AddAdmin({ auth, apartmenetData }) {
                                 }
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-col justify-start tablet:flex-col">
                                         <CustomInput
@@ -120,14 +120,14 @@ export default function AddAdmin({ auth, apartmenetData }) {
                                             type="password"
                                         />
 
-                                        <div className="mt-8 w-full">
+                                        <div className="w-full mt-8">
                                             <InputSelect
                                                 value={apartment}
                                                 onChange={handleApartmentChange}
                                                 options={apartmenetData}
                                             />
                                             {errors.apartment_id && (
-                                                <p className="text-red-500 text-sm ml-0 mt-3">
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.apartment_id}
                                                 </p>
                                             )}
@@ -135,7 +135,7 @@ export default function AddAdmin({ auth, apartmenetData }) {
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
                                                 variant="fill"
                                                 onClick={handleSubmit}

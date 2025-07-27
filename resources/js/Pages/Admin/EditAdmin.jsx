@@ -45,7 +45,7 @@ export default function EditAdmin({ auth, apartmenetData, adminData }) {
             auth={auth}
             errors={errors}
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Add New Admin
                 </h2>
             }
@@ -71,20 +71,20 @@ export default function EditAdmin({ auth, apartmenetData, adminData }) {
                             href={route("admin.edit", {
                                 id: dataID,
                             })}
-                            className="opacity-100 text-primary font-bold"
+                            className="font-bold opacity-100 text-primary"
                         >
                             Edit Admin
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
                     <div className="bg-white overflow-hidden sm:rounded-lg shadow-[0_1px_100px_#c3b0f7] h-full">
-                        <Card className=" p-12 h-full w-full">
+                        <Card className="w-full h-full p-12 ">
                             <PageHeader
-                                title={"Edit Admin Data"}
+                                title={"Edit Data Admin"}
                                 description={"Edit Data Admin pada Apartemen"}
                                 showSearch={false}
                             />
-                            <CardBody className=" px-0 h-full  ">
+                            <CardBody className="h-full px-0 ">
                                 <form onSubmit={handleSubmit}>
                                     <div className="flex flex-col justify-start tablet:flex-col">
                                         <CustomInput
@@ -109,7 +109,7 @@ export default function EditAdmin({ auth, apartmenetData, adminData }) {
                                         />
 
                                         <CustomInput
-                                            label="New Password (Optional)"
+                                            label="Password Baru (Opsional)"
                                             id="new_password"
                                             value={data.new_password}
                                             onChange={(e) =>
@@ -123,14 +123,14 @@ export default function EditAdmin({ auth, apartmenetData, adminData }) {
                                             type="password"
                                         />
 
-                                        <div className="mt-8 w-full">
+                                        <div className="w-full mt-8">
                                             <InputSelect
                                                 value={apartment}
                                                 onChange={handleApartmentChange}
                                                 options={apartmenetData}
                                             />
                                             {errors.apartment_id && (
-                                                <p className="text-red-500 text-sm ml-0 mt-3">
+                                                <p className="mt-3 ml-0 text-sm text-red-500">
                                                     {errors.apartment_id}
                                                 </p>
                                             )}
@@ -138,7 +138,7 @@ export default function EditAdmin({ auth, apartmenetData, adminData }) {
                                     </div>
 
                                     <div className="flex flex-row mt-8">
-                                        <div className="flex w-max gap-4 ml-0">
+                                        <div className="flex gap-4 ml-0 w-max">
                                             <Button
                                                 variant="fill"
                                                 onClick={handleSubmit}

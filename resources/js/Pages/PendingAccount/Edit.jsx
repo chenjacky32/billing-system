@@ -127,7 +127,7 @@ const EditPendingAccount = ({
                             href={route("accountActivation.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Account Management
+                            Daftar Akun
                         </Link>
                         <Link
                             href={route("accountActivation.edit", {
@@ -135,7 +135,7 @@ const EditPendingAccount = ({
                             })}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Activation
+                            Aktivasi
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -143,9 +143,9 @@ const EditPendingAccount = ({
                         <Card className="w-full h-full p-12 ">
                             <div className="w-full h-fit">
                                 <PageHeader
-                                    title={"Account Pending"}
+                                    title={"Kelola Aktivasi Akun"}
                                     description={
-                                        "Informasi Detail Akun Pending"
+                                        "Informasi Detail Akun Pemilik/Penghuni yang mau diaktivasi"
                                     }
                                     showSearch={false}
                                 />
@@ -380,7 +380,7 @@ const EditPendingAccount = ({
                                                     onClick={handleSubmit}
                                                     loading={processing}
                                                 >
-                                                    Save
+                                                    Simpan
                                                 </Button>
                                             </div>
                                         </div>

@@ -86,7 +86,7 @@ export default function Admin({ auth, errors, data, filters, apartmenetData }) {
                 </h2>
             }
         >
-            <Head title="Admin List" />
+            <Head title="Daftar Admin" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -115,9 +115,9 @@ export default function Admin({ auth, errors, data, filters, apartmenetData }) {
                                         "search"
                                     )
                                 }
-                                title={"Admin List"}
+                                title={"Daftar Admin"}
                                 description={
-                                    "Informasi Data Adin pada Masing-masing Apartemen"
+                                    "Informasi Data Admin pada Masing-masing Apartemen"
                                 }
                                 buttonLabel={"Tambah Admin"}
                                 icon={buttonIcon}

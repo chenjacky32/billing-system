@@ -73,11 +73,11 @@ export default function OwnerReport({ auth, errors, data, filters }) {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Unit Owner Report
+                    Laporan Pemilik/Penghuni Unit
                 </h2>
             }
         >
-            <Head title="Unit Owner Report" />
+            <Head title="Laporan Pemilik/Penghuni Unit" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -92,7 +92,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                             href={route("owner.report.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Unit Owner Report
+                            Laporan Berdasarkan Pemilik/Penghuni Unit
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -103,13 +103,13 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                 handleSearch={(event) =>
                                     handleSearch(event.target.value, "search")
                                 }
-                                title={"Unit Owner Report"}
+                                title={"Laporan Pemilik/Penghuni Unit"}
                                 description={
-                                    "Informasi Data Tagihan dari Setiap Owner"
+                                    "Informasi Data Tagihan dari Setiap Pemilik/Penghuni Unit"
                                 }
                                 buttonLabel={"Tambah Unit Owner"}
                                 addRoute={"unitowner.add"}
-                                label="Cari Nama Unit Owner / Nomor Unit"
+                                label="Cari Nama Pemilik / Nomor Unit"
                                 showAddButton={false}
                             />
                             <CardBody className="px-0">
@@ -333,7 +333,7 @@ export default function OwnerReport({ auth, errors, data, filters }) {
                                                                     as="button"
                                                                 >
                                                                     <Tooltip
-                                                                        content={`View ${user.fullname}'s Billing History`}
+                                                                        content={`Lihat Detail Histori - ${user.fullname}`}
                                                                         animate={{
                                                                             mount: {
                                                                                 scale: 1,

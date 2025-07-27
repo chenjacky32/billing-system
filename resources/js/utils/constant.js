@@ -1,4 +1,4 @@
-export const TypeBilling = ["Air", "Listrik", "Maintenance", "Parkir"];
+export const TypeBilling = ["Air", "Listrik", "Maintenance"];
 export const stickyColumnStyles = {
     baseClass: "sticky-col",
     background: "bg-blue-50",

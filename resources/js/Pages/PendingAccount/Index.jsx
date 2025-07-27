@@ -106,11 +106,11 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Account Management
+                    Daftar Akun
                 </h2>
             }
         >
-            <Head title=" Account Managment" />
+            <Head title="  Daftar Akun" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -125,7 +125,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                             href={route("accountActivation.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Account Management
+                            Daftar Akun
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -136,8 +136,10 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                 handleSearch={(e) =>
                                     handleInputChange(e.target.value, "search")
                                 }
-                                title={"Account Managment"}
-                                description={"Informasi Data Akun User"}
+                                title={"Daftar Akun"}
+                                description={
+                                    "Informasi Data Akun Pemilik/Penghuni Unit"
+                                }
                                 showAddButton={false}
                                 label="Cari Nama Akun"
                                 hasFilter={true}

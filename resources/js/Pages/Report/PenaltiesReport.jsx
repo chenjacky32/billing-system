@@ -22,6 +22,7 @@ import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
 import { useEffect } from "react";
 
 const TABLE_HEAD = [
+    "Id-Billing",
     "No Unit",
     "Nama Pemilik",
     "Tower",
@@ -193,11 +194,11 @@ export default function PenaltiesReport({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Overdue Billing
+                    Tagihan Belum Lunas & Sudah Jatuh Tempo
                 </h2>
             }
         >
-            <Head title="Billing List" />
+            <Head title="Tagihan Belum Lunas & Sudah Jatuh Tempo" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -212,7 +213,7 @@ export default function PenaltiesReport({
                             href={route("billing.penalties.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Overdue Billing
+                            Tagihan Belum Lunas & Sudah Jatuh Tempo
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -220,7 +221,9 @@ export default function PenaltiesReport({
                         <Card className="w-full h-full p-12 ">
                             <PageHeader
                                 showInput={false}
-                                title={"Overdue Billing"}
+                                title={
+                                    "Tagihan Belum Lunas & Sudah Jatuh Tempo"
+                                }
                                 description={
                                     "Informasi Data Billing Yang Belum Lunas Dan Sudah Jatuh Tempo"
                                 }
@@ -261,7 +264,7 @@ export default function PenaltiesReport({
                                 <div className="flex flex-row flex-wrap justify-start w-full">
                                     <div className="mr-4 w-[21rem] mt-5 tablet:w-full">
                                         <InputSearch
-                                            label="Cari Nama Unit Owner / Nomor Unit"
+                                            label="Cari Nama Pemilik / Nomor Unit"
                                             searchValue={search}
                                             handleSearch={(event) =>
                                                 handleInputChange(
@@ -404,6 +407,25 @@ export default function PenaltiesReport({
                                                                         variant="small"
                                                                         className="font-normal capitalize"
                                                                     >
+                                                                        {id ??
+                                                                            "-"}
+                                                                    </Typography>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} 
+                                                                `}
+                                                                style={{
+                                                                    left: stickyColumnStyles
+                                                                        .positions[1],
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="font-normal capitalize"
+                                                                    >
                                                                         {residence?.roomNo ??
                                                                             "-"}
                                                                     </Typography>
@@ -414,7 +436,7 @@ export default function PenaltiesReport({
                                                                 className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background}`}
                                                                 style={{
                                                                     left: stickyColumnStyles
-                                                                        .positions[1],
+                                                                        .positions[2],
                                                                 }}
                                                             >
                                                                 <div className="flex flex-col">
@@ -434,7 +456,7 @@ export default function PenaltiesReport({
                                                                 className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
                                                                 style={{
                                                                     left: stickyColumnStyles
-                                                                        .positions[2],
+                                                                        .positions[3],
                                                                 }}
                                                             >
                                                                 <div className="flex flex-col">
@@ -449,11 +471,9 @@ export default function PenaltiesReport({
                                                             </td>
 
                                                             <td
-                                                                className={`${classes} ${stickyColumnStyles.baseClass} ${stickyColumnStyles.background} `}
-                                                                style={{
-                                                                    left: stickyColumnStyles
-                                                                        .positions[3],
-                                                                }}
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
                                                                 <div className="flex flex-col">
                                                                     <Typography

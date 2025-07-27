@@ -52,7 +52,7 @@ const TABLE_HEAD = [
     "Tanggal dibayar",
     "Dibuat Oleh",
     "Edit",
-    "Delete",
+    "Hapus",
 ];
 
 export default function Billing({
@@ -362,7 +362,7 @@ export default function Billing({
                 </h2>
             }
         >
-            <Head title="Billing List" />
+            <Head title="Daftar Billing " />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8 ">
@@ -392,14 +392,14 @@ export default function Billing({
                                         "search"
                                     )
                                 }
-                                title={"Billing List"}
+                                title={"Daftar Billing"}
                                 description={
-                                    "Informasi Data Billing pada Masing-masing Unit Owner"
+                                    "Informasi Data Billing pada Masing-masing Pemilik/Penghuni Unit"
                                 }
                                 buttonLabel={"Tambah Billing"}
                                 icon={buttonIcon}
                                 addRoute={"billing.add"}
-                                label="Cari Nama Unit Owner / Nomor Unit"
+                                label="Cari Nama Pemilik/Penghuni atau Nomor Unit"
                                 hasFilter={true}
                             />
 
@@ -933,7 +933,7 @@ export default function Billing({
                                                                 }
                                                             >
                                                                 <Tooltip
-                                                                    content="Delete Billing"
+                                                                    content="Hapus Billing"
                                                                     animate={{
                                                                         mount: {
                                                                             scale: 1,
@@ -997,7 +997,7 @@ export default function Billing({
                                             <PageHeader
                                                 title={"Otorisasi Diperlukan !"}
                                                 description={
-                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Billing."
+                                                    "Silahkan masukkan kata sandi untuk melanjutkan proses Edit Data Billing."
                                                 }
                                                 showSearch={false}
                                             />

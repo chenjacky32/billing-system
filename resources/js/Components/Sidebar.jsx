@@ -45,7 +45,7 @@ export default function Sidebar({ user, classname, auth }) {
                 <Link href={route("dashboard")}>
                     <ApplicationLogo className="bg-white p-3 rounded-2xl shadow-[0_1px_30px_#E8E3E7]" />
                 </Link>
-                <Typography>Good Evening, {user}</Typography>
+                <Typography>Halo, {user}</Typography>
             </div>
             <List>
                 <Link href={route("dashboard")}>
@@ -94,7 +94,7 @@ export default function Sidebar({ user, classname, auth }) {
                                                 className="w-5 h-3"
                                             />
                                         </ListItemPrefix>
-                                        Admin
+                                        Daftar Admin
                                     </ListItem>
                                 </Link>
                             )}
@@ -106,7 +106,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Apartment
+                                    Apartemen
                                 </ListItem>
                             </Link>
                             <Link href={route("apartementTower.index")}>
@@ -117,7 +117,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Apartment Tower
+                                    Tower Apartemen
                                 </ListItem>
                             </Link>
                             <Link href={route("accountActivation.index")}>
@@ -128,7 +128,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Account Management
+                                    Daftar Akun Pemilik/Penghuni Unit
                                 </ListItem>
                             </Link>
                             <Link href={route("unitOwnerApartment.index")}>
@@ -139,7 +139,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Unit Owner List
+                                    Daftar Pemilik/Penghuni Unit
                                 </ListItem>
                             </Link>
                             <Link href={route("billingCategory.index")}>
@@ -150,7 +150,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Billing Category
+                                    Tarif Kategori Tagihan
                                 </ListItem>
                             </Link>
                             <Link href={route("billingFineRules.index")}>
@@ -161,7 +161,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Billing Fine Rules
+                                    Aturan Pengenaan Denda Tagihan
                                 </ListItem>
                             </Link>
                         </List>
@@ -200,7 +200,7 @@ export default function Sidebar({ user, classname, auth }) {
                                 <BuildingOffice2Icon className="w-5 h-5 group-hover:text-primary" />
                             </ListItemPrefix>
                             <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
-                                VA (Virtual Account)
+                                VA (Virtual Akun)
                             </Typography>
                         </AccordionHeader>
                     </ListItem>
@@ -214,7 +214,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    VA Monitoring
+                                    Pengelolaan Virtual Akun
                                 </ListItem>
                             </Link>
                         </List>
@@ -227,7 +227,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Get VA Report
+                                    Ambil Laporan Virtual Akun
                                 </ListItem>
                             </Link>
                         </List>
@@ -257,7 +257,7 @@ export default function Sidebar({ user, classname, auth }) {
                                 <DocumentTextIcon className="w-5 h-5 group-hover:text-primary" />
                             </ListItemPrefix>
                             <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
-                                Report
+                                Laporan
                             </Typography>
                         </AccordionHeader>
                     </ListItem>
@@ -271,7 +271,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Paid Billing
+                                    Tagihan Lunas
                                 </ListItem>
                             </Link>
                             <Link href={route("billing.unpaid.index")}>
@@ -282,7 +282,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Unpaid Billing
+                                    Tagihan Belum Lunas & Belum Jatuh Tempo
                                 </ListItem>
                             </Link>
                             <Link href={route("billing.penalties.index")}>
@@ -293,7 +293,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Overdue Billing
+                                    Tagihan Belum Lunas & Sudah Jatuh Tempo
                                 </ListItem>
                             </Link>
                             <Link href={route("owner.report.index")}>
@@ -304,7 +304,7 @@ export default function Sidebar({ user, classname, auth }) {
                                             className="w-5 h-3"
                                         />
                                     </ListItemPrefix>
-                                    Unit Owner Report
+                                    Laporan Berdasarkan Pemilik/Penghuni Unit
                                 </ListItem>
                             </Link>
                         </List>
@@ -318,7 +318,7 @@ export default function Sidebar({ user, classname, auth }) {
                         <ListItemPrefix>
                             <UserCircleIcon className="w-5 h-5" />
                         </ListItemPrefix>
-                        Profile
+                        Profil Akun
                     </ListItem>
                 </Link>
                 <Link href={route("logout")} method="post" as="button">

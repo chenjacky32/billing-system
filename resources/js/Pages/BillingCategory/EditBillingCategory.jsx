@@ -108,7 +108,7 @@ export default function EditBillingCategory({
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Add Billing Category
+                    Edit Tarif Kategori Tagihan
                 </h2>
             }
         >
@@ -127,7 +127,7 @@ export default function EditBillingCategory({
                             href={route("billingCategory.index")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Billing Category
+                            Tarif Kategori Tagihan
                         </Link>
                         <Link
                             href={route("billingCategory.edit", {
@@ -144,7 +144,7 @@ export default function EditBillingCategory({
                         <Card className="w-full h-full p-12 ">
                             <div className="w-full h-fit">
                                 <PageHeader
-                                    title={"Edit Category Billing"}
+                                    title={"Edit Tarif Kategori Tagihan"}
                                     description={
                                         "Edit Informasi Kategori Tagihan"
                                     }
