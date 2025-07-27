@@ -217,7 +217,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                 const isLast =
                                                     index === vaData.length - 1;
                                                 const classes = isLast
-                                                    ? "p-4"
+                                                    ? "pl-4"
                                                     : "pl-4 border-b border-blue-gray-150";
 
                                                 const {
@@ -443,16 +443,22 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                                 >
                                                                     {status ===
                                                                     1 ? (
-                                                                        "-"
+                                                                        <div className="flex items-center text-black min-h-12">
+                                                                            <span>
+                                                                                -
+                                                                            </span>
+                                                                        </div>
                                                                     ) : (
-                                                                        <CountdownTimer
-                                                                            startDate={
-                                                                                transactionDate
-                                                                            }
-                                                                            endDate={
-                                                                                expiredDate
-                                                                            }
-                                                                        />
+                                                                        <div className="flex items-center min-h-12">
+                                                                            <CountdownTimer
+                                                                                startDate={
+                                                                                    transactionDate
+                                                                                }
+                                                                                endDate={
+                                                                                    expiredDate
+                                                                                }
+                                                                            />
+                                                                        </div>
                                                                     )}
                                                                 </Typography>
                                                             </div>
@@ -460,75 +466,87 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
 
                                                         <td className={classes}>
                                                             {status === 1 ? (
-                                                                "-"
+                                                                <div className="flex items-center text-black min-h-12">
+                                                                    <span>
+                                                                        -
+                                                                    </span>
+                                                                </div>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleExpired(
-                                                                            id
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Tooltip
-                                                                        content="Expiredkan VA"
-                                                                        animate={{
-                                                                            mount: {
-                                                                                scale: 1,
-                                                                                y: 0,
-                                                                            },
-                                                                            unmount:
-                                                                                {
-                                                                                    scale: 0,
-                                                                                    y: 25,
-                                                                                },
-                                                                        }}
-                                                                        className="bg-teal-500"
+                                                                <div className="flex items-center min-h-12">
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleExpired(
+                                                                                id
+                                                                            )
+                                                                        }
                                                                     >
-                                                                        <IconButton
-                                                                            color="teal"
-                                                                            variant="filled"
+                                                                        <Tooltip
+                                                                            content="Expiredkan VA"
+                                                                            animate={{
+                                                                                mount: {
+                                                                                    scale: 1,
+                                                                                    y: 0,
+                                                                                },
+                                                                                unmount:
+                                                                                    {
+                                                                                        scale: 0,
+                                                                                        y: 25,
+                                                                                    },
+                                                                            }}
+                                                                            className="bg-teal-500"
                                                                         >
-                                                                            <NoSymbolIcon className="w-4 h-4" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </button>
+                                                                            <IconButton
+                                                                                color="teal"
+                                                                                variant="filled"
+                                                                            >
+                                                                                <NoSymbolIcon className="w-4 h-4" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </button>
+                                                                </div>
                                                             )}
                                                         </td>
 
                                                         <td className={classes}>
                                                             {status === 1 ? (
-                                                                "-"
+                                                                <div className="flex items-center text-black min-h-12">
+                                                                    <span>
+                                                                        -
+                                                                    </span>
+                                                                </div>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() =>
-                                                                        handleDelete(
-                                                                            id
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Tooltip
-                                                                        content="Hapus VA"
-                                                                        animate={{
-                                                                            mount: {
-                                                                                scale: 1,
-                                                                                y: 0,
-                                                                            },
-                                                                            unmount:
-                                                                                {
-                                                                                    scale: 0,
-                                                                                    y: 25,
-                                                                                },
-                                                                        }}
-                                                                        className="bg-red-600"
+                                                                <div className="flex items-center min-h-12">
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                id
+                                                                            )
+                                                                        }
                                                                     >
-                                                                        <IconButton
-                                                                            color="red"
-                                                                            variant="filled"
+                                                                        <Tooltip
+                                                                            content="Hapus VA"
+                                                                            animate={{
+                                                                                mount: {
+                                                                                    scale: 1,
+                                                                                    y: 0,
+                                                                                },
+                                                                                unmount:
+                                                                                    {
+                                                                                        scale: 0,
+                                                                                        y: 25,
+                                                                                    },
+                                                                            }}
+                                                                            className="bg-red-600"
                                                                         >
-                                                                            <TrashIcon className="w-4 h-4" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </button>
+                                                                            <IconButton
+                                                                                color="red"
+                                                                                variant="filled"
+                                                                            >
+                                                                                <TrashIcon className="w-4 h-4" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </button>
+                                                                </div>
                                                             )}
                                                         </td>
                                                     </tr>
