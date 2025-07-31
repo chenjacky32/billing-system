@@ -143,6 +143,51 @@ export default function BillingCategory({
         }
     }, [flash.message, flash.error]);
 
+    const handleDelete = (id) => {
+        toast.info(
+            <div className="p-4">
+                <p>
+                    Apakah Anda yakin ingin menghapus data Tarif Kategori ini?
+                </p>
+                <div className="flex justify-end mt-4">
+                    <button
+                        className="px-4 py-2 mr-2 text-white bg-red-500 rounded hover:bg-red-700"
+                        onClick={() => deleteData(id)}
+                    >
+                        Ya
+                    </button>
+                    <button
+                        className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-700"
+                        onClick={() => toast.dismiss()}
+                    >
+                        Tidak
+                    </button>
+                </div>
+            </div>,
+            {
+                icon: false,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false,
+                autoClose: false,
+                hideProgressBar: true,
+                position: "top-center",
+            }
+        );
+    };
+
+    const deleteData = (id) => {
+        router.post(
+            "/billing-category/delete",
+            { id },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onFinish: () => toast.dismiss(),
+            }
+        );
+    };
+
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
     return (
@@ -178,7 +223,9 @@ export default function BillingCategory({
                         <Card className="w-full h-full p-12">
                             <PageHeader
                                 showAddButton={
-                                    role === "SUPER ADMIN" ? true : false
+                                    role === "SUPER ADMIN" || role === "OWNER"
+                                        ? true
+                                        : false
                                 }
                                 searchValue={search}
                                 handleSearch={(event) =>
@@ -426,7 +473,9 @@ export default function BillingCategory({
                                                                     className="bg-green-600"
                                                                 >
                                                                     {role ===
-                                                                    "SUPER ADMIN" ? (
+                                                                        "SUPER ADMIN" ||
+                                                                    role ===
+                                                                        "OWNER" ? (
                                                                         <>
                                                                             <Link
                                                                                 href={route(
@@ -477,40 +526,37 @@ export default function BillingCategory({
                                                                 }
                                                             >
                                                                 {role ===
-                                                                "SUPER ADMIN" ? (
-                                                                    <Link
-                                                                        href={route(
-                                                                            "billingCategory.delete",
-                                                                            {
-                                                                                id: id,
-                                                                            }
-                                                                        )}
-                                                                        method="post"
-                                                                        as="button"
-                                                                    >
-                                                                        <Tooltip
-                                                                            content="Hapus Tarif Kategori Tagihan"
-                                                                            animate={{
-                                                                                mount: {
-                                                                                    scale: 1,
-                                                                                    y: 0,
+                                                                    "SUPER ADMIN" ||
+                                                                role ===
+                                                                    "OWNER" ? (
+                                                                    <Tooltip
+                                                                        content="Hapus Tarif Kategori Tagihan"
+                                                                        animate={{
+                                                                            mount: {
+                                                                                scale: 1,
+                                                                                y: 0,
+                                                                            },
+                                                                            unmount:
+                                                                                {
+                                                                                    scale: 0,
+                                                                                    y: 25,
                                                                                 },
-                                                                                unmount:
-                                                                                    {
-                                                                                        scale: 0,
-                                                                                        y: 25,
-                                                                                    },
+                                                                        }}
+                                                                        className="bg-red-600"
+                                                                    >
+                                                                        <Button
+                                                                            size="md"
+                                                                            variant="gradient"
+                                                                            color="red"
+                                                                            onClick={() => {
+                                                                                handleDelete(
+                                                                                    id
+                                                                                );
                                                                             }}
-                                                                            className="bg-red-600"
                                                                         >
-                                                                            <IconButton
-                                                                                color="red"
-                                                                                variant="filled"
-                                                                            >
-                                                                                <TrashIcon className="w-4 h-4" />
-                                                                            </IconButton>
-                                                                        </Tooltip>
-                                                                    </Link>
+                                                                            <TrashIcon className="w-4 h-4" />
+                                                                        </Button>
+                                                                    </Tooltip>
                                                                 ) : (
                                                                     <Tooltip content="You don't have permission">
                                                                         <IconButton

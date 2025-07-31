@@ -99,7 +99,7 @@ const UserApartment = ({
     };
 
     const handleEditClick = (id) => {
-        if (role === "SUPER ADMIN") {
+        if (role === "SUPER ADMIN" || role === "OWNER") {
             const ownerSelected = userApartments.data.find(
                 (item) => item.id === id
             );

@@ -213,7 +213,9 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                         <Card className="w-full h-full p-12">
                             <PageHeader
                                 showAddButton={
-                                    role === "SUPER ADMIN" ? true : false
+                                    role === "SUPER ADMIN" || role === "OWNER"
+                                        ? true
+                                        : false
                                 }
                                 searchValue={search}
                                 handleSearch={(event) =>
@@ -445,7 +447,9 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                                                     className="bg-green-600"
                                                                 >
                                                                     {role ===
-                                                                    "SUPER ADMIN" ? (
+                                                                        "SUPER ADMIN" ||
+                                                                    role ===
+                                                                        "OWNER" ? (
                                                                         <>
                                                                             <Link
                                                                                 href={route(
@@ -496,7 +500,9 @@ const BillingFineRules = ({ auth, errors, data, filters, apartmentId }) => {
                                                                 }
                                                             >
                                                                 {role ===
-                                                                "SUPER ADMIN" ? (
+                                                                    "SUPER ADMIN" ||
+                                                                role ===
+                                                                    "OWNER" ? (
                                                                     <Tooltip
                                                                         content="Hapus Aturan Denda Tagihan"
                                                                         animate={{

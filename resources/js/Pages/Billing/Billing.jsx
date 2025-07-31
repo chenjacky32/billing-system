@@ -269,15 +269,22 @@ export default function Billing({
     };
 
     const deleteData = (id) => {
-        router.post(
-            "/billing/delete",
-            { id },
-            {
-                preserveScroll: true,
-                preserveState: false,
-                onFinish: () => toast.dismiss(),
-            }
-        );
+        if (role === "SUPER ADMIN" || role === "OWNER") {
+            router.post(
+                "/billing/delete",
+                { id },
+                {
+                    preserveScroll: true,
+                    preserveState: false,
+                    onFinish: () => toast.dismiss(),
+                }
+            );
+        } else {
+            toast.dismiss();
+            toast.error(
+                "Anda tidak memiliki hak akses untuk menghapus data Billing ini"
+            );
+        }
     };
 
     const handleClickEdit = ({ id, apartId }) => {
@@ -884,7 +891,9 @@ export default function Billing({
                                                                     className="bg-green-600"
                                                                 >
                                                                     {role ===
-                                                                    "SUPER ADMIN" ? (
+                                                                        "SUPER ADMIN" ||
+                                                                    role ===
+                                                                        "OWNER" ? (
                                                                         <>
                                                                             <Link
                                                                                 href={route(
