@@ -18,19 +18,25 @@ class VerifyUserSessionId
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check()){
+            /** @var \App\Models\User $user */
             $user = Auth::user();
             $currentSession = session()->getId();
 
-            if ($user->session_id && $user->session_id !== $currentSession){
-                Auth::guard('web')->logout();
+            if ($user->session_id && $user->session_id !== $currentSession) {
+                $oldSessionPath = storage_path('framework/sessions/' . $user->session_id);
+                
+                if (!file_exists($oldSessionPath)) {
+                    $user->session_id = $currentSession;
+                    $user->save();
+                } else {
+                    Auth::guard('web')->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()->route('login')->withErrors([
-                    'email' => trans('auth.session-middleware-failed')
-                ]);
-
+                    return redirect()->route('login')->withErrors([
+                        'email' => trans('auth.session-middleware-failed'),
+                    ]);
+                }
             }
         }
 
