@@ -8,6 +8,8 @@ import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import { Button } from "@material-tailwind/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,6 +23,15 @@ export default function Login({ status, canResetPassword }) {
             reset("password");
         };
     }, []);
+
+    useEffect(() => {
+        if (errors?.email) {
+            toast.error(errors?.email);
+        }
+        if (errors?.password) {
+            toast.error(errors?.password);
+        }
+    }, [errors?.email, errors?.password]);
 
     const handleOnChange = (event) => {
         setData(
@@ -42,7 +53,7 @@ export default function Login({ status, canResetPassword }) {
             <Head title="Log in" />
 
             {status && (
-                <div className="mb-4 font-medium text-sm text-green-600">
+                <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
@@ -61,7 +72,7 @@ export default function Login({ status, canResetPassword }) {
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="block w-full mt-1"
                         autoComplete="username"
                         isFocused={true}
                         onChange={handleOnChange}
@@ -78,7 +89,7 @@ export default function Login({ status, canResetPassword }) {
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="block w-full mt-1"
                         autoComplete="current-password"
                         onChange={handleOnChange}
                     />
@@ -103,7 +114,7 @@ export default function Login({ status, canResetPassword }) {
                     {/* {canResetPassword && (
                         <Link
                             href={route("password.request")}
-                            className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="text-sm text-gray-600 underline rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Forgot your password?
                         </Link>
@@ -119,6 +130,7 @@ export default function Login({ status, canResetPassword }) {
                     </Button>
                 </div>
             </form>
+            <ToastContainer />
         </GuestLayout>
     );
 }

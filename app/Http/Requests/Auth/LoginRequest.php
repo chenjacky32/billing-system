@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\File;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Session;
 
 class LoginRequest extends FormRequest
 {
@@ -40,6 +44,9 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        $user = User::where('email', $this->email)->first();
+        $this->checkAndClearExpiredSession($user);
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
@@ -81,5 +88,32 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+    }
+
+    public function checkAndClearExpiredSession(?User $user)
+    {   
+        if (!$user || !$user->session_id) {
+            return;
+        }
+
+        if ($user && $user->session_id) {
+            $sessionFile = storage_path('framework/sessions/' . $user->session_id);
+            
+            if (File::exists($sessionFile)) {
+                $lastModified = File::lastModified($sessionFile);
+                $sessionLifetime = config('session.lifetime') * 60; 
+                $expiresAt = $lastModified + $sessionLifetime;
+
+                    if (time() < $expiresAt) {
+                        throw ValidationException::withMessages([
+                            'email' => trans('auth.session-failed')
+                        ]);
+                    } else {
+                        File::delete($sessionFile);
+                        $user->session_id = null;
+                        $user->save();
+                    }
+            }
+        }
     }
 }

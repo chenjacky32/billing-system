@@ -54,7 +54,7 @@ Route::get('/unauthorized', function () {
 
 
 // ! SUPER ADMIN ROUTES:
-Route::middleware(['auth', 'verified', 'role:SUPER ADMIN'])->group(function () {
+Route::middleware(['auth','verify.session', 'verified', 'role:SUPER ADMIN'])->group(function () {
     // !Apartment
     Route::get('/apartement', [ApartementController::class, "index"])->name('apartement.index');
     Route::get('/apartement/add', function () {
@@ -72,7 +72,7 @@ Route::middleware(['auth', 'verified', 'role:SUPER ADMIN'])->group(function () {
 });
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','verify.session'])->group(function () {
 
     // !Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
