@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\UnitOwnerList;
 use App\Http\Controllers\AccountActivationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartementController;
@@ -141,8 +142,10 @@ Route::middleware(['auth','verify.session'])->group(function () {
     Route::get('/va-monitoring/report', [VAMonitoringController::class, 'reportVaReport'])->name('VAMonitoring.report');
     Route::post('/va-monitoring/history', [VAMonitoringController::class, 'getHistoryVATransaction'])->name('VAMonitoring.historyTransaction');
 
-    // !Export Billing List
+    // !Export Data
     Route::get('/billing/export', [BillingController::class, 'export'])->name('billing.export');
+    Route::get('/account-management/export', [AccountActivationController::class, 'export'])->name('accountManagement.export');
+    Route::get('/unit-owner-apartment/export', [UnitOwnerApartmentController::class, 'export'])->name('unitOwnerApartment.export');
 
     // !Report
     Route::get('/paid-billing-report', [ReportController::class, 'showPaid'])->name('billing.paid.index');

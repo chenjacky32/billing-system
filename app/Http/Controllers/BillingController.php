@@ -966,8 +966,9 @@ class BillingController extends Controller
                 }
 
                 return $billing;
-            });
-            
+            }); 
+
+            libxml_use_internal_errors(true);
             return Excel::download(new ExportsBilling(data: $data), 'billing.xlsx');
     }
 }

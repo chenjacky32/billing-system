@@ -40,7 +40,7 @@ class UserApartmentOkgo extends Model
         return $this->belongsTo(ApartmentType::class, 'apartmentType', 'id');
     }
 
-    public function apartment()
+    public function apartmentRelation()
     {
         return $this->belongsTo(Apartment::class,'apartmentId','id');
     }

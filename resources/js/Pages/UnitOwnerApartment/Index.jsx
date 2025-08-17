@@ -15,6 +15,7 @@ import {
     Button,
 } from "@material-tailwind/react";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
@@ -47,7 +48,7 @@ const UserApartment = ({
 }) => {
     const role = auth.user.role;
     const { flash } = usePage().props;
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(filters?.search ?? "");
     const [isPasswordVerified, setIsPasswordVerified] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [ownerId, setOwnerId] = useState(null);
@@ -220,6 +221,7 @@ const UserApartment = ({
             { search: type === "search" ? value : search },
             {
                 preserveState: true,
+                preserveScroll: true,
                 replace: true,
             }
         );
@@ -237,10 +239,17 @@ const UserApartment = ({
         }
     }
 
+    function handleExport() {
+        const params = new URLSearchParams({
+            search: filters.search || "",
+        }).toString();
+        window.location.href =
+            route("unitOwnerApartment.export") + "?" + params;
+    }
+
     useEffect(() => {
         if (flash.message) {
             toast.success(flash.message);
-            // console.log("useEffect 1");
         }
     }, [flash.message]);
 
@@ -286,11 +295,24 @@ const UserApartment = ({
                                 description={
                                     "Informasi Data Pemilik/Penghuni Pada Apartemen"
                                 }
-                                buttonLabel={"Tambah Unit Owner"}
-                                icon={buttonIcon}
+                                hasFilter={true}
                                 label="Cari Nama Pemilik/Penghuni"
                                 showAddButton={false}
+                                // buttonLabel={"Tambah Unit Owner"}
+                                // icon={buttonIcon}
                             />
+
+                            <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full mobile:flex-col mobile:mr-5">
+                                <Button
+                                    className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors duration-200 bg-blue-500 border border-blue-600 rounded-md hover:bg-blue-600 tablet:w-full tablet:mr-4"
+                                    variant="outlined"
+                                    onClick={handleExport}
+                                >
+                                    <DocumentArrowDownIcon class="h-6 w-6 text-white" />
+                                    Export
+                                </Button>
+                            </div>
+
                             <CardBody className="px-0 overflow-scroll">
                                 <table
                                     className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "
@@ -630,7 +652,6 @@ const UserApartment = ({
                                                                     data.roomNo ??
                                                                     ""
                                                                 }
-                                                                type="number"
                                                                 onChange={(e) =>
                                                                     setData(
                                                                         "roomNo",

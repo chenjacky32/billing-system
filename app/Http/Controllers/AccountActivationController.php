@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use App\Helpers\LookupCache;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AccountActivation as ExportsAccountActivation;
 
 class AccountActivationController extends Controller
 {
@@ -136,6 +138,7 @@ class AccountActivationController extends Controller
     public function update(Request $request, $id){
         $validatedData = $request->validate([
             'active' => 'required|integer|min:0|max:1',
+            'roomNo'=> 'required|string|max:20',
             'apartmentId' => 'required|integer|min:1|max:999999999999999',
             'apartmentTowerId' => 'required|integer|min:1|max:999999999999999',
             'powerCapacityId' => 'required|integer|min:1|max:999999999999999',
@@ -143,11 +146,66 @@ class AccountActivationController extends Controller
 
         $userApartment = UserApartmentOkgo::find($id);
         $userApartment->active = $validatedData['active'];
+        $userApartment->roomNo = $validatedData['roomNo'];
         $userApartment->apartmentId = $validatedData['apartmentId'];
         $userApartment->apartmentTowerId = $validatedData['apartmentTowerId'];
         $userApartment->powerCapacityId = $validatedData['powerCapacityId'];
         $userApartment->save();
 
         return redirect('/account-management')->with('success', 'Account status updated successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        $role = $user->role;
+        $apartId = $user->apartment_id;
+
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentTowerMap = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartmentMap = LookupCache::apartmentMap($apartId, $role);
+
+        $query = UserApartmentOkgo::select(
+                    'id', 'userId', 'apartmentTowerId', 'apartmentId', 
+                    'roomNo', 'identityImage', 'userImage', 'active', 
+                    'apartmentType', 'ownership')
+                ->with(['user:id,fullname,email,phone'])
+                ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
+                    return $query->where('apartmentId', $user->apartment_id);
+                });
+
+
+        $query->when($request->has('search'), function ($query) use ($request) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($query) use ($searchTerm) {
+                $query->whereHas('user', fn ($q) => $q->where('fullname', 'like', "%$searchTerm%")
+                                                    ->orWhere('email', 'like', "%$searchTerm%"));
+            });
+        });
+
+        $query->when($request->filled('status'), fn ($q) =>
+            $q->where('active', $request->status)
+        );
+
+        $data = $query->orderByDesc('id')->get();
+
+        $data->transform(function ($item) use ($apartmentTypeMap, $apartmentTowerMap, $apartmentMap) {
+            // Inject apartType
+            $item->apartType = (object) [
+                'id' => $item->apartmentType,
+                'name' => $apartmentTypeMap[$item->apartmentType] ?? 'Unknown'
+            ];
+
+            // Inject apartmentTower (include apartment if already eager loaded)
+            $item->apartmentTower = $apartmentTowerMap[$item->apartmentTowerId] ?? null;
+
+            // Inject apartment
+            $item->apartment = $apartmentMap[$item->apartmentId] ?? null;
+
+            return $item;
+        });
+
+        libxml_use_internal_errors(true);
+        return Excel::download(new ExportsAccountActivation(data: $data), 'Daftar-Akun.xlsx');
     }
 }
