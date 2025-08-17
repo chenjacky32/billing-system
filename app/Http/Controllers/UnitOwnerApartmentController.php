@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Helpers\LookupCache;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UnitOwnerList as ExportsUnitOwnerList;
 
 class UnitOwnerApartmentController extends Controller
 {
@@ -104,7 +105,7 @@ class UnitOwnerApartmentController extends Controller
         $validatedData = $request->validate([
             'apartmentTowerId'=> 'required|exists:apartment_tower,id',
             'apartmentId'=> 'required|exists:apartments,id',
-            'roomNo'=> 'required|integer|min:1|max:999999999999999',
+            'roomNo'=> 'required|string|max:20',
         ]);
 
         $userApartment = UserApartmentOkgo::find($id);
@@ -122,5 +123,52 @@ class UnitOwnerApartmentController extends Controller
         return redirect('/unit-owner-apartment')->with('success', 'Unit owner data has been updated!');
     }
 
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        $role = $user->role;
+        $apartId = $user->apartment_id;
 
+        $apartmentTypeMap = LookupCache::apartmentTypeMap();
+        $apartmentTowerMap = LookupCache::apartmentTowerMap($apartId, $role);
+        $apartmentMap = LookupCache::apartmentMap($apartId, $role);
+
+        $query = UserApartmentOkgo::select(
+                'id','userId','apartmentTowerId','apartmentId',
+                'roomNo','active','apartmentType',
+                'ownership'
+            )->with(['user:id,fullname,email,phone'])
+            ->where('active', 1)
+            ->when($role !== 'SUPER ADMIN', function ($query) use ($user) {
+                    return $query->where('apartmentId', $user->apartment_id);
+            });
+
+        $query->when($request->has('search'), function ($query) use ($request) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($query) use ($searchTerm) {
+                $query->whereHas('user', fn ($q) => $q->where('fullname', 'like', "%$searchTerm%")
+                                                    ->orWhere('email', 'like', "%$searchTerm%"));
+            });
+        });
+
+        $data = $query->orderByDesc('id')->get();
+
+        $data->transform(function ($item) use ($apartmentTypeMap, $apartmentTowerMap, $apartmentMap) {
+            $item->apartType = (object) [
+                'id' => $item->apartmentType,
+                'name' => $apartmentTypeMap[$item->apartmentType] ?? 'Unknown'
+            ];
+
+            // Inject apartmentTower (include apartment if already eager loaded)
+            $item->apartmentTower = $apartmentTowerMap[$item->apartmentTowerId] ?? null;
+
+            // Inject apartment
+            $item->apartment = $apartmentMap[$item->apartmentId] ?? null;
+
+            return $item;
+        });
+        
+        libxml_use_internal_errors(true);
+        return Excel::download(new ExportsUnitOwnerList(data: $data), 'Daftar-Penghuni-Aktif.xlsx');
+    }
 }

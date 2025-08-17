@@ -1,6 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
 import {
+    Button,
     Card,
     Typography,
     CardBody,
@@ -11,6 +12,7 @@ import {
     Option,
 } from "@material-tailwind/react";
 import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import { router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import Pagination from "@/Components/Pagination";
@@ -38,7 +40,7 @@ const TABLE_HEAD = [
 const PendingAccountList = ({ auth, data, filters, errors }) => {
     const { flash } = usePage().props;
     const [status, setStatus] = useState("");
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(filters?.search ?? "");
 
     const handleInputChange = (value, type) => {
         if (type === "search") {
@@ -55,6 +57,7 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
             },
             {
                 preserveState: true,
+                preserveScroll: true,
                 replace: true,
             }
         );
@@ -98,6 +101,14 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
             default:
                 return ""; // Default background color
         }
+    }
+
+    function handleExport() {
+        const params = new URLSearchParams({
+            search: filters.search || "",
+            status: filters.status || "",
+        }).toString();
+        window.location.href = route("accountManagement.export") + "?" + params;
     }
 
     return (
@@ -170,6 +181,18 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="w-[21rem] flex flex-row gap-4 mt-5 tablet:w-full mobile:flex-col mobile:mr-5 ">
+                                <Button
+                                    className="flex items-center justify-center w-full px-4 py-2 font-medium text-white transition-colors duration-200 bg-blue-500 border border-blue-600 rounded-md hover:bg-blue-600 tablet:w-full tablet:mr-4"
+                                    variant="outlined"
+                                    onClick={handleExport}
+                                >
+                                    <DocumentArrowDownIcon class="h-6 w-6 text-white" />
+                                    Export
+                                </Button>
+                            </div>
+
                             <CardBody className="px-0 overflow-scroll">
                                 <table
                                     className="w-full mt-4 text-left border table-auto mobile:mt-0 min-w-max "

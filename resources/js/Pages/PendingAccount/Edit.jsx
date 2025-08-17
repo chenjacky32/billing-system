@@ -32,6 +32,7 @@ const EditPendingAccount = ({
             role === "SUPER ADMIN" ? userApartment.apartmentId : apartId,
         apartmentTowerId: userApartment.apartmentTowerId || "",
         powerCapacityId: userApartment.powerCapacityId || "",
+        roomNo: userApartment.roomNo || 0,
     });
 
     const dataID = userApartment.id;
@@ -97,6 +98,8 @@ const EditPendingAccount = ({
             apartmentId: value.value,
         }));
     };
+
+    const handleRoomChange = (value) => {};
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -265,11 +268,14 @@ const EditPendingAccount = ({
 
                                             <CustomInput
                                                 label="Unit Number"
-                                                id="unitNumber"
-                                                value={
-                                                    userApartmentData?.roomNo
+                                                id="Nomor Unit"
+                                                value={data.roomNo}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "roomNo",
+                                                        e.target.value
+                                                    )
                                                 }
-                                                disabled={true}
                                             />
                                         </div>
                                         <div className="w-full mr-4 tablet:mt-8">
