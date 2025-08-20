@@ -258,9 +258,9 @@
                 @else
                 <td>-</td>
                 @endif
-                <td style="text-align: center;">{{ $billing->start_meter ? number_format($billing->start_meter, 0) : '-' }}</td>
-                <td style="text-align: center;">{{ $billing->end_meter ? number_format($billing->end_meter, 0) : '-' }}</td>
-                <td style="text-align: center;">{{ $billing->meter_reading ? number_format($billing->meter_reading, 0) : '-' }}</td>
+                <td style="text-align: center;">{{ $billing->start_meter ? number_format($billing->start_meter, 3) : '-' }}</td>
+                <td style="text-align: center;">{{ $billing->end_meter ? number_format($billing->end_meter, 3) : '-' }}</td>
+                <td style="text-align: center;">{{ $billing->meter_reading ? number_format($billing->meter_reading, 3) : '-' }}</td>
                 <td style="text-align: right;">Rp. {{ number_format($billing->unit_price ?? 0, 2) }}</td>
                 <td style="text-align: right;">Rp. {{ number_format($billing->billing_fee, 2) }}</td>
               </tr>

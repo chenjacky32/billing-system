@@ -253,9 +253,9 @@ class BillingController extends Controller
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Air or Listrik
         if (in_array($billingType, ['Listrik','Air'])) {
-            $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
-            $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
-            $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['meter_reading'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
+            $rules['start_meter'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
+            $rules['end_meter'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
             $rules['end_meter_image_path'] = 'required|image|mimes:jpeg,png,jpg,webp|max:2048';
@@ -486,9 +486,9 @@ class BillingController extends Controller
 
         // Conditionally add start_meter, end_meter, unit_price, minimum_charge if billing_type is Listrik
         if (in_array($billingType, ['Listrik','Air'])){
-            $rules['meter_reading'] = 'required|integer|min:1|max:999999999999999';
-            $rules['start_meter'] = 'required|integer|min:1|max:999999999999999';
-            $rules['end_meter'] = 'required|integer|min:1|max:999999999999999';
+            $rules['meter_reading'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
+            $rules['start_meter'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
+            $rules['end_meter'] = 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999';
             $rules['unit_price'] = 'required|integer|min:1|max:999999999999999';
             $rules['minimum_charge'] = 'required|integer|min:0|max:999999999999999';
             
@@ -693,8 +693,8 @@ class BillingController extends Controller
 
     public function calculateBill(Request $request) {
         $validator = Validator::make($request->all(), [
-            'start_meter' => 'required|integer|min:1|max:999999999999999',
-            'end_meter' => 'required|integer|gte:start_meter|max:999999999999999',
+            'start_meter' => 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999',
+            'end_meter' => 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|gte:start_meter|max:999999999999999',
             'unit_price' => 'required|integer|min:1|max:999999999999999',
             'minimum_charge' => 'required|numeric|min:0|max:999999999999999',
             'owner_id' => 'required|integer',
@@ -709,17 +709,21 @@ class BillingController extends Controller
         }
 
         $validatedData = $validator->validated();
-    
-        $startMeter = $validatedData['start_meter'];
-        $endMeter = $validatedData['end_meter'];
-        $unitPrice = $validatedData['unit_price'];
-        $minimumCharge = $validatedData['minimum_charge'];
+        
+        $startMeter = (float) str_replace(',', '.', $validatedData['start_meter']);
+        $endMeter   = (float) str_replace(',', '.', $validatedData['end_meter']);
+        $unitPrice  = (float) $validatedData['unit_price'];
+        $minimumCharge = (float) $validatedData['minimum_charge'];
     
         // Hitung selisih meteran
         $meterDifference = $endMeter - $startMeter;
         $totalCharge = $meterDifference * $unitPrice;
         $billingFee = $totalCharge < $minimumCharge ? $minimumCharge : $totalCharge;
-    
+        
+        $meterDifference = round($meterDifference, 3);
+        $totalCharge = round($totalCharge, 3);
+        $billingFee      = (int) round($billingFee);
+
         // Hitung denda jika ada
         $fine = $this->calculateFine($request, $request->input('billing_type'), $request->input('owner_id'));
         
@@ -729,7 +733,7 @@ class BillingController extends Controller
             'billing_fee' => $billingFee,
             'meter_reading' => $meterDifference,
             'fine' => $fine,
-            'total_amount' => $billingFee + $fine,
+            'total_amount' => $billingFee + (int) round($fine),
         ], 200);
     }
 
@@ -773,8 +777,8 @@ class BillingController extends Controller
         // Tambahkan validasi spesifik berdasarkan billing_type
         if (in_array($billingType, ['Air', 'Listrik'])) {
             $rules = array_merge($rules, [
-                'start_meter' => 'required|integer|min:1|max:999999999999999',
-                'end_meter' => 'required|integer|min:1|max:999999999999999',
+                'start_meter' => 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999',
+                'end_meter' => 'required|numeric|regex:/^\d+(\.\d{1,3})?$/|min:0|max:999999999999999',
                 'unit_price' => 'required|integer|min:1|max:999999999999999',
                 'minimum_charge' => 'required|numeric|min:0|max:999999999999999',
             ]);
