@@ -45,7 +45,7 @@ const TotalAmountSection = ({ data, setData, billingType, errors }) => {
                     id="total"
                     disabled={true}
                     value={
-                        data.total_amount ? formatNumber(data.total_amount) : ""
+                        data.total_amount ? formatNumber(data.total_amount) : 0
                     }
                     errors={errors.total_amount}
                     className="tablet:mt-0"

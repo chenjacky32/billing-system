@@ -25,7 +25,7 @@ const BillingAmountSection = ({ billingType, data, errors }) => {
             <CustomInput
                 label="Nominal Tagihan"
                 id="billing_fee"
-                value={data.billing_fee ? formatNumber(data.billing_fee) : ""}
+                value={data.billing_fee ? formatNumber(data.billing_fee) : 0}
                 type="text"
                 disabled={true}
                 errors={errors.billing_fee}

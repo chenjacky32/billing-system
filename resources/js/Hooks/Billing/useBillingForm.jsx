@@ -14,7 +14,7 @@ const useBillingForm = (
               end_meter: billingData.end_meter,
               unit_price: billingData.unit_price,
               minimum_charge: billingData.minimum_charge,
-              billing_fee: billingData.billing_fee || flash?.billing_fee,
+              billing_fee: billingData.billing_fee || flash?.billing_fee || 0,
               maintenance_type: initialData.maintenanceTypeSelected,
               vehicle_type_parking: initialData.vehicleTypeSelected,
               meter_reading: billingData.meter_reading || flash?.meter_reading,
@@ -33,8 +33,7 @@ const useBillingForm = (
               owner_id: billingData.residence_id,
               fine: billingData.fine ?? 0,
               total_amount:
-                  billingData.fine + billingData.billing_fee ||
-                  flash?.total_amount,
+                  billingData.total_amount || flash?.total_amount || 0,
               due_date: billingData.due_date,
           }
         : {
