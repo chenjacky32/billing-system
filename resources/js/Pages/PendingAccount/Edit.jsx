@@ -362,6 +362,9 @@ const EditPendingAccount = ({
                                                 label="Status Akun"
                                                 id="status"
                                                 color="blue"
+                                                disabled={
+                                                    status === 1 ? true : false
+                                                }
                                                 value={status}
                                                 onChange={handleStatusChange}
                                             >

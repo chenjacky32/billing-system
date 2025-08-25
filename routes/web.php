@@ -124,6 +124,7 @@ Route::middleware(['auth','verify.session'])->group(function () {
     Route::get('/account-management', [AccountActivationController::class, 'index'])->name('accountActivation.index');
     Route::get('/account-management/{id}/edit', [AccountActivationController::class, 'edit'])->name('accountActivation.edit');
     Route::post('/account-management/{id}/update', [AccountActivationController::class, 'update'])->name('accountActivation.update');
+    Route::post('/account-management/delete', [AccountActivationController::class, 'destroy'])->name('accountActivation.delete');
 
     // !Billing
     Route::get('/billing/add', [BillingController::class, 'add'])->name('billing.add');

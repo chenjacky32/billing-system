@@ -11,7 +11,11 @@ import {
     Select,
     Option,
 } from "@material-tailwind/react";
-import { FolderPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+import {
+    FolderPlusIcon,
+    PencilIcon,
+    TrashIcon,
+} from "@heroicons/react/24/solid";
 import { DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 import { router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
@@ -35,6 +39,7 @@ const TABLE_HEAD = [
     "status",
     "Foto KTP",
     "Active",
+    "Hapus",
 ];
 
 const PendingAccountList = ({ auth, data, filters, errors }) => {
@@ -110,6 +115,49 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
         }).toString();
         window.location.href = route("accountManagement.export") + "?" + params;
     }
+
+    const handleDelete = (id) => {
+        toast.info(
+            <div className="p-4">
+                <p>Apakah Anda yakin ingin menghapus data Akun ini?</p>
+                <div className="flex justify-end mt-4">
+                    <button
+                        className="px-4 py-2 mr-2 text-white bg-red-500 rounded hover:bg-red-700"
+                        onClick={() => deleteData(id)}
+                    >
+                        Ya
+                    </button>
+                    <button
+                        className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-700"
+                        onClick={() => toast.dismiss()}
+                    >
+                        Tidak
+                    </button>
+                </div>
+            </div>,
+            {
+                icon: false,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false,
+                autoClose: false,
+                hideProgressBar: true,
+                position: "top-center",
+            }
+        );
+    };
+
+    const deleteData = (id) => {
+        router.post(
+            "/account-management/delete",
+            { id },
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onFinish: () => toast.dismiss(),
+            }
+        );
+    };
 
     return (
         <AuthenticatedLayout
@@ -409,6 +457,62 @@ const PendingAccountList = ({ auth, data, filters, errors }) => {
                                                                     </IconButton>
                                                                 </Tooltip>
                                                             </Link>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            {active === 0 ? (
+                                                                <Tooltip
+                                                                    content="Hapus Data"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                    className="bg-red-600"
+                                                                >
+                                                                    <Button
+                                                                        size="md"
+                                                                        variant="gradient"
+                                                                        color="red"
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                userId
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <TrashIcon className="w-4 h-4" />
+                                                                    </Button>
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <Tooltip
+                                                                    content="Tidak dapat dihapus"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                    className="bg-gray-600"
+                                                                >
+                                                                    <Button
+                                                                        size="md"
+                                                                        color="blue-gray"
+                                                                        variant="gradient"
+                                                                    >
+                                                                        <TrashIcon className="w-4 h-4" />
+                                                                    </Button>
+                                                                </Tooltip>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 );

@@ -36,4 +36,9 @@ return [
         'client_secret' => env('BRI_CLIENT_SECRET'),
     ],
 
+    'okgo-api'=>[
+        'base_url' => env('OKGO_BASE_URL'),
+        'secret'   => env('OKGO_IMAGE_SECRET'),
+    ],
+
 ];

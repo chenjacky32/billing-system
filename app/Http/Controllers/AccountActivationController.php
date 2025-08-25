@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Apartment;
 use App\Models\ApartmentTower;
 use App\Models\ApartmentType;
+use App\Models\UserOkgo;
 use App\Models\UserApartmentOkgo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,9 @@ use Inertia\Inertia;
 use App\Helpers\LookupCache;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AccountActivation as ExportsAccountActivation;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use App\Events\AccountDeleted;
 
 class AccountActivationController extends Controller
 {
@@ -207,5 +211,34 @@ class AccountActivationController extends Controller
 
         libxml_use_internal_errors(true);
         return Excel::download(new ExportsAccountActivation(data: $data), 'Daftar-Akun.xlsx');
+    }
+    
+    public function destroy(Request $request)
+    {
+        DB::connection('okgo')->beginTransaction();
+        $id = $request->id;
+
+        try {
+            $user = UserOkgo::findOrFail($id);
+            $userApartment = UserApartmentOkgo::where('userId',$user->id)->first();
+
+            $identityImage = $userApartment->identityImage ?? null;
+            $userImage     = $userApartment->userImage ?? null;
+
+            $userApartment->delete();
+            $user->delete();
+
+            DB::connection('okgo')->commit();
+            event(new AccountDeleted($identityImage, $userImage));
+
+            return redirect('/account-management')
+                ->with('success', 'Account deleted successfully.');
+                
+        } catch(\Exception $e) {
+            DB::connection('okgo')->rollBack();
+
+            return redirect('/account-management')
+                ->with('error', 'Failed to delete account: ' . $e->getMessage());
+        }
     }
 }
