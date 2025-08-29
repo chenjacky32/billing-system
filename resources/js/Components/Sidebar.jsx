@@ -231,6 +231,19 @@ export default function Sidebar({ user, classname, auth }) {
                                 </ListItem>
                             </Link>
                         </List>
+                        <List className="p-0 text-textColor ">
+                            <Link href={route("VAMonitoring.reconcile")}>
+                                <ListItem className="hover:text-primary ">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Rekonsiliasi Pembayaran
+                                </ListItem>
+                            </Link>
+                        </List>
                     </AccordionBody>
                 </Accordion>
 

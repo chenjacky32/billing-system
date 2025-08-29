@@ -342,4 +342,100 @@ class VAMonitoringController extends Controller
             ], $responseBRI->status());
         }
     }
+
+    public function getReconcileVA()
+    {
+        $user = Auth::user();
+        $role = $user->role;    
+        $apartId = $user->apartment_id;
+
+        $corpCodeOption = [];
+
+        if ($role !== 'SUPER ADMIN') {
+            $corpCode = ApartmentCorpCode::where('apartmentId', $apartId)
+                ->where('isActive', true)
+                ->get();
+        } else {
+            $corpCode = ApartmentCorpCode::where('isActive', true)
+                ->get();
+        }
+        
+        $corpCodeOption = $corpCode->map(function ($item) {
+            return [
+                'label' => $item->partnerServiceId . ' - ' . $item->apartment->name,
+                'value' => (string) $item->partnerServiceId,
+            ];
+        });
+
+        return Inertia::render('VAMonitoring/VaReconcile',[
+            'corpCode' => $corpCodeOption,
+        ]);
+    }
+
+    public function getSignatureVATransaction($body)
+    {   
+        $secretKey = env('OKGO_IMAGE_SECRET');
+        $rawPayload = $secretKey . json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $result = hash('sha256', $rawPayload);
+
+        return $result;
+    }
+
+    public function getReconcileVATransaction(Request $request)
+    {
+        $rules = [
+            'corp_code' => 'required|string|digits:5',
+            'start_date' => 'required|date|date_format:Y-m-d',
+            'start_time' => 'required|string',
+            'end_time' => 'required|string',
+            'timezone' => 'required|string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 422,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        $body = [
+            'partnerServiceId'=> str_pad(trim($validatedData['corp_code']), 8, " ", STR_PAD_LEFT),
+            'startDate' => $validatedData['start_date'],
+            'startTime' => $validatedData['start_time'],
+            'endTime' => $validatedData['end_time'],
+        ];
+
+        $getSignature = $this->getSignatureVATransaction($body);
+
+        try {
+            $responseReconcile = Http::withHeaders([
+                'X-Signature'   => $getSignature,
+                'Content-Type'  =>  'application/json',
+            ])->post('https://apis.okgo.co.id/apartment/billing/payment/reconcile', $body);
+        } catch (\Exception $e){
+            return response()->json([
+                'statusCode' => 500 ,
+                'message' => $e->getMessage()
+            ],500);
+        }
+
+        if ($responseReconcile->successful()) {
+            return response()->json([
+                'statusCode' => $responseReconcile->status(),
+                'message' => 'Success',
+                'data' => $responseReconcile->json(),
+            ], $responseReconcile->status());
+        } else {
+            return response()->json([
+                'statusCode' => $responseReconcile->status(),
+                'message' => $responseReconcile->json('message'),
+            ], $responseReconcile->status());
+        }
+    }
 }

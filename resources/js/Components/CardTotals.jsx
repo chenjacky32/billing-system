@@ -3,6 +3,10 @@ import {
     BanknotesIcon,
     WalletIcon,
     ScaleIcon,
+    ClipboardDocumentListIcon,
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
+    XCircleIcon,
 } from "@heroicons/react/24/solid";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 
@@ -31,6 +35,38 @@ const CardTotals = ({ value, label, variant = "blue" }) => {
             iconColor: "text-red-700",
             textColor: "text-red-600",
             icon: ScaleIcon,
+        },
+        totalChecked: {
+            border: "border-indigo-200",
+            background: "bg-indigo-50",
+            iconBackground: "bg-indigo-100",
+            iconColor: "text-indigo-700",
+            textColor: "text-indigo-600",
+            icon: ClipboardDocumentListIcon,
+        },
+        matched: {
+            border: "border-green-200",
+            background: "bg-green-50",
+            iconBackground: "bg-green-100",
+            iconColor: "text-green-700",
+            textColor: "text-green-600",
+            icon: CheckCircleIcon,
+        },
+        unpaid: {
+            border: "border-yellow-200",
+            background: "bg-yellow-50",
+            iconBackground: "bg-yellow-100",
+            iconColor: "text-yellow-700",
+            textColor: "text-yellow-600",
+            icon: ExclamationTriangleIcon,
+        },
+        failed: {
+            border: "border-red-200",
+            background: "bg-red-50",
+            iconBackground: "bg-red-100",
+            iconColor: "text-red-700",
+            textColor: "text-red-600",
+            icon: XCircleIcon,
         },
     };
 

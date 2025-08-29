@@ -22,23 +22,21 @@ import ClientPagination from "@/Components/ClientPagination";
 import { formattedWithTimeZone } from "@/utils/helper";
 import { Timezone } from "@/utils/constant";
 import moment from "moment";
+import CardWrapper from "@/Components/CardWrapper";
+import CardTotals from "@/Components/CardTotals";
 
 const TABLE_HEAD = [
     "No",
-    "Corp Code",
-    "No Customer",
+    "Id-TRX",
+    "Id-Biling",
     "No Virtual Account",
     "Nama Virtual Account",
     "Jumlah Pembayaran",
-    "Id-TRX",
     "Tanggal Transaksi",
-    "Keterangan",
-    "channel",
-    "Sumber Akun VA",
-    "Teller ID",
+    "Status Rekonsiliasi",
 ];
 
-const VaReport = ({ auth, corpCode }) => {
+const VaReconcile = ({ auth, error, corpCode }) => {
     const [requestPayload, setRequestPayload] = React.useState({
         timezone: "+07:00",
         corp_code: "",
@@ -46,9 +44,9 @@ const VaReport = ({ auth, corpCode }) => {
         start_time: "",
         end_time: "",
     });
-
     const [currentPage, setCurrentPage] = React.useState(1);
-    const [historyVA, setHistoryVA] = React.useState([]);
+    const [reconsileVA, setReconsileVA] = React.useState([]);
+    const [summary, setSummary] = React.useState([]);
     const [errors, setErrors] = React.useState({
         timezone: "",
         corp_code: "",
@@ -58,9 +56,9 @@ const VaReport = ({ auth, corpCode }) => {
     });
 
     const itemPerPage = 10;
-    const totalPages = Math.ceil(historyVA.length / itemPerPage);
+    const totalPages = Math.ceil(reconsileVA.length / itemPerPage);
 
-    const paginatedData = historyVA.slice(
+    const paginatedData = reconsileVA.slice(
         (currentPage - 1) * itemPerPage,
         currentPage * itemPerPage
     );
@@ -99,11 +97,12 @@ const VaReport = ({ auth, corpCode }) => {
             corp_code: payload.corp_code,
         };
         try {
-            const res = await getHistoryVa(finalPayload);
+            const res = await getReconsileVA(finalPayload);
 
             if (res.statusCode == 200) {
                 toast.success(res.message);
-                setHistoryVA(res.data.virtualAccountData);
+                setReconsileVA(res.data.details);
+                setSummary(res.data.summary);
             }
 
             if (res.statusCode == 422 && res.errors) {
@@ -120,19 +119,6 @@ const VaReport = ({ auth, corpCode }) => {
             return res;
         } catch (error) {
             toast.error("Terjadi Kesalahan Sistem. Silahkan Coba lagi.");
-        }
-    };
-
-    const getHistoryVa = async (payload) => {
-        try {
-            const response = await ApiService.post(
-                "",
-                route(NetworkEndpoint.GET_HISTORY_VA_TRANSACTION),
-                payload
-            );
-
-            return response;
-        } catch (error) {
             return {
                 statusCode: error?.response?.status || 500,
                 message: error?.response?.data?.message || "Unknown error",
@@ -140,6 +126,28 @@ const VaReport = ({ auth, corpCode }) => {
             };
         }
     };
+
+    const getReconsileVA = async (payload) => {
+        const response = await ApiService.post(
+            "",
+            route(NetworkEndpoint.GET_RECONCILE_VA_TRANSACTION),
+            payload
+        );
+        return response;
+    };
+
+    function getStatusColor(status) {
+        switch (status) {
+            case "Gagal diperbarui":
+                return "bg-orange-500";
+            case "Berhasil diperbarui":
+                return "bg-green-500";
+            case "Tidak ditemukan":
+                return "bg-red-500";
+            default:
+                return "bg-gray-500";
+        }
+    }
 
     const buttonIcon = <FolderPlusIcon strokeWidth={2} className="w-4 h-4" />;
 
@@ -149,11 +157,11 @@ const VaReport = ({ auth, corpCode }) => {
             errors={errors}
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Ambil Laporan Virtual Akun
+                    Rekonsiliasi Pembayaran
                 </h2>
             }
         >
-            <Head title="Ambil Laporan Virtual Akun" />
+            <Head title="Rekonsiliasi Pembayaran" />
 
             <div className="py-12">
                 <div className="w-full mx-auto max-w-1xl sm:px-6 lg:px-8">
@@ -165,10 +173,10 @@ const VaReport = ({ auth, corpCode }) => {
                             Dashboard
                         </Link>
                         <Link
-                            href={route("VAMonitoring.report")}
+                            href={route("VAMonitoring.reconcile")}
                             className="font-bold opacity-100 text-primary"
                         >
-                            Ambil Laporan Virtual Akun
+                            Rekonsiliasi Pembayaran
                         </Link>
                         <a href="#"></a>
                     </Breadcrumbs>
@@ -177,9 +185,9 @@ const VaReport = ({ auth, corpCode }) => {
                             <PageHeader
                                 showAddButton={false}
                                 showSearch={false}
-                                title={"Ambil Laporan Virtual Akun"}
+                                title={" Rekonsiliasi Pembayaran Virtual Akun"}
                                 description={
-                                    "Mengambil Laporan Transaksi Virtual Account dari Sistem BRI"
+                                    "Rekonsiliasi Pembayaran Virtual Account dari Sistem BRI"
                                 }
                                 icon={buttonIcon}
                                 label="Cari Nomor VA"
@@ -310,11 +318,11 @@ const VaReport = ({ auth, corpCode }) => {
                                     <div className="w-1/2 mt-2 text-sm font-extrabold text-red-500 mobile:text-xs">
                                         **"Silakan tentukan rentang waktu
                                         (Tanggal Mulai, Waktu Mulai, Waktu
-                                        Akhir) untuk mengambil riwayat transaksi
-                                        BRIVA Anda. Ingat, rentang waktu
-                                        maksimal adalah 24 jam dan pengambilan
-                                        laporan minimal 24 jam dari waktu
-                                        transaksi."
+                                        Akhir) untuk Rekonsiliasi riwayat
+                                        transaksi BRIVA Anda. Ingat, rentang
+                                        waktu maksimal adalah 24 jam dan
+                                        pengambilan laporan minimal 24 jam dari
+                                        waktu transaksi."
                                     </div>
                                     <Button
                                         className="w-[49rem] mt-4 tablet:w-full tablet:mr-96 bg-white border-primary text-primary"
@@ -323,9 +331,34 @@ const VaReport = ({ auth, corpCode }) => {
                                             handleSubmit(requestPayload)
                                         }
                                     >
-                                        Cari
+                                        Mulai Rekonsiliasi
                                     </Button>
                                 </div>
+                            </div>
+
+                            <div className="mt-5">
+                                <CardWrapper>
+                                    <CardTotals
+                                        value={summary.totalChecked ?? 0}
+                                        label="Total Transaksi Dicek"
+                                        variant="totalChecked"
+                                    />
+                                    <CardTotals
+                                        value={summary.matched ?? 0}
+                                        label="Pembayaran Cocok (transaksi yang berhasil ditemukan & sesuai)"
+                                        variant="matched"
+                                    />
+                                    <CardTotals
+                                        value={summary.unpaid ?? 0}
+                                        label="Belum Terbayar (tagihan yang belum ada pembayaran di sistem bank)"
+                                        variant="unpaid"
+                                    />
+                                    <CardTotals
+                                        value={summary.failed ?? 0}
+                                        label="Gagal Diproses (data transaksi yang error/gagal saat rekonsiliasi)"
+                                        variant="failed"
+                                    />
+                                </CardWrapper>
                             </div>
 
                             <CardBody className="px-0 overflow-scroll">
@@ -354,176 +387,135 @@ const VaReport = ({ auth, corpCode }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedData.map((items, index) => {
-                                            const isLast =
-                                                index === items.length - 1;
-                                            const classes = isLast
-                                                ? "p-4"
-                                                : "pl-4 py-2 border-b border-blue-gray-150";
-                                            return (
-                                                <tr
-                                                    key={index}
-                                                    className="text-black transition duration-300 group bg-primary/15 hover:bg-primary/5"
-                                                >
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {index + 1}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {
-                                                                    items.partnerServiceId
-                                                                }
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {
-                                                                    items.customerNo
-                                                                }
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-medium underline capitalize"
-                                                            >
-                                                                {
-                                                                    items.virtualAccountNo
-                                                                }
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {
-                                                                    items.virtualAccountName
-                                                                }
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-bold capitalize"
-                                                            >
-                                                                {new Intl.NumberFormat(
-                                                                    "id-ID",
+                                        {paginatedData.map(
+                                            (
+                                                {
+                                                    trxId,
+                                                    billingId,
+                                                    va,
+                                                    name,
+                                                    amount,
+                                                    trxDateTime,
+                                                    statusReconcile,
+                                                },
+                                                index
+                                            ) => {
+                                                const isLast =
+                                                    index ===
+                                                    paginatedData.length - 1;
+                                                const classes = isLast
+                                                    ? "p-4"
+                                                    : "pl-4 py-2 border-b border-blue-gray-150";
+                                                return (
+                                                    <tr
+                                                        key={index}
+                                                        className="text-black transition duration-300 group bg-primary/15 hover:bg-primary/5"
+                                                    >
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {index + 1}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {trxId}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {billingId}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-medium underline capitalize"
+                                                                >
+                                                                    {va}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {name}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-bold capitalize"
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "id-ID",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "IDR",
+                                                                        }
+                                                                    ).format(
+                                                                        amount
+                                                                    )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="font-normal capitalize"
+                                                                >
+                                                                    {trxDateTime ===
+                                                                    "-"
+                                                                        ? "-"
+                                                                        : moment(
+                                                                              trxDateTime
+                                                                          ).format(
+                                                                              "DD MMM YYYY HH:mm"
+                                                                          )}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <div className="flex flex-col">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className={`font-semibold capitalize ${getStatusColor(
+                                                                        statusReconcile
+                                                                    )} text-white rounded-xl w-32 flex justify-center
+                                                                    `}
+                                                                >
                                                                     {
-                                                                        style: "currency",
-                                                                        currency:
-                                                                            "IDR",
+                                                                        statusReconcile
                                                                     }
-                                                                ).format(
-                                                                    items
-                                                                        .totalAmount
-                                                                        .value ??
-                                                                        0
-                                                                )}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {items.trxId}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {moment(
-                                                                    items.trxDateTime
-                                                                ).format(
-                                                                    "DD MMM YYYY HH:mm"
-                                                                )}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {items
-                                                                    .additionalInfo
-                                                                    ?.description ??
-                                                                    "-"}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {items
-                                                                    .additionalInfo
-                                                                    ?.channel ??
-                                                                    "-"}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {items
-                                                                    .additionalInfo
-                                                                    ?.sourceAccountVa ??
-                                                                    "-"}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className={classes}>
-                                                        <div className="flex flex-col">
-                                                            <Typography
-                                                                variant="small"
-                                                                className="font-normal capitalize"
-                                                            >
-                                                                {items
-                                                                    .additionalInfo
-                                                                    ?.tellerId ??
-                                                                    "-"}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            }
+                                        )}
                                     </tbody>
                                 </table>
                             </CardBody>
@@ -545,4 +537,4 @@ const VaReport = ({ auth, corpCode }) => {
     );
 };
 
-export default VaReport;
+export default VaReconcile;
