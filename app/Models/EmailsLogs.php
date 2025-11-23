@@ -13,5 +13,6 @@ class EmailsLogs extends Model
 
     protected $fillable = ['recipient_email','subject','content_preview',
                             'status','email_type','billing_id','error_message',
-                            'sent_at'];
+                            'sent_at'
+                        ];
 }

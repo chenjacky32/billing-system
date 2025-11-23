@@ -10,7 +10,8 @@
         }
         
         body {
-          font-family: system-ui, sans-serif;
+          font-family: DejaVu Sans, sans-serif;
+          /* font-family: system-ui, sans-serif; */
           color: #333;
           margin: 0;
           padding: 10px;
@@ -163,6 +164,7 @@
         .landscape-container {
           max-width: 100%;
           margin: 0 auto;
+          position: relative;
         }
 
         .compact-spacing {
@@ -180,10 +182,57 @@
         .product-table tbody tr {
           height: auto;
         }
+
+        /* Watermark Stempel SUDAH LUNAS */
+        .paid-stamp {
+          position: absolute;
+          top: 60px;
+          left: 20%;
+          transform: rotate(-20deg);
+          z-index: 999;
+          pointer-events: none;
+        }
+
+        .paid-stamp-content {
+          border: 8px solid #22c55e;
+          border-radius: 20px;
+          padding: 25px 45px;
+          background-color: rgba(173, 216, 230, 0.75);
+          box-shadow: 0 0 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .paid-stamp-text {
+          font-size: 36px;
+          font-weight: bold;
+          color: #22c55e;
+          text-align: center;
+          letter-spacing: 2px;
+          margin: 0;
+          line-height: 1.1;
+        }
+
+        .paid-stamp-date {
+          font-size: 14px;
+          font-weight: 600;
+          color: #16a34a;
+          text-align: center;
+          margin-top: 8px;
+          letter-spacing: 1px;
+        }
       </style>
     </head>
     <body>
       <div class="landscape-container">
+        <!-- Watermark Stempel SUDAH LUNAS -->
+        @if($billing->status === "Success" && $billing->is_paid == 1)
+        <div class="paid-stamp">
+          <div class="paid-stamp-content">
+            <div class="paid-stamp-text">SUDAH LUNAS</div>
+            <div class="paid-stamp-date">{{ \Carbon\Carbon::parse($billing->paid_date)->format('d F Y') }}</div>
+          </div>
+        </div>
+        @endif
+
         <!-- Header Section -->
         <table class="header-table compact-spacing">
           <tr>

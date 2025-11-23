@@ -32,21 +32,31 @@ class VAMonitoringController extends Controller
         $userApartmentId = $user->apartment_id;
 
         $apartment = Apartment::find($userApartmentId);
-
         $search = $request->input('search');
 
-        // Ambil billingTransaction duluan dengan filter virtualAccount
-        $billingTransactions = DB::connection('okgo')->table('billingTransaction')
-            ->where('isDeleted', 0)
+        // Ambil data billingTransaction + Items dari DB okgo
+        $billingTransactions = DB::connection('okgo')
+            ->table('billingTransaction as bt')
+            ->select(
+                'bt.id as billingTransactionId',
+                'bt.virtualAccount',
+                'bt.responseMessage',
+                'bt.transactionDate',
+                'bt.isExpired',
+                'bt.isUsedForPayment',
+                'bti.billingId'
+            )
+            ->join('billingTransactionItems as bti', 'bt.id', '=', 'bti.billingTransactionId')
+            ->where('bt.isDeleted', 0)
             ->when($search, function ($query) use ($search) {
-                $query->where('virtualAccount', 'like', "%$search%");
+                $query->where('bt.virtualAccount', 'like', "%$search%");
             })
-            ->get()
-            ->groupBy('billingId');
+            ->get();
 
-        $filteredBillingIds = array_keys($billingTransactions->toArray());
+        // Ambil semua billingId yang muncul di hasil atas
+        $billingIds = $billingTransactions->pluck('billingId')->unique()->values()->all();
 
-        // Ambil hanya billing yg ada di hasil transaksi
+        // Ambil data billings dari DB utama
         $billings = DB::table('billings')
             ->select(
                 'billings.id',
@@ -57,41 +67,48 @@ class VAMonitoringController extends Controller
                 'billings.created_at',
                 'billings.apartment_id',
                 'billings.is_paid',
-                'apartments.name as apartment_name',
                 'billings.paid_date',
-                'billings.billing_type'
+                'billings.billing_type',
+                'apartments.name as apartment_name'
             )
             ->join('apartments', 'billings.apartment_id', '=', 'apartments.id')
             ->when($role !== 'SUPER ADMIN', function ($query) use ($userApartmentId) {
                 $query->where('billings.apartment_id', '=', $userApartmentId);
             })
-            ->whereIn('billings.id', $filteredBillingIds)
-            ->orderByDesc('billings.id')
-            ->get();
+            ->whereIn('billings.id', $billingIds)
+            ->get()
+            ->keyBy('id'); // biar mudah dicari berdasarkan id
 
+        // Gabungkan hasilnya
         $results = [];
-            foreach ($billings as $billing) {
-                foreach ($billingTransactions[$billing->id] as $bt) {
-                    $results[] = [
-                        'id'=> $bt->id,
-                        'billingId' => $billing->id,
-                        'period' => $billing->period,
-                        'total_amount' => $billing->total_amount,
-                        'status' => $bt->isUsedForPayment,
-                        'is_paid' => $billing->is_paid,
-                        'residence_id' => $billing->residence_id,
-                        'created_at' => $billing->created_at,
-                        'isExpired' => $bt->isExpired,
-                        'apartmentName'=> $billing->apartment_name,
-                        'billingType' => $billing->billing_type,
-                        'paidDate' => $billing->paid_date,
-                        'virtualAccount' => $bt->virtualAccount,
-                        'responseMessage' => $bt->responseMessage,
-                        'transactionDate' => $bt->transactionDate,
-                    ];
-                }
-            }
+        $autoIncrement = 1;
+        
+        /** @var \stdClass $bt */
+        foreach ($billingTransactions as $bt) {
+            $billing = $billings->get($bt->billingId);
+            if (!$billing) continue;
 
+            $results[] = [
+                'id' => $autoIncrement++,
+                'billingTransactionId' => $bt->billingTransactionId,
+                'billingId' => $billing->id,
+                'period' => $billing->period,
+                'total_amount' => $billing->total_amount,
+                'status' => $bt->isUsedForPayment,
+                'is_paid' => $billing->is_paid,
+                'residence_id' => $billing->residence_id,
+                'created_at' => $billing->created_at,
+                'isExpired' => $bt->isExpired,
+                'apartmentName' => $billing->apartment_name,
+                'billingType' => $billing->billing_type,
+                'paidDate' => $billing->paid_date,
+                'virtualAccount' => $bt->virtualAccount,
+                'responseMessage' => $bt->responseMessage,
+                'transactionDate' => $bt->transactionDate,
+            ];
+        }
+
+        // Pagination manual
         $page = $request->input('page', 1);
         $perPage = 10;
         $total = count($results);
@@ -99,10 +116,7 @@ class VAMonitoringController extends Controller
 
         $currentUrl = $request->url();
         $queryParams = $request->except('page');
-
-        $buildPageUrl = function ($page) use ($currentUrl, $queryParams) {
-            return $currentUrl . '?' . http_build_query(array_merge($queryParams,['page' => $page]));
-        };
+        $buildPageUrl = fn($page) => $currentUrl . '?' . http_build_query(array_merge($queryParams, ['page' => $page]));
 
         $prevPage = $page > 1 ? $buildPageUrl($page - 1) : null;
         $nextPage = $page < ceil($total / $perPage) ? $buildPageUrl($page + 1) : null;
@@ -118,10 +132,108 @@ class VAMonitoringController extends Controller
                 'last_page' => (int) ceil($total / $perPage),
                 'prev_page_url' => $prevPage,
                 'next_page_url' => $nextPage,
-            ]
-        ]);
+            ],
+        ]);    
     }
 
+    // public function index(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     $role = $user->role;
+    //     $userApartmentId = $user->apartment_id;
+
+    //     $apartment = Apartment::find($userApartmentId);
+
+    //     $search = $request->input('search');
+
+    //     // Ambil billingTransaction duluan dengan filter virtualAccount
+    //     $billingTransactions = DB::connection('okgo')->table('billingTransaction')
+    //         ->where('isDeleted', 0)
+    //         ->when($search, function ($query) use ($search) {
+    //             $query->where('virtualAccount', 'like', "%$search%");
+    //         })
+    //         ->get()
+    //         ->groupBy('billingId');
+
+    //     $filteredBillingIds = array_keys($billingTransactions->toArray());
+
+    //     // Ambil hanya billing yg ada di hasil transaksi
+    //     $billings = DB::table('billings')
+    //         ->select(
+    //             'billings.id',
+    //             'billings.period',
+    //             'billings.total_amount',
+    //             'billings.status',
+    //             'billings.residence_id',
+    //             'billings.created_at',
+    //             'billings.apartment_id',
+    //             'billings.is_paid',
+    //             'apartments.name as apartment_name',
+    //             'billings.paid_date',
+    //             'billings.billing_type'
+    //         )
+    //         ->join('apartments', 'billings.apartment_id', '=', 'apartments.id')
+    //         ->when($role !== 'SUPER ADMIN', function ($query) use ($userApartmentId) {
+    //             $query->where('billings.apartment_id', '=', $userApartmentId);
+    //         })
+    //         ->whereIn('billings.id', $filteredBillingIds)
+    //         ->orderByDesc('billings.id')
+    //         ->get();
+
+    //     $results = [];
+    //         foreach ($billings as $billing) {
+    //             foreach ($billingTransactions[$billing->id] as $bt) {
+    //                 $results[] = [
+    //                     'id'=> $bt->id,
+    //                     'billingId' => $billing->id,
+    //                     'period' => $billing->period,
+    //                     'total_amount' => $billing->total_amount,
+    //                     'status' => $bt->isUsedForPayment,
+    //                     'is_paid' => $billing->is_paid,
+    //                     'residence_id' => $billing->residence_id,
+    //                     'created_at' => $billing->created_at,
+    //                     'isExpired' => $bt->isExpired,
+    //                     'apartmentName'=> $billing->apartment_name,
+    //                     'billingType' => $billing->billing_type,
+    //                     'paidDate' => $billing->paid_date,
+    //                     'virtualAccount' => $bt->virtualAccount,
+    //                     'responseMessage' => $bt->responseMessage,
+    //                     'transactionDate' => $bt->transactionDate,
+    //                 ];
+    //             }
+    //         }
+
+    //     $page = $request->input('page', 1);
+    //     $perPage = 10;
+    //     $total = count($results);
+    //     $slicedResults = array_slice($results, ($page - 1) * $perPage, $perPage);
+
+    //     $currentUrl = $request->url();
+    //     $queryParams = $request->except('page');
+
+    //     $buildPageUrl = function ($page) use ($currentUrl, $queryParams) {
+    //         return $currentUrl . '?' . http_build_query(array_merge($queryParams,['page' => $page]));
+    //     };
+
+    //     $prevPage = $page > 1 ? $buildPageUrl($page - 1) : null;
+    //     $nextPage = $page < ceil($total / $perPage) ? $buildPageUrl($page + 1) : null;
+
+    //     return Inertia::render('VAMonitoring/Index', [
+    //         'apartment' => $apartment,
+    //         'vaData' => $slicedResults,
+    //         'filters' => $request->only('search'),
+    //         'pagination' => [
+    //             'total' => $total,
+    //             'per_page' => $perPage,
+    //             'current_page' => (int) $page,
+    //             'last_page' => (int) ceil($total / $perPage),
+    //             'prev_page_url' => $prevPage,
+    //             'next_page_url' => $nextPage,
+    //         ]
+    //     ]);
+    // }
+
+    
     public function patchExpiredVA(Request $request, $id)
     {
         try {
@@ -144,8 +256,20 @@ class VAMonitoringController extends Controller
                 return redirect()->back()->with('error', 'Data VA tidak ditemukan');
             }
 
+            $billingTransactionItems = DB::connection('okgo')
+                                        ->table('billingTransactionItems')
+                                        ->where('billingTransactionId', $billingTransaction->id)
+                                        ->get();
+
+            if ($billingTransactionItems->isEmpty()) {
+                return redirect()->back()->with('error', 'Data billing item tidak ditemukan untuk transaksi ini');
+            }
+
+            $billingId = $billingTransactionItems->pluck('billingId')->toArray();
+            LOG::info('billingId', ['billingId' => $billingId]);
+            
             $resMessage = json_decode($billingTransaction->responseMessage);
-            $billingId = $billingTransaction->billingId;
+            // $billingId = $billingTransaction->billingId;
             $partnerServiceId = $resMessage->virtualAccountData->partnerServiceId;
             $virtualAccountNo = $billingTransaction->virtualAccount;
             $customerNo = $resMessage->virtualAccountData->customerNo;
@@ -201,7 +325,7 @@ class VAMonitoringController extends Controller
 
                         $logDelete = DeleteVaLog::create([
                             'billingTransactionId' => $id,
-                            'billingId' => $billingId,
+                            'billingId' => json_encode($billingId),
                             'virtualAccount'=> $virtualAccountNo,
                             'responseMessage' => json_encode($responseBRI->json()),
                             'deletedBy' => Auth::user()->id,

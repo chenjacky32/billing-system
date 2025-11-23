@@ -10,6 +10,7 @@ use App\Http\Controllers\BillingFineRules;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BillingFineRulesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailLogActivityController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UnitOwnerApartmentController;
@@ -19,7 +20,9 @@ use App\Http\Controllers\VAMonitoringController;
 use App\Http\Controllers\VerifyAccessPasswordController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +55,16 @@ Route::fallback(function () {
 Route::get('/unauthorized', function () {
     return Inertia::render('UnauthorizedPage');
 })->name('unauthorized');
+
+// !Artisan Command
+Route::get('/clear-all-cache-temp', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:clear');
+
+    return "Semua cache dibersihkan tanpa rebuild!";
+});
 
 
 // ! SUPER ADMIN ROUTES:
@@ -135,6 +148,7 @@ Route::middleware(['auth','verify.session'])->group(function () {
     Route::post('/billing/delete', [BillingController::class, 'destroy'])->name('billing.delete');
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
     Route::post('/billing/previous-meter',[BillingController::class,'getStartMeter'])->name('billing.previousMeter');
+    Route::get('/billing/{id}/download-invoice',[BillingController::class,'downloadInvoice'])->name('billing.downloadInvoice');
 
     // !Virtual Account 
     Route::get('/va-monitoring', [VAMonitoringController::class, 'index'])->name('VAMonitoring.index');
@@ -156,6 +170,9 @@ Route::middleware(['auth','verify.session'])->group(function () {
     Route::get('/overdue-billing-report', [ReportController::class, 'showPenalties'])->name('billing.penalties.index');
     Route::get('/owner-report', [ReportController::class, 'ownerReport'])->name('owner.report.index');
     Route::get('/owner-report/{id}/show', [ReportController::class, 'show'])->name('owner.report.show');
+
+    // !Log Activity
+    Route::get('/log-activity/email',[EmailLogActivityController::class,'index'])->name('emailLogActivity.index');
 
     // !Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

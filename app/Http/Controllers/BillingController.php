@@ -975,4 +975,60 @@ class BillingController extends Controller
             libxml_use_internal_errors(true);
             return Excel::download(new ExportsBilling(data: $data), 'billing.xlsx');
     }
+
+    public function downloadInvoice($id)
+    {
+        try {
+            $billing = Billing::findOrFail($id);
+
+             // Inject Apartment Types
+            $apartmentTypeMap = LookupCache::apartmentTypeMap();
+            $unitPowerCapacitiesMap = LookupCache::unitPowerCapacitiesMap();
+
+            if ($billing->residence) {
+                $id = $billing->residence->apartmentType;
+                $billing->residence->apartmentTypeData = isset($apartmentTypeMap[$id])
+                    ? (object)['id' => $id, 'name' => $apartmentTypeMap[$id]]
+                    : (object)['id' => '', 'name' => ''];
+
+                $idCapacity = $billing->residence->powerCapacityId;
+                $billing->residence->unitPowerCapacity = isset($unitPowerCapacitiesMap[$idCapacity])
+                    ? (object)['id' => $idCapacity, 'capacity' => $unitPowerCapacitiesMap[$idCapacity]]
+                    : (object)['id' => '-', 'capacity' => '-'];
+            }
+
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+
+            // ob_clean();
+            // ob_start();
+
+            $pdf = Pdf::loadView('pdf.invoice', compact('billing'))
+                ->setPaper('a4', 'landscape')
+                ->setOptions([
+                    'dpi' => 90,
+                    'defaultFont' => 'DejaVu Sans',
+                    'isHtml5ParserEnabled' => true,
+                    'isPhpEnabled' => true,
+                    'margin_top' => 8,
+                    'margin_bottom' => 8,
+                    'margin_left' => 8,
+                    'margin_right' => 8,
+                ]);
+            
+            $fileName = 'invoice-' . $billing->id . '.pdf';
+
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            },
+            $fileName,[
+                'Content-Type' => 'application/pdf',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            ]);
+            // return $pdf->download($fileName)->header('Content-Type', values: 'application/pdf');
+        } catch (\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 }

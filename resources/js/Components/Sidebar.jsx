@@ -19,6 +19,7 @@ import {
     ChevronDownIcon,
     CreditCardIcon,
     DocumentTextIcon,
+    Cog6ToothIcon,
     HomeIcon,
 } from "@heroicons/react/24/outline";
 import ApplicationLogo from "./ApplicationLogo";
@@ -318,6 +319,50 @@ export default function Sidebar({ user, classname, auth }) {
                                         />
                                     </ListItemPrefix>
                                     Laporan Berdasarkan Pemilik/Penghuni Unit
+                                </ListItem>
+                            </Link>
+                        </List>
+                    </AccordionBody>
+                </Accordion>
+
+                <Accordion
+                    open={open === 4}
+                    icon={
+                        <ChevronDownIcon
+                            strokeWidth={2.5}
+                            className={`mx-auto h-4 w-4 transition-transform ${
+                                open === 2 ? "rotate-180" : ""
+                            }`}
+                        />
+                    }
+                >
+                    <ListItem
+                        className="p-0 hover:text-primary "
+                        selected={open === 4}
+                    >
+                        <AccordionHeader
+                            onClick={() => handleOpen(4)}
+                            className="p-3 border-b-0 group text-textColor group-hover:text-primary"
+                        >
+                            <ListItemPrefix>
+                                <Cog6ToothIcon className="w-5 h-5 group-hover:text-primary" />
+                            </ListItemPrefix>
+                            <Typography className="mr-auto font-normal text-textColor group-hover:text-primary">
+                                Log Aktivitas
+                            </Typography>
+                        </AccordionHeader>
+                    </ListItem>
+                    <AccordionBody className="py-1 ">
+                        <List className="p-0 text-textColor ">
+                            <Link href={route("emailLogActivity.index")}>
+                                <ListItem className="hover:text-primary ">
+                                    <ListItemPrefix>
+                                        <ChevronRightIcon
+                                            strokeWidth={3}
+                                            className="w-5 h-3"
+                                        />
+                                    </ListItemPrefix>
+                                    Log Pengiriman Email
                                 </ListItem>
                             </Link>
                         </List>

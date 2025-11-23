@@ -30,7 +30,11 @@ import Pagination from "@/Components/Pagination";
 import PageHeader from "@/Components/PageHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { XMarkIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
+import {
+    XMarkIcon,
+    DocumentArrowDownIcon,
+    FolderArrowDownIcon,
+} from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
 import { TypeBilling, stickyColumnStyles } from "@/utils/constant";
@@ -51,6 +55,7 @@ const TABLE_HEAD = [
     "Status Pembayaran",
     "Tanggal dibayar",
     "Dibuat Oleh",
+    "Download",
     "Edit",
     "Hapus",
 ];
@@ -285,6 +290,22 @@ export default function Billing({
                 "Anda tidak memiliki hak akses untuk menghapus data Billing ini"
             );
         }
+    };
+
+    const handleClickDownload = (id) => {
+        const link = document.createElement("a");
+        link.href = `/billing/${id}/download-invoice`;
+        link.target = "_blank"; // PENTING di shared hosting!
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // const a = document.createElement("a");
+        // a.href = `/billing/${id}/download-invoice`;
+        // a.setAttribute("download", "");
+        // document.body.appendChild(a);
+        // a.click();
+        // a.remove();
     };
 
     const handleClickEdit = ({ id, apartId }) => {
@@ -868,6 +889,39 @@ export default function Billing({
                                                                         created_by.name
                                                                     }
                                                                 </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <Tooltip
+                                                                    content="Download Billing"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <Button
+                                                                        size="md"
+                                                                        variant="gradient"
+                                                                        color="light-blue"
+                                                                        onClick={() =>
+                                                                            handleClickDownload(
+                                                                                id
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <FolderArrowDownIcon className="w-4 h-4 font-bold" />
+                                                                    </Button>
+                                                                </Tooltip>
                                                             </td>
 
                                                             <td

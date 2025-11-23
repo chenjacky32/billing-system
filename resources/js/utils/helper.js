@@ -133,3 +133,11 @@ export const formattedWithTimeZone = (time, timezone = "+07:00") => {
     if (!time) return "";
     return `${time}:00${timezone}`;
 };
+
+export const truncateText = (text, maxLength) => {
+    if (typeof text !== "string" || text.length <= maxLength) {
+        return text;
+    }
+
+    return text.substring(0, maxLength) + "...";
+};

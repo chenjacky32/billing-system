@@ -1,4 +1,7 @@
 export const TypeBilling = ["Air", "Listrik", "Maintenance"];
+
+export const TypeStatus = ["Sent", "Error"];
+
 export const stickyColumnStyles = {
     baseClass: "sticky-col",
     background: "bg-blue-50",
@@ -12,4 +15,5 @@ export const Timezone = [
 ];
 
 export const loadImageSecretKey = "OKGO#MANSYUR_2025$v8Lk-Np9W";
+
 export const baseURL = "https://apis.okgo.co.id";

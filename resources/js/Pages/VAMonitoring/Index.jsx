@@ -204,6 +204,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                     apartmentName,
                                                     period,
                                                     paidDate,
+                                                    billingTransactionId,
                                                     billingType,
                                                     status,
                                                     responseMessage,
@@ -476,7 +477,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                                     <button
                                                                         onClick={() =>
                                                                             handleExpired(
-                                                                                id
+                                                                                billingTransactionId
                                                                             )
                                                                         }
                                                                     >
@@ -519,7 +520,7 @@ const VAMonitoring = ({ auth, error, vaData, pagination, filters }) => {
                                                                     <button
                                                                         onClick={() =>
                                                                             handleDelete(
-                                                                                id
+                                                                                billingTransactionId
                                                                             )
                                                                         }
                                                                     >
