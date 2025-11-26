@@ -107,6 +107,9 @@ class VAMonitoringController extends Controller
                 'transactionDate' => $bt->transactionDate,
             ];
         }
+        
+        // mengurutkan data virtual akun secara Desc 
+        usort($results, fn($a, $b) => $b['id'] <=> $a['id']);
 
         // Pagination manual
         $page = $request->input('page', 1);

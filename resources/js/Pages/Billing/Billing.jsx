@@ -1131,7 +1131,7 @@ export default function Billing({
                                         filters.period,
                                         filters.towerId,
                                         filters.unitType,
-                                        filters.billing_type
+                                        filters.billingType
                                     )
                                 }
                             />

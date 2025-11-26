@@ -11,7 +11,6 @@
         
         body {
           font-family: DejaVu Sans, sans-serif;
-          /* font-family: system-ui, sans-serif; */
           color: #333;
           margin: 0;
           padding: 10px;
@@ -186,25 +185,23 @@
         /* Watermark Stempel SUDAH LUNAS */
         .paid-stamp {
           position: absolute;
-          top: 60px;
-          left: 20%;
+          top: 560px;
+          left:8%;
+          /* top: 400px; */
+          /* left: 20%; */
           transform: rotate(-20deg);
           z-index: 999;
           pointer-events: none;
         }
 
         .paid-stamp-content {
-          border: 8px solid #22c55e;
-          border-radius: 20px;
           padding: 25px 45px;
-          background-color: rgba(173, 216, 230, 0.75);
-          box-shadow: 0 0 25px rgba(34, 197, 94, 0.3);
         }
 
         .paid-stamp-text {
-          font-size: 36px;
+          font-size: 20px;
           font-weight: bold;
-          color: #22c55e;
+          color: rgb(155, 0, 0);
           text-align: center;
           letter-spacing: 2px;
           margin: 0;
@@ -212,9 +209,8 @@
         }
 
         .paid-stamp-date {
-          font-size: 14px;
-          font-weight: 600;
-          color: #16a34a;
+          font-size: 11px
+          color:  rgb(155, 0, 0);
           text-align: center;
           margin-top: 8px;
           letter-spacing: 1px;
