@@ -34,6 +34,7 @@ import {
     XMarkIcon,
     DocumentArrowDownIcon,
     FolderArrowDownIcon,
+    EnvelopeIcon,
 } from "@heroicons/react/24/outline";
 import CustomSelect from "@/Components/CustomSelect";
 import dayjs from "dayjs";
@@ -56,6 +57,7 @@ const TABLE_HEAD = [
     "Tanggal dibayar",
     "Dibuat Oleh",
     "Download",
+    "Kirim Email",
     "Edit",
     "Hapus",
 ];
@@ -378,6 +380,14 @@ export default function Billing({
             billingType: filters.billingType || "",
         }).toString();
         window.location.href = route("billing.export") + "?" + params;
+    };
+
+    const handleSendEmailById = (id) => {
+        router.post(`/billing/${id}/send-invoice`, {
+            preserveScroll: true,
+            preserveState: false,
+            onFinish: () => toast.dismiss(),
+        });
     };
 
     return (
@@ -920,6 +930,40 @@ export default function Billing({
                                                                         }
                                                                     >
                                                                         <FolderArrowDownIcon className="w-4 h-4 font-bold" />
+                                                                    </Button>
+                                                                </Tooltip>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <Tooltip
+                                                                    content="Kirim Email"
+                                                                    animate={{
+                                                                        mount: {
+                                                                            scale: 1,
+                                                                            y: 0,
+                                                                        },
+                                                                        unmount:
+                                                                            {
+                                                                                scale: 0,
+                                                                                y: 25,
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <Button
+                                                                        size="md"
+                                                                        variant="gradient"
+                                                                        color="purple"
+                                                                        onClick={() =>
+                                                                            handleSendEmailById(
+                                                                                id
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <EnvelopeIcon className="w-4 h-4 font-bold" />
                                                                     </Button>
                                                                 </Tooltip>
                                                             </td>

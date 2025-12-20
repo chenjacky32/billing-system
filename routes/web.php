@@ -149,6 +149,8 @@ Route::middleware(['auth','verify.session'])->group(function () {
     Route::post('/billing/count-billing', [BillingController::class, 'countBilling'])->name('billing.count');
     Route::post('/billing/previous-meter',[BillingController::class,'getStartMeter'])->name('billing.previousMeter');
     Route::get('/billing/{id}/download-invoice',[BillingController::class,'downloadInvoice'])->name('billing.downloadInvoice');
+    Route::post('/billing/{id}/send-invoice', [BillingController::class, 'sendInvoice'])->name('billing.sendInvoice');
+
 
     // !Virtual Account 
     Route::get('/va-monitoring', [VAMonitoringController::class, 'index'])->name('VAMonitoring.index');

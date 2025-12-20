@@ -1031,4 +1031,20 @@ class BillingController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function sendInvoice($id)
+    {
+        try {
+            $billing = Billing::findOrFail($id);
+
+            event(new GenerateInvoiceRequested($billing));
+
+            return redirect()->back()->with(
+                'success',
+                'Invoice sedang diproses dan akan dikirim melalui email.'
+            );
+        } catch (\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 }
