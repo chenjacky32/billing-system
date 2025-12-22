@@ -13,6 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --- Langkah Baru: Setup PHP ---
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1" # Sesuaikan dengan kebutuhan minimal project Anda
+          extensions: mbstring, xml, ctype, iconv, mysql, zip
+          coverage: none
+
+      # --- Langkah Baru: Install Composer Dependencies ---
+      - name: Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -36,6 +48,5 @@ jobs:
             **/.git*
             **/.env
             **/node_modules/**
-            **/vendor/**
             **/storage/**
             **/tests/**
