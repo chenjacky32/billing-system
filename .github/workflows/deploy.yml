@@ -1,0 +1,41 @@
+name: Deploy to CPanel via FTP
+
+on:
+  push:
+    branches:
+      - feat/master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install frontend
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Deploy to CPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: / # sesuaikan root hosting
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.env
+            **/node_modules/**
+            **/vendor/**
+            **/storage/**
+            **/tests/**
