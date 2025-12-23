@@ -46,6 +46,7 @@ jobs:
           dangerous-clean-slate: false
           exclude: |
             **/.git*
+            **/vendor/**
             **/.env
             **/node_modules/**
             **/storage/**
