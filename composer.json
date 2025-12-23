@@ -65,9 +65,7 @@
     },
     "config": {
         "optimize-autoloader": true,
-        "config": {
-            "platform-check": false
-        },
+        "platform-check": false,
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {

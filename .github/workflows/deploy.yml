@@ -35,7 +35,14 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_PUSHER_APP_KEY: ${{ secrets.PUSHER_APP_KEY }}
+          VITE_PUSHER_APP_CLUSTER: ${{ secrets.PUSHER_APP_CLUSTER }}
+          VITE_PUSHER_HOST: ${{ secrets.PUSHER_HOST }}
+          VITE_PUSHER_PORT: ${{ secrets.PUSHER_PORT }}
+          VITE_PUSHER_SCHEME: ${{ secrets.PUSHER_SCHEME }}
 
+      # --- Langkah Baru: Deploy to CPanel via FTP ---
       - name: Deploy to CPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -46,8 +53,11 @@ jobs:
           dangerous-clean-slate: false
           exclude: |
             **/.git*
-            **/vendor/**
-            **/.env
+            **/.github/**
             **/node_modules/**
+            **/vendor/**
             **/storage/**
+            **/.env
             **/tests/**
+            composer.json
+            composer.lock
